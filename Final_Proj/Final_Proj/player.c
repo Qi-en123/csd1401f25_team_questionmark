@@ -58,18 +58,22 @@ void simulate_player(Player* player, CP_Image spritesheet) {
 	render_player(player, spritesheet);
 }
 
-float timer = 0.0f;
-int current_frame = 0;
+//These are for player animation
+float time_between_frame = 0.0f; //to check time between each frame
+int current_frame = 0; //to check current frame
 
 void render_player(Player* player, CP_Image spritesheet) {
 #define SPRITE_WIDTH 18
 #define SPRITE_HEIGHT 18
 #define FRAMES 12
+
+	//--------------------- MOVEMENT ---------------------//
 	float pos_x = player->position.x;
 	float pos_y = player->position.y;
 
 	float img_x = 0.0f;
 
+	//IDLE ANIMATION
 	if (player->player_state == IDLE) {
 		switch (player->rotation)
 		{
@@ -95,6 +99,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 		}
 	}
 
+	//WALKING ANIMATION
 	if (player->player_state == WALKING) {
 		switch (player->rotation)
 		{
@@ -118,9 +123,9 @@ void render_player(Player* player, CP_Image spritesheet) {
 			break;
 		}
 
-		timer += CP_System_GetDt();
-		if (timer > 0.3f) {
-			timer = 0.0f;
+		time_between_frame += CP_System_GetDt();
+		if (time_between_frame > 0.3f) {
+			time_between_frame = 0.0f;
 			current_frame = (1 + current_frame) % 2;
 		}
 	}

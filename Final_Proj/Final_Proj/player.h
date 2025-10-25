@@ -8,8 +8,6 @@ You can use this for player Movement & Interactions
 
 #include "cprocessing.h"
 
-#define friction 1.0f
-
 typedef struct Vector2 {
 	float x, y;
 }Vector2;
