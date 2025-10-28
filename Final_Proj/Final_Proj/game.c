@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "player.h"
+#include "tools.h"
 
 CP_Font myFont; 
 float stage_timer = 180.0f;
@@ -16,6 +17,13 @@ float speed = 300.0f;
 float starting_pos_x = 100.0f, starting_pos_y = 100.0f;
 CP_Image player_spritesheet;
 
+//--------------------- Tools ---------------------//
+#define l1_tool_size 3
+tool level1_tools[l1_tool_size];
+tool_name level1_tool_names[l1_tool_size] = { WATERING_CAN, SOIL, SEEDS };
+
+int carrying = 0;
+
 
 void Game_Init(void)
 {
@@ -24,17 +32,44 @@ void Game_Init(void)
 	myFont = CP_Font_Load("Assets/Exo2-Regular.ttf");
 
 	//Initialize player with default values
-	create_player(&player, speed, starting_pos_x, starting_pos_y);
+	initialize_player(&player, speed, starting_pos_x, starting_pos_y);
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
 
+	//tools
+	initialize_tools(level1_tools, l1_tool_size, level1_tool_names);
 }
 
 void Game_Update(void)
 {
-	CP_Graphics_ClearBackground(CP_Color_Create(255,255,255,0));
+	CP_Graphics_ClearBackground(CP_Color_Create(150, 150, 150, 255));
+
+	//--------------------- Tools ---------------------//
+	simulate_tools(level1_tools, l1_tool_size, player.position.x, player.position.y);
+
+	//--------------------- Player ---------------------//
 	//EVERYTH PLAYER RELATED IN THIS FUNCTION
 	simulate_player(&player, player_spritesheet);
 
+	//if player not holding anyth
+	if (HAND == player.held_tool) {
+		if (CP_Input_KeyReleased(KEY_Q)) {
+			for (int i = 0; i < l1_tool_size; i++) {
+				if (true == level1_tools[i].in_range) {
+					player.held_tool = level1_tools[i].tool_name;
+					break;
+				}
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < l1_tool_size; i++) {
+			if (level1_tools[i].tool_name == player.held_tool) {
+				move_tool(&level1_tools[i].position.x, &level1_tools[i].position.y);
+			}
+		}
+	}
+
+	//--------------------- Timer ---------------------//
 	//render timer on top
 	start_timer();
 }
@@ -65,4 +100,33 @@ void start_timer() {
 	//converts stage_timer into a string/char*
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 	CP_Font_DrawText(countdown, 30.0f + CP_System_GetWindowWidth() / 8.0f / 2, 30.0f + 80.0f/2);
+}
+
+void move_tool(float *posx, float *posy) {
+#define offset 30
+	float offset_x = 0.0f;
+	float offset_y = 0.0f;
+
+	switch (player.rotation) {
+	case 0:
+		offset_x = 0.0f;
+		offset_y = offset;
+		break;
+	case 90:
+		offset_x = -offset;
+		offset_y = 0.0f;
+		break;
+	case 180:
+		offset_x = 0.0f;
+		offset_y = -offset;
+		break;
+	case 270:
+		offset_x = offset;
+		offset_y = 0.0f;
+		break;
+	default:
+		break;
+	}
+	*posx = player.position.x + offset_x;
+	*posy = player.position.y + offset_y;
 }

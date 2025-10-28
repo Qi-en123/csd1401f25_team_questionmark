@@ -8,15 +8,16 @@ Movements, Interactions, Animation, Stats
 #include <math.h>
 
 //intialize the player object
-void create_player(Player* player, float speed, float posx, float posy) {
+void initialize_player(Player* player, float speed, float posx, float posy) {
 	player->position.x = posx;
 	player->position.y = posy;
 	player->player_state = IDLE;
 	player->speed = speed;
 	player->rotation = 0;
+	player->held_tool = HAND;
 }
 
-//This is handle inputs and change the states accordingly
+//This is to handle inputs and change the player states accordingly
 void handle_player_input(Player* player) {
 	player->player_state = IDLE;
 
@@ -43,8 +44,6 @@ void handle_player_input(Player* player) {
 		player->rotation = 180;
 		player->player_state = WALKING;
 	}
-
-
 }
 
 //The actual movement is from here
@@ -53,6 +52,7 @@ void move_player(float* pos, float speed) {
 	*pos += speed * dt;
 }
 
+//All of the player functions in here
 void simulate_player(Player* player, CP_Image spritesheet) {
 	handle_player_input(player);
 	render_player(player, spritesheet);
@@ -62,6 +62,7 @@ void simulate_player(Player* player, CP_Image spritesheet) {
 float time_between_frame = 0.0f; //to check time between each frame
 int current_frame = 0; //to check current frame
 
+//To draw the player
 void render_player(Player* player, CP_Image spritesheet) {
 #define SPRITE_WIDTH 18
 #define SPRITE_HEIGHT 18
