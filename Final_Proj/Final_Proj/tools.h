@@ -18,11 +18,13 @@ typedef struct tool {
 	tool_name tool_name;
 	Vector2 position;
 	Vector2 initial_pos;
-	CP_Color color;
-	bool in_range;
+	CP_Color color; //TO BE SWAPPED WITH THE TOOL ASSET
+	bool in_range; //checks if player is within range of tool
 }tool;
 
 void initialize_tools(tool* tools, int size, tool_name* tool_names);
 
-void simulate_tools(tool* tools, int size, float player_posx, float player_posy);
+void render_tools(tool* tools, int size, float player_posx, float player_posy, tool_name held_tool);
+void render_held_tool(tool* tools, int size, tool_name tool_name);
+
 #endif // !TOOLS_H

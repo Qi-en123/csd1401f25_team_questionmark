@@ -44,15 +44,20 @@ void Game_Update(void)
 	CP_Graphics_ClearBackground(CP_Color_Create(150, 150, 150, 255));
 
 	//--------------------- Tools ---------------------//
-	simulate_tools(level1_tools, l1_tool_size, player.position.x, player.position.y);
+	render_tools(level1_tools, l1_tool_size, player.position.x, player.position.y, player.held_tool);
+	if (90 == player.rotation || 180 == player.rotation) render_held_tool(level1_tools, l1_tool_size, player.held_tool);
 
 	//--------------------- Player ---------------------//
 	//EVERYTH PLAYER RELATED IN THIS FUNCTION
 	simulate_player(&player, player_spritesheet);
+	if (0 == player.rotation || 270 == player.rotation) render_held_tool(level1_tools, l1_tool_size, player.held_tool);
 
-	//if player not holding anyth
+	//--------------------- Hold Tool ---------------------//
+	//sry for this mess
+	//If player is not holding anything
 	if (HAND == player.held_tool) {
 		if (CP_Input_KeyReleased(KEY_Q)) {
+			//Picks up the first tool that is in range
 			for (int i = 0; i < l1_tool_size; i++) {
 				if (true == level1_tools[i].in_range) {
 					player.held_tool = level1_tools[i].tool_name;
@@ -61,10 +66,26 @@ void Game_Update(void)
 			}
 		}
 	}
+	//If player is holding something
 	else {
 		for (int i = 0; i < l1_tool_size; i++) {
+			//Held tool
 			if (level1_tools[i].tool_name == player.held_tool) {
 				move_tool(&level1_tools[i].position.x, &level1_tools[i].position.y);
+
+				//if player is back at where he picked up the tool
+				if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
+					level1_tools[i].initial_pos.x, level1_tools[i].initial_pos.y, 40.0f + tool_range)) {
+
+					level1_tools[i].in_range = true;
+
+					if (CP_Input_KeyReleased(KEY_Q)) {
+						player.held_tool = HAND;
+						level1_tools[i].position.x = level1_tools[i].initial_pos.x;
+						level1_tools[i].position.y = level1_tools[i].initial_pos.y;
+					}
+				}
+				else level1_tools[i].in_range = false;
 			}
 		}
 	}
@@ -102,25 +123,28 @@ void start_timer() {
 	CP_Font_DrawText(countdown, 30.0f + CP_System_GetWindowWidth() / 8.0f / 2, 30.0f + 80.0f/2);
 }
 
+//moves the tool along with the player
 void move_tool(float *posx, float *posy) {
 #define offset 30
 	float offset_x = 0.0f;
 	float offset_y = 0.0f;
 
+	//These are rough offsets -- will have to change it once the tool sprite is up
+	//Have to make it look like the player is holding it (right handed)
 	switch (player.rotation) {
-	case 0:
+	case 0: //DOWN
 		offset_x = 0.0f;
 		offset_y = offset;
 		break;
-	case 90:
+	case 90: //LEFT
 		offset_x = -offset;
 		offset_y = 0.0f;
 		break;
-	case 180:
+	case 180: //UP
 		offset_x = 0.0f;
 		offset_y = -offset;
 		break;
-	case 270:
+	case 270: //RIGHT
 		offset_x = offset;
 		offset_y = 0.0f;
 		break;
