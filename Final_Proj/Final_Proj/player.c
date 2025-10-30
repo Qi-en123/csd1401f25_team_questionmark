@@ -14,7 +14,6 @@ void initialize_player(Player* player, float speed, float posx, float posy) {
 	player->player_state = IDLE;
 	player->speed = speed;
 	player->rotation = 0;
-	player->held_tool = HAND;
 }
 
 //This is to handle inputs and change the player states accordingly

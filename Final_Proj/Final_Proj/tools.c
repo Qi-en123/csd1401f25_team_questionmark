@@ -3,7 +3,7 @@
 #include "utils.h"
 
 //Initializes the tools needed/unlocked for each level
-void initialize_tools(tool* tools, int size, tool_name* tool_names) {
+void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_tool) {
 #define toolStartPosX 100
 #define toolStartPosY 200
 	//each tool diff initialpos and different sprites
@@ -12,58 +12,64 @@ void initialize_tools(tool* tools, int size, tool_name* tool_names) {
 
 	for (int i = 0; i < size; i++) {
 		//Setting the positions of the tools
-		tools[i].initial_pos.x = tools[i].position.x = toolStartPosX;
-		tools[i].initial_pos.y = tools[i].position.y = toolStartPosY + 120.0f * i;
-		tools[i].tool_name = tool_names[i];
-		tools[i].in_range = false;
+		Tool *tool = &tools[i];
+		tool->initial_pos.x = tool->position.x = toolStartPosX;
+		tool->initial_pos.y = tool->position.y = toolStartPosY + 120.0f * i;
+		tool->tool_name = tool_names[i];
+		tool->in_range = false;
+		tool->rotation = 0.0f;
 
 		//Setting the sprites/color of the tools
 		switch (tool_names[i]) {
 		case WATERING_CAN:
-			tools[i].color = CP_Color_Create(0, 0, 255, 255);
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
+			tool->rotatable = false;
 			break;
 		case SOIL:
-			tools[i].color = CP_Color_Create(255, 180, 20, 255);
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/shovel.png");
+			tool->rotatable = true;
 			break;
 		case SEEDS:
-			tools[i].color = CP_Color_Create(30, 255, 100, 255);
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+			tool->rotatable = false;
 			break;
 		default:
 			break;
 		}
 	}
+
+	held_tool->tool_name = HAND;
 }
 
 //Render unheld tools and checks if player is within range of them
-void render_tools(tool* tools, int size, float player_posx, float player_posy, tool_name held_tool) {
+void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool_name held_tool) {
+#define SPRITE_WIDTH 16
+#define SPRITE_HEIGHT 16
+
 	for (int i = 0; i < size; i++) {
 		//if tool is not held
 		if (held_tool != tools[i].tool_name) {
 			//if player is in range
 			if (AreCirclesIntersecting(player_posx, player_posy, 9.0f,
 				tools[i].position.x, tools[i].position.y, 40.0f + tool_range)) {
-
-				CP_Settings_Fill(tintColor(tools[i].color, 1.0f / 3.0f));
 				tools[i].in_range = true;
 			}
 			else {
-				CP_Settings_Fill(tools[i].color);
 				tools[i].in_range = false;
 			}
-			CP_Graphics_DrawCircle(tools[i].position.x, tools[i].position.y, 60.0f);
-		}
-		else { //if tool is being held
-			//dont draw
+			CP_Image_Draw(tools[i].tool_sprite, tools[i].position.x, tools[i].position.y,
+				SPRITE_WIDTH * 2.8f, SPRITE_HEIGHT * 2.8f, 255);
 		}
 	}
 }
 
 //renders the held tool seperately
-void render_held_tool(tool* tools, int size, tool_name tool_name) {
-	for (int i = 0; i < size; i++) {
-		if (tools[i].tool_name == tool_name) {
-			tools[i].in_range ? CP_Settings_Fill(tintColor(tools[i].color, 1.0f/6.0f)) : CP_Settings_Fill(tools[i].color);
-			CP_Graphics_DrawCircle(tools[i].position.x, tools[i].position.y, 60.0f);
-		}
-	}
+void render_held_tool(Tool* tool) {
+	CP_Image_DrawAdvanced(tool->tool_sprite, tool->position.x, tool->position.y,
+		SPRITE_WIDTH * 2.1f, SPRITE_HEIGHT * 2.1f, 255, tool->rotation * tool->rotatable);
+}
+
+void use_tool(Tool* tool) {
+	//change rotation
+	//maybe do smth to plants here
 }

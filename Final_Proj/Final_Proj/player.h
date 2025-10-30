@@ -8,7 +8,6 @@ You can use this for player Movement & Interactions
 
 #include "cprocessing.h"
 #include "utils.h"
-#include "tools.h"
 
 typedef enum Player_State {
 	IDLE,		//0
@@ -23,7 +22,6 @@ typedef struct Player {
 	int rotation;
 	float speed;
 	Player_State player_state;
-	tool_name held_tool;
 } Player;
 
 void initialize_player(Player* player, float speed, float posx, float posy);
