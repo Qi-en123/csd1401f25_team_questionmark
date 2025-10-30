@@ -48,7 +48,6 @@ void handle_player_input(Player* player) {
 
 //The actual movement is from here
 void move_player(float* pos, float speed) {
-	float dt = CP_System_GetDt();
 	*pos += speed * dt;
 }
 
