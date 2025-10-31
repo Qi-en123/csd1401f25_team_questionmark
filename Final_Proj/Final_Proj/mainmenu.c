@@ -55,6 +55,7 @@ void Main_Menu_Update(void)
 	{
 		// go game page
 		CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+		//CP_Engine_SetNextGameState(ui_init, ui_update, ui_exit);
 	}
 	// if exit button is clicked, terminate program
 	else if (CP_Input_MouseClicked() && IsAreaClicked(x_coordinate, exit_y, length, height, CP_Input_GetMouseX(), CP_Input_GetMouseY()) == 1)

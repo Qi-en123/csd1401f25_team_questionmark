@@ -42,6 +42,6 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 	//if distance between circle 1 centre and circle 2 centre is less than the sum of 2 radius means intersecting
 	return distance <= r1 + r2 ? 1 : 0;
 
-
-
 }
+
+//int AreObjectIntersecting(float pot_x, float pot_y, float sun_x, float sun_y) {}
