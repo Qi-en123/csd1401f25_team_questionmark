@@ -1,18 +1,34 @@
 #include <math.h>
 #include "cprocessing.h"
 
-int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
+// Returns 1 if mouse clicked inside rectangle
+int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 {
-	// if mouse is within left to right of triangle and y is within bottom to top of triangle
-	if ((click_y >= area_center_y - 0.5 * area_height && click_y <= area_center_y + 0.5 * area_height) && (click_x >= area_center_x - 0.5 * area_width && click_x <= area_center_x + 0.5 * area_width))
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+    float mouseX = CP_Input_GetMouseX();
+    float mouseY = CP_Input_GetMouseY();
+
+    // Check if mouse is inside rectangle bounds
+    if (mouseX >= rectX && mouseX <= rectX + rectW &&
+        mouseY >= rectY && mouseY <= rectY + rectH)
+    {
+        // Check left mouse button click
+        if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
+            return 1;
+    }
+
+    return 0;
 }
+// returns 1 if mouse is hovered
+int IsButtonHovered(float rectX, float rectY, float rectW, float rectH)
+{
+	float mx = CP_Input_GetMouseX();
+	float my = CP_Input_GetMouseY();
+
+	return (mx >= rectX && mx <= rectX + rectW &&
+		my >= rectY && my <= rectY + rectH);
+}
+
+
 // if mouse is within left to right of triangle and y is within bottom to top of triangle
 int IsCircleClicked(float circle_center_x, float circle_center_y, float diameter, float click_x, float click_y)
 {
