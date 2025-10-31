@@ -2,169 +2,214 @@
 #include "mainmenu.h" // to go back with key Q
 #include <math.h>   // calculations for speed and all  
 #include "utils.h" //for intersecting function
+#include "game.h"
+#include <stdio.h>
+
+#include "player.h"
+#include "tools.h"
+
+CP_Font myFont;
+float stage_timer = 35.0f;
+
+//--------------------- Player ---------------------//
+Player player;
+float speed = 300.0f;
+float starting_pos_x = 100.0f, starting_pos_y = 100.0f;
+CP_Image player_spritesheet;
+
+//--------------------- Tools ---------------------//
+#define l1_tool_size 3
+Tool level1_tools[l1_tool_size];
+Tool_name level1_tool_names[l1_tool_size] = { WATERING_CAN, SOIL, SEEDS };
+Tool held_tool;
+
+//--------------------- Timer ---------------------//
+CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
+float timer_pos_x, timer_pos_y;
+float timer_width, timer_height;
+float timer_font_size;
+CP_Color timer_font_color;
 
 
+int carrying = 0;
 
-float small_circlex;
-float small_circley;
-float max_hp;
-float current_hp;
-float small_hpWidth;
-float gap;
-float hp_height;
-int num_of_hpBar;
 
 void Game_Init(void)
 {
-    // initalising all the default settings so that everytime user exit and come back, it restarts instead of continue from last checkpoint
-    small_circlex = CP_System_GetWindowWidth() / 2.0f;
-    small_circley = CP_System_GetWindowHeight() / 2.0f;
-    max_hp = 1300.0f;
-    hp_height = 45.0f;
-    current_hp = max_hp;
-    num_of_hpBar = 10;
-    small_hpWidth = 75.0f;
-    gap = (max_hp - (small_hpWidth * 10)) / 9;
-}
+	CP_Settings_RectMode(CP_POSITION_CENTER);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
+	//Initialize player with default values
+	initialize_player(&player, speed, starting_pos_x, starting_pos_y);
+	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
+
+	//Tools
+	initialize_tools(level1_tools, l1_tool_size, level1_tool_names, &held_tool);
+
+	//Timer
+#pragma region Timer Initialization
+
+	timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
+	timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
+	timer_width = CP_System_GetWindowWidth() / 8.0f;
+	timer_height = 70.0f;
+	timer_font_size = 50.0f;
+	timer_pos_x = 30.0f + timer_width / 2;
+	timer_pos_y = 30.0f + timer_height / 2;
+	timer_font_color = CP_Color_Create(255, 255, 255, 255);
+
+#pragma endregion
+}
 
 void Game_Update(void)
 {
-    //create blue colour for small circle
-    CP_Color blue = CP_Color_Create(0, 0, 255, 255);
-    //create red colour for health bar
-    CP_Color health_red = CP_Color_Create(255, 0, 0, 255);
-    //create dark red for empty health bar
-    CP_Color empty_health_red = CP_Color_Create(128, 0, 0, 255);
-    //create green colour for big circle 1
-    CP_Color red = CP_Color_Create(220, 100, 100, 255);
-    //create green colour for big circle 2
-    CP_Color green = CP_Color_Create(100, 220, 100, 255);
-    //create gray colour for background
-    CP_Color gray = CP_Color_Create(210, 210, 210, 255);
-    //set background colour to gray
-    CP_Graphics_ClearBackground(gray);
+	CP_Graphics_ClearBackground(CP_Color_Create(150, 150, 150, 255));
 
-    /*-----------------------------------------------------------------------*/
-    // draw two big circle (circle of effect)
-    //fill first big circle red
-    CP_Settings_Fill(red);
-    //initialise the x and y coordinate of red circle
-    float red_circlex = CP_System_GetWindowWidth() / 4.0f;
-    float red_circley = CP_System_GetWindowHeight() / 2.0f;
-    //draw first big circle at the middle height of screen and 1/4 width from the left
-    CP_Graphics_DrawCircle(red_circlex, red_circley, 400.0f);
-    //fill second big circle green
-    CP_Settings_Fill(green);
-    //initialise the x and y coordinate of green circle
-    float green_circlex = CP_System_GetWindowWidth() / 4.0f * 3.0f;
-    float green_circley = CP_System_GetWindowHeight() / 2.0f;
-    //draw second big circle at the middle height of screen and 3/4 width from the left
-    CP_Graphics_DrawCircle(green_circlex, green_circley, 400.0f);
+	//--------------------- Tools ---------------------//
+	render_tools(level1_tools, l1_tool_size, player.position.x, player.position.y, held_tool.tool_name);
+	//Render tool behind player if player facing Left or Up
+	if (held_tool.tool_name != HAND && (90 == player.rotation || 180 == player.rotation)) {
+		render_held_tool(&held_tool);
+	}
 
-    /*-----------------------------------------------------------------------*/
-    //SMALL CIRCLE AND THE WSAD MOVEMENT
-    //fill small circle blue
-    CP_Settings_Fill(blue);
-    //draw small circle
-    CP_Graphics_DrawCircle(small_circlex, small_circley, 120.0f);
-    //speed to move using key "WSAD"
-    float dt = CP_System_GetDt();
-    float speed = 400.0f * dt;
-    //if user press key WSAD, it will go up down left right respectively
-    if (CP_Input_KeyDown(KEY_D)) { small_circlex += speed; }
-    if (CP_Input_KeyDown(KEY_A)) { small_circlex += -speed; }
-    if (CP_Input_KeyDown(KEY_S)) { small_circley += speed; }
-    if (CP_Input_KeyDown(KEY_W)) { small_circley += -speed; }
-    /*-----------------------------------------------------------------------*/
+	//--------------------- Player ---------------------//
+	//EVERYTH PLAYER RELATED IN THIS FUNCTION
+	simulate_player(&player, player_spritesheet);
+	//Render tool infront if player facing Right or Down
+	if (held_tool.tool_name != HAND && (0 == player.rotation || 270 == player.rotation)) {
+		render_held_tool(&held_tool);
+	}
 
-    //MINUS AND ADD HP
+	//--------------------- Hold Tool ---------------------//
+	//If player is not holding anything
+	if (HAND == held_tool.tool_name) {
+		if (CP_Input_KeyReleased(KEY_Q)) {
+			//Picks up the first tool that is in range
+			for (int i = 0; i < l1_tool_size; i++) {
+				if (level1_tools[i].in_range) {
+					held_tool = level1_tools[i];
+					break;
+				}
+			}
+		}
+	}
+	//If player is holding something
+	else {
+		move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
+		handle_tool_interaction(&held_tool);
+	}
 
-    //if small circle is intersecting red circle
-    if (AreCirclesIntersecting(small_circlex, small_circley, 120.0f / 2.0f, red_circlex, red_circley, 400.0f / 2.0f)) {
-        if (current_hp > 0) //as long as hp is not 0
-            current_hp -= 100.0f * dt; //we minus hp 
-    }
-    //if small circle is intersecting red circle
-    if (AreCirclesIntersecting(small_circlex, small_circley, 120.0f / 2.0f, green_circlex, green_circley, 400.0f / 2.0f)) {
-        if (current_hp < max_hp) //as long as hp is less than max hp
-            current_hp += 100.0f * dt; //we add hp
-    }
-
-
-
-
-
-
-
-
-
-
-
-    /*----------------------------------------------------------------------*/
-    //HEALTH BAR
-
-    /*DO NOTE THAT WE WILL CODE THE SMALL HP BAR SUCH THAT ONLY WHEN FULL THEN THE 10TH SMALL HP BAR WILL APPEAR,
-    LIKEWISE CURRENT HP IS 89% THEN WILL SHOW 8TH BAR ETC, SO THAT USER ROUGHLY KNOW HP HAVE HOW MANY PERCENTAGE LEFT.
-    THIS IS TO LET USER KNOW HP BAR IS FULL
-    */
-
-    //Set position to corner so that we can allign the small hp bar later 
-    CP_Settings_RectMode(CP_POSITION_CORNER);
-    //fill empty health bar dark red colour
-    CP_Settings_Fill(empty_health_red);
-    //draw empty health bar
-    CP_Graphics_DrawRect(150.0f, 40.0f, max_hp, hp_height);
-
-    //fill health bar red colour
-    CP_Settings_Fill(health_red);
-    //draw rectangle (health red)
-    CP_Graphics_DrawRect(150.0f, 40.0f, current_hp, hp_height);
-    // Calculate how many small hp bar to show
-    int HpToShow = ((current_hp / max_hp) * num_of_hpBar);
-    // draw the expected small hp bar with x position of each bar + the gaps and previous hp bars width
-    for (int i = 0; i < HpToShow; i++) {
-        float x = 150.0f + i * (small_hpWidth + gap);
-        CP_Graphics_DrawRect(x, 130.0f, small_hpWidth, hp_height);
-    }
-    /*-----------------------------------------------------------------------*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // if Q is pressed, go back main menu page
-    if (CP_Input_KeyDown(KEY_Q)) { CP_Engine_SetNextGameStateForced(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
-
-
+	//--------------------- Timer ---------------------//
+	//render timer on top
+	start_timer();
 }
 
 void Game_Exit(void)
 {
+	CP_Image_Free(player_spritesheet);
+	CP_Font_Free(myFont);
+	CP_Image_Free(timer_bg_blue);
+	CP_Image_Free(timer_bg_red);
+	for (int i = 0; i < l1_tool_size; i++) {
+		CP_Image_Free(level1_tools[i].tool_sprite);
+	}
+}
 
+void start_timer() {
+	//countdown
+	stage_timer -= dt;
+
+	static float timer_red_alpha;
+
+	//--------------------- Timer Code ---------------------//
+	//clamp timer
+	int minutes = ((int)stage_timer / 60.0f) >= 0 ? ((int)stage_timer / 60) : 0;
+	int seconds = ((int)stage_timer % 60) >= 0 ? ((int)stage_timer % 60) : 0;
+
+	//Big enough to store formatted string
+	char countdown[50] = { 0 };
+	//converts stage_timer into a string/char*
+	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
+
+	//blinking effect
+	if (stage_timer < 30.0f) {
+		if ((int)stage_timer % 2) {
+			timer_red_alpha += 255.0f * dt;
+			timer_width += timer_width * dt * 0.09f;
+			timer_height += timer_height * dt * 0.09f;
+			timer_font_size += timer_font_size * dt * 0.25f;
+		}
+		else {
+			timer_red_alpha -= 200.0f * dt;
+			timer_width -= timer_width * dt * 0.09f;
+			timer_height -= timer_height * dt * 0.09f;
+			timer_font_size -= timer_font_size * dt * 0.25f;
+		}
+		timer_red_alpha = CP_Math_ClampFloat(timer_red_alpha, 0.0f, 255.0f);
+		timer_font_color = ((int)(stage_timer * 1.5f) % 2) ? CP_Color_Create(50, 50, 50, 255) : CP_Color_Create(255, 255, 255, 255);
+		timer_width = CP_Math_ClampFloat(timer_width, CP_System_GetWindowWidth() / 8.0f * 0.9f, CP_System_GetWindowWidth() / 8.0f * 1.1f);
+		timer_height = CP_Math_ClampFloat(timer_height, 70.0f * 0.9f, 70.0f * 1.1f);
+	}
+
+	//Timer background
+	CP_Image_Draw(timer_bg_blue, timer_pos_x, timer_pos_y, timer_width, timer_height, 255);
+	CP_Image_Draw(timer_bg_red, timer_pos_x, timer_pos_y, timer_width, timer_height, timer_red_alpha);
+	//Timer 
+	CP_Settings_TextSize(timer_font_size);
+	CP_Settings_Fill(timer_font_color);
+	CP_Font_DrawText(countdown, timer_pos_x, timer_pos_y);
+}
+
+//moves the tool along with the player
+void move_tool(float* posx, float* posy, float* rotation) {
+	float offset_x = 0.0f;
+	float offset_y = 0.0f;
+
+	//Have to make it look like the player is holding it (right handed)
+	switch (player.rotation) {
+	case 0: //DOWN
+		offset_x = -20.0f;
+		offset_y = 28.0f;
+		break;
+	case 90: //LEFT
+		offset_x = -12.0f;
+		offset_y = 15.0f;
+		break;
+	case 180: //UP
+		offset_x = 20.0f;
+		offset_y = 10.0f;
+		break;
+	case 270: //RIGHT
+		offset_x = 10.0f;
+		offset_y = 20.0f;
+		break;
+	default:
+		break;
+	}
+	*posx = player.position.x + offset_x;
+	*posy = player.position.y + offset_y;
+	*rotation = player.rotation - 180.0f;
+}
+
+void handle_tool_interaction(Tool* tool) {
+	//if player is back at where he picked up the tool
+	if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
+		tool->initial_pos.x, tool->initial_pos.y, 40.0f + tool_range)) {
+
+		tool->in_range = true;
+
+		if (CP_Input_KeyReleased(KEY_Q)) {
+			tool->tool_name = HAND;
+			tool->position.x = tool->initial_pos.x;
+			tool->position.y = tool->initial_pos.y;
+		}
+	}
+	else tool->in_range = false;
+
+	//--------------------- Plant Interaction ---------------------//
+	//will check for plant intersection, nxt time
+	//if (CP_Input_KeyDown(KEY_E)) {
+
+	//}
 }

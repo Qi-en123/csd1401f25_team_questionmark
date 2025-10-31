@@ -57,7 +57,15 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 	float distance = sqrt(distance_x * distance_x + distance_y * distance_y);
 	//if distance between circle 1 centre and circle 2 centre is less than the sum of 2 radius means intersecting
 	return distance <= r1 + r2 ? 1 : 0;
+}
 
+//Returns the tinted version of color.
+//Note: tint_val must be float
+CP_Color tintColor(CP_Color color, float tint_val) {
+	float r, g, b;
+	r = color.r + (255 - color.r) * tint_val;
+	g = color.g + (255 - color.g) * tint_val;
+	b = color.b + (255 - color.b) * tint_val;
 
-
+	return CP_Color_Create(r,g,b,255);
 }

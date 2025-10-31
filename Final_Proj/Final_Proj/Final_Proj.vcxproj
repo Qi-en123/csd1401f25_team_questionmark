@@ -104,6 +104,8 @@ xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /
     <ClCompile Include="mainmenu.c" />
     <ClCompile Include="opening.c" />
     <ClCompile Include="opening_gamename.c" />
+    <ClCompile Include="player.c" />
+    <ClCompile Include="tools.c" />
     <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +115,8 @@ xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /
     <ClInclude Include="mainmenu.h" />
     <ClInclude Include="opening.h" />
     <ClInclude Include="opening_gamename.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="tools.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
