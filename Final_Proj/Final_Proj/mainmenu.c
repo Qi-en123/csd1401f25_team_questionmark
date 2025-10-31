@@ -1,7 +1,8 @@
 #include "cprocessing.h"
 #include "utils.h"
 #include "game.h"
-
+#include "levels.h"
+#include "credits.h"
 //image
 CP_Image spriteSheet;
 CP_Image mainmenu_bg;
@@ -93,7 +94,7 @@ void Main_Menu_Update(void)
     float btnHeight = 90.0f;
     float btnX = x_coord - 50;
     float btnY[5] = { 225.0f, 325.0f, 425.0f, 525.0f, 625.0f };
-    const char* btnText[5] = { "Continue", "Levels", "Guide", "Credit", "Exit" };
+    const char* btnText[5] = { "Start", "Levels", "Controls", "Credits", "Quit" };
 
     // set the buttons drawing mode to corner so that its easier to align with the text
     CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -106,6 +107,16 @@ void Main_Menu_Update(void)
         else {
             CP_Image_Draw(button_white, btnX, btnY[i], btnWidth, btnHeight, 255);
         }
+    }
+
+    // if levels button is clicked, go to levels page
+    if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight) == 1) {
+        CP_Engine_SetNextGameState(Level_Init, Level_Update, Level_Exit);
+    }
+
+    // if credits button is clicked, go to credits page
+    if (IsButtonClicked(btnX, btnY[3], btnWidth, btnHeight) == 1) {
+        CP_Engine_SetNextGameState(Credits_Init, Credits_Update, Credits_Exit);
     }
 
     // if exit button is clicked, terminate the game

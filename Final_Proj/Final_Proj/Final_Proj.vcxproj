@@ -97,16 +97,22 @@ xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="credits.c" />
     <ClCompile Include="game.c" />
+    <ClCompile Include="levels.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mainmenu.c" />
     <ClCompile Include="opening.c" />
+    <ClCompile Include="opening_gamename.c" />
     <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="credits.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="levels.h" />
     <ClInclude Include="mainmenu.h" />
     <ClInclude Include="opening.h" />
+    <ClInclude Include="opening_gamename.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

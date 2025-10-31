@@ -1,9 +1,10 @@
 #include "cprocessing.h"
-#include "mainmenu.h"
+#include "opening_gamename.h"
 
 CP_Image logo;
 CP_BOOL opening = FALSE;
 int alpha = 0;
+
 float startTime = 0;
 
 void Opening_Init(void)
@@ -27,7 +28,15 @@ void Opening_Update(void)
         CP_Image_Draw(logo,
             CP_System_GetWindowWidth() / 2.0f,
             CP_System_GetWindowHeight() / 2.0f,
-            500, 300, alpha);
+            1200, 700, alpha);
+
+
+
+
+
+
+
+
 
         // After 4 seconds, go to next state
         if (CP_System_GetSeconds() - startTime > 3.0f)
@@ -35,12 +44,12 @@ void Opening_Update(void)
     }
     else
     {
-        CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+        CP_Engine_SetNextGameState(Opening_GameName_Init, Opening_GameName_Update, Opening_GameName_Exit);
     }
 }
 
 void Opening_Exit(void)
 {
     CP_Image_Free(logo);
-    CP_Settings_NoTint();
+
 }
