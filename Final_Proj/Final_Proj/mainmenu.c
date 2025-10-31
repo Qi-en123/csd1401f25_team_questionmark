@@ -110,6 +110,11 @@ void Main_Menu_Update(void)
     }
 
     // if levels button is clicked, go to levels page
+    if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight) == 1) {
+        CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+    }
+
+    // if levels button is clicked, go to levels page
     if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight) == 1) {
         CP_Engine_SetNextGameState(Level_Init, Level_Update, Level_Exit);
     }

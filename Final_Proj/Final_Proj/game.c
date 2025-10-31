@@ -61,12 +61,10 @@ int carrying = 0;
 
 void Game_Init(void)
 {
-	CP_Settings_RectMode(CP_POSITION_CENTER);
+	
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
-    // initalising all the default settings so that everytime user exit and come back, it restarts instead of continue from last checkpoint
-    small_circlex = CP_System_GetWindowWidth() / 2.0f;
-    small_circley = CP_System_GetWindowHeight() / 2.0f;
+
 
 
     //ahmad
@@ -75,7 +73,7 @@ void Game_Init(void)
     requestbg = CP_Image_Load("Assets/button_square_gradient.png");
     customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
     CP_Settings_ImageMode(CP_POSITION_CORNER);
-    CP_System_SetWindowSize(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
+
 
     CP_System_SetFrameRate(60);
     boxCount = 0;
@@ -89,29 +87,31 @@ void Game_Init(void)
 
     CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
     //ahmad
-}
 
-	//Initialize player with default values
-	initialize_player(&player, speed, starting_pos_x, starting_pos_y);
-	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
+    //Initialize player with default values
+    initialize_player(&player, speed, starting_pos_x, starting_pos_y);
+    player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
 
-	//Tools
-	initialize_tools(level1_tools, l1_tool_size, level1_tool_names, &held_tool);
+    //Tools
+    initialize_tools(level1_tools, l1_tool_size, level1_tool_names, &held_tool);
 
-	//Timer
+    //Timer
 #pragma region Timer Initialization
 
-	timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
-	timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
-	timer_width = CP_System_GetWindowWidth() / 8.0f;
-	timer_height = 70.0f;
-	timer_font_size = 50.0f;
-	timer_pos_x = 30.0f + timer_width / 2;
-	timer_pos_y = 30.0f + timer_height / 2;
-	timer_font_color = CP_Color_Create(255, 255, 255, 255);
+    timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
+    timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
+    timer_width = CP_System_GetWindowWidth() / 8.0f;
+    timer_height = 70.0f;
+    timer_font_size = 50.0f;
+    timer_pos_x = 30.0f + timer_width / 2;
+    timer_pos_y = 30.0f + timer_height / 2;
+    timer_font_color = CP_Color_Create(255, 255, 255, 255);
 
 #pragma endregion
 }
+
+
+
 
 void Game_Update(void)
 {
@@ -147,25 +147,16 @@ void Game_Update(void)
 		render_held_tool(&held_tool);
 	}
     /*-----------------------------------------------------------------------*/
-    //SMALL CIRCLE AND THE WSAD MOVEMENT
-    //fill small circle blue
-    CP_Settings_Fill(blue);
-    //draw small circle
-    CP_Graphics_DrawCircle(small_circlex, small_circley, 120.0f);
-    //speed to move using key "WSAD"
-    float dt = CP_System_GetDt();
-    float speed = 800.0f * dt;
-    //if user press key WSAD, it will go up down left right respectively
-    if (CP_Input_KeyDown(KEY_D)) { small_circlex += speed; }
-    if (CP_Input_KeyDown(KEY_A)) { small_circlex += -speed; }
-    if (CP_Input_KeyDown(KEY_S)) { small_circley += speed; }
-    if (CP_Input_KeyDown(KEY_W)) { small_circley += -speed; }
-    /*-----------------------------------------------------------------------*/
+    CP_Settings_Fill(red);
+    //initialise the x and y coordinate of red circle
+    float red_circlex = CP_System_GetWindowWidth() / 4.0f;
+    float red_circley = CP_System_GetWindowHeight() / 2.0f;
+    //draw first big circle at the middle height of screen and 1/4 width from the left
+    CP_Graphics_DrawCircle(red_circlex, red_circley, 400.0f);
 
-    //MINUS AND ADD HP
     static int inRedZone = 0;
     //if small circle is intersecting red circle
-    int touchingRed = AreCirclesIntersecting(small_circlex, small_circley, 120.0f / 2.0f,red_circlex, red_circley, 400.0f / 2.0f);
+    int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,red_circlex, red_circley, 400.0f / 2.0f);
     for (int i = 0; i < boxCount; i++) {
         if (!boxes[i].removing)
         {
@@ -259,7 +250,7 @@ void Game_Update(void)
                 boxes[i].x = boxes[i].targetX;
         }
 
-
+        CP_Settings_ImageMode(CP_POSITION_CORNER);
         CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
         float timeLeft = boxes[i].lateTimer;
         if (timeLeft < 0) timeLeft = 0;
@@ -297,7 +288,7 @@ void Game_Update(void)
     float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
     float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
 
-    if (AreCirclesIntersecting(small_circlex, small_circley, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
+    if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
 
         for (int i = 0; i < count; i++)
         {   // water
@@ -322,7 +313,7 @@ void Game_Update(void)
 
 
     // if Q is pressed, go back main menu page
-    if (CP_Input_KeyDown(KEY_Q)) { CP_Engine_SetNextGameStateForced(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
+    if (CP_Input_KeyDown(KEY_ESCAPE)) { CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
 
 	//--------------------- Hold Tool ---------------------//
 	//If player is not holding anything
@@ -358,7 +349,7 @@ void Game_Exit(void)
 		CP_Image_Free(level1_tools[i].tool_sprite);
         
 	}
-     //CP_Image_Free(timerbackground);
+ 
     CP_Image_Free(requestbg);
     CP_Sound_Free(customerNoti);
 }
@@ -398,7 +389,8 @@ void start_timer() {
 		timer_width = CP_Math_ClampFloat(timer_width, CP_System_GetWindowWidth() / 8.0f * 0.9f, CP_System_GetWindowWidth() / 8.0f * 1.1f);
 		timer_height = CP_Math_ClampFloat(timer_height, 70.0f * 0.9f, 70.0f * 1.1f);
 	}
-
+    CP_Settings_ImageMode(CP_POSITION_CENTER);
+    CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE); // center text
 	//Timer background
 	CP_Image_Draw(timer_bg_blue, timer_pos_x, timer_pos_y, timer_width, timer_height, 255);
 	CP_Image_Draw(timer_bg_red, timer_pos_x, timer_pos_y, timer_width, timer_height, timer_red_alpha);
