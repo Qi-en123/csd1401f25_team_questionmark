@@ -136,6 +136,11 @@ void Level_Update(void)
         CP_Font_DrawText(btnText[i], textX, textY);
     }
 
+    if (IsButtonClicked(btnX[0], btnY, btnWidth, btnHeight) == 1) {
+        CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+    }
+
+
     //draw exit button
     if (IsButtonHovered(50, 50, 100, 100) || IsButtonClicked(50, 50, 100, 100)) {
         CP_Image_Draw(button_exitG_level, 50, 50, 100, 100, 255);

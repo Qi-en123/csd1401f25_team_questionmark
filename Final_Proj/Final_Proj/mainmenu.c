@@ -92,7 +92,7 @@ void Main_Menu_Update(void)
     int x_coord = 650; // shared x coordinate for all buttons
     float btnWidth = 500.0f;
     float btnHeight = 90.0f;
-    float btnX = x_coord - 50;
+    float btnX = x_coord - 100;
     float btnY[5] = { 225.0f, 325.0f, 425.0f, 525.0f, 625.0f };
     const char* btnText[5] = { "Start", "Levels", "Controls", "Credits", "Quit" };
 
