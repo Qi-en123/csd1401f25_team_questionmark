@@ -7,56 +7,52 @@
 
 #include "player.h"
 #include "tools.h"
+#include "plants.h"
+
+#include <stdlib.h>
+#include <time.h>
 
 CP_Font myFont;
-float stage_timer = 35.0f;
 
 //--------------------- Player ---------------------//
 Player player;
-float speed = 300.0f;
-float starting_pos_x = 100.0f, starting_pos_y = 100.0f;
+float player_speed;
+float player_startpos_x, player_startpos_y;
 CP_Image player_spritesheet;
 
 //--------------------- Tools ---------------------//
-#define l1_tool_size 3
-Tool level1_tools[l1_tool_size];
-Tool_name level1_tool_names[l1_tool_size] = { WATERING_CAN, SOIL, SEEDS };
+#define L1_TOOL_SIZE 3
+Tool level1_tools[L1_TOOL_SIZE];
+Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEEDS };
 Tool held_tool;
 
 //--------------------- Timer ---------------------//
+float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
 float timer_width, timer_height;
 float timer_font_size;
 CP_Color timer_font_color;
-//ahmad
-#include <stdlib.h>
-#include <time.h>
-void spawn_box(void);
 
-CP_Image timerbackground = NULL;
+
 CP_Image requestbg = NULL;
-CP_Font myFont;
 CP_Sound customerNoti;
 
 typedef struct {
-    float x, y;
-    float targetX;
-    float width, height;
-    float speed;
-    int removing;
-    float removeSpeed;
-    float lateTimer;
+	float x, y;
+	float targetX;
+	float width, height;
+	float speed;
+	int removing;
+	float removeSpeed;
+	float lateTimer;
 } Box;
 
 // Maximum number of box
 #define MAX_BOXES 5
 Box boxes[MAX_BOXES];
-int boxCount = 0;
-float spawnTimer = 0.0f;
-//ahmad
-
-int carrying = 0;
+int boxCount;
+float spawnTimer;
 
 //-----------------------------------------------------------------------------------------
 // draw background
@@ -181,13 +177,19 @@ void draw_tile_map(void)
     }
 }
 //------------------------------------------------------------------------------
+//--------------------- Pots ---------------------//
+#define L1_POT_SIZE 4
+Pot level1_pots[L1_POT_SIZE];
 
 void Game_Init(void)
 {
-	
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
+	srand((unsigned int)time(NULL));
+	requestbg = CP_Image_Load("Assets/button_square_gradient.png");
+	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
     spriteSheetTiles = CP_Image_Load("Assets/preview.png");
     //ahmad
@@ -196,44 +198,37 @@ void Game_Init(void)
     requestbg = CP_Image_Load("Assets/button_square_gradient.png");
     customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
     CP_Settings_ImageMode(CP_POSITION_CORNER);
+	CP_System_SetFrameRate(60);
+	boxCount = 0;
+	spawnTimer = 0;
 
+	//Initialize player with default values
+	player_speed = 300.0f;
+	player_startpos_x = player_startpos_y = 100.0f;
+	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
+	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
 
-    CP_System_SetFrameRate(60);
-    boxCount = 0;
-    spawnTimer = 0;
+	//Tools
+	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool);
 
-    // Set large text size
-    CP_Settings_TextSize(150);
-
-    // Center align text horizontally and vertically
-    CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
-
-    CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-    //ahmad
-
-    //Initialize player with default values
-    initialize_player(&player, speed, starting_pos_x, starting_pos_y);
-    player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
-
-    //Tools
-    initialize_tools(level1_tools, l1_tool_size, level1_tool_names, &held_tool);
-
-    //Timer
+	//Timer
 #pragma region Timer Initialization
 
-    timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
-    timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
-    timer_width = CP_System_GetWindowWidth() / 8.0f;
-    timer_height = 70.0f;
-    timer_font_size = 50.0f;
-    timer_pos_x = 30.0f + timer_width / 2;
-    timer_pos_y = 30.0f + timer_height / 2;
-    timer_font_color = CP_Color_Create(255, 255, 255, 255);
+	stage_timer = 35.0f;
+	timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
+	timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
+	timer_width = CP_System_GetWindowWidth() / 8.0f;
+	timer_height = 70.0f;
+	timer_font_size = 50.0f;
+	timer_pos_x = 30.0f + timer_width / 2;
+	timer_pos_y = 30.0f + timer_height / 2;
+	timer_font_color = CP_Color_Create(255, 255, 255, 255);
 
 #pragma endregion
+
+	//Pots
+	initialize_pots(level1_pots, L1_POT_SIZE);
 }
-
-
 
 
 void Game_Update(void)
@@ -244,24 +239,24 @@ void Game_Update(void)
  
     CP_Settings_ImageMode(CP_POSITION_CORNER);
     CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
-    CP_Graphics_ClearBackground(CP_Color_Create(0, 0, 0, 255));
+
     draw_tile_map();
 
-    //create blue colour for small circle
-    CP_Color blue = CP_Color_Create(0, 0, 255, 255);
-    //create red colour for health bar
-    CP_Color health_red = CP_Color_Create(255, 0, 0, 255);
-    //create dark red for empty health bar
-    CP_Color empty_health_red = CP_Color_Create(128, 0, 0, 255);
-    //create green colour for big circle 1
-    CP_Color red = CP_Color_Create(220, 100, 100, 255);
-    //create green colour for big circle 2
-    CP_Color green = CP_Color_Create(100, 220, 100, 255);
-    //create gray colour for background
+
+
+
+	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
+	CP_Color red = CP_Color_Create(220, 100, 100, 255);
+	CP_Color green = CP_Color_Create(100, 220, 100, 255);
+	CP_Color gray = CP_Color_Create(210, 210, 210, 255);
+
+
+	//--------------------- Pots ---------------------//
+	render_pots(level1_pots, L1_POT_SIZE, player.position.x, player.position.y);
 
 
 	//--------------------- Tools ---------------------//
-	render_tools(level1_tools, l1_tool_size, player.position.x, player.position.y, held_tool.tool_name);
+	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool.tool_name);
 	//Render tool behind player if player facing Left or Up
 	if (held_tool.tool_name != HAND && (90 == player.rotation || 180 == player.rotation)) {
 		render_held_tool(&held_tool);
@@ -274,181 +269,142 @@ void Game_Update(void)
 	if (held_tool.tool_name != HAND && (0 == player.rotation || 270 == player.rotation)) {
 		render_held_tool(&held_tool);
 	}
-    /*-----------------------------------------------------------------------*/
-    CP_Settings_Fill(red);
-    //initialise the x and y coordinate of red circle
-    float red_circlex = CP_System_GetWindowWidth() / 4.0f;
-    float red_circley = CP_System_GetWindowHeight() / 2.0f;
-    //draw first big circle at the middle height of screen and 1/4 width from the left
-    CP_Graphics_DrawCircle(red_circlex, red_circley, 400.0f);
 
-    static int inRedZone = 0;
-    //if small circle is intersecting red circle
-    int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,red_circlex, red_circley, 400.0f / 2.0f);
-    for (int i = 0; i < boxCount; i++) {
-        if (!boxes[i].removing)
-        {
-            boxes[i].lateTimer -= dt;
-
-
-            if (boxes[i].lateTimer <= 0.0f)
-            {
-                boxes[i].removing = 1;
-                boxes[i].removeSpeed = 300.0f;
-            }
-        }
-    }
-    const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-    int numPraises = 3;
-    static char currentPraise[32] = "";
-    static float praiseTimer = 0.0f;
-
-    if (touchingRed && !inRedZone)
-    {
-
-        // Remove ONE box
-        if (boxCount > 0 && boxes[0].removing == 0)
-        {
-            boxes[0].removing = 1;
-            boxes[0].removeSpeed = 300.0f;
-        }
-        int idx = rand() % numPraises;
-        snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-        praiseTimer = 1.0f; // show for 1 second
-        inRedZone = 1;
-    }
-    else if (!touchingRed)
-    {
-        inRedZone = 0;
-    }
-
-    if (praiseTimer > 0.0f)
-    {
-        CP_Settings_TextSize(80);
-        CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-
-        float screenW = (float)CP_System_GetWindowWidth();
-        float screenH = (float)CP_System_GetWindowHeight();
-        CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-
-        praiseTimer -= CP_System_GetDt();
-    }
-
-    
-
-
-
-
-
-
-
-    //ahmad
-    spawnTimer += dt;
-    
-    // Spawn every 2 seconds
-    if (spawnTimer >= 20.0f) {
-        spawn_box();
-        spawnTimer = 0.0f;
-    }
-
-    
-    for (int i = 0; i < boxCount; i++) {
-        
-        if (boxes[i].removing)
-        {
-            boxes[i].y -= boxes[i].removeSpeed * dt;
-
-            // If off-screen, delete it
-            if (boxes[i].y + boxes[i].height < 0)
-            {
-                // shift boxes down
-                for (int j = 1; j < boxCount; j++)
-                    boxes[j - 1] = boxes[j];
-
-                boxCount--;
-                i--; // loop checks next box correctly
-                continue;
-            }
-        }
-
-        if (boxes[i].x > boxes[i].targetX) {
-            boxes[i].x -= boxes[i].speed;
-            if (boxes[i].x < boxes[i].targetX)
-                boxes[i].x = boxes[i].targetX;
-        }
-
-        CP_Settings_ImageMode(CP_POSITION_CORNER);
-        CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-        float timeLeft = boxes[i].lateTimer;
-        if (timeLeft < 0) timeLeft = 0;
-
-        CP_Settings_TextSize(50);
-        CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-        char timerStr[8];
-        snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-        CP_Font_DrawText(timerStr,boxes[i].x + boxes[i].width / 2,boxes[i].y + boxes[i].height + 20);
-    }
-    //ahmad
+	/*-----------------------------------------------------------------------*/
+	//CP_Settings_Fill(red);
+	////initialise the x and y coordinate of red circle
+	//float red_circlex = CP_System_GetWindowWidth() / 4.0f;
+	//float red_circley = CP_System_GetWindowHeight() / 2.0f;
+	////draw first big circle at the middle height of screen and 1/4 width from the left
+	//CP_Graphics_DrawCircle(red_circlex, red_circley, 400.0f);
+	//
+	//static int inRedZone = 0;
+	////if small circle is intersecting red circle
+	//int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 400.0f / 2.0f);
+	//for (int i = 0; i < boxCount; i++) {
+	//	if (!boxes[i].removing)
+	//	{
+	//		boxes[i].lateTimer -= dt;
+	//
+	//		if (boxes[i].lateTimer <= 0.0f)
+	//		{
+	//			boxes[i].removing = 1;
+	//			boxes[i].removeSpeed = 300.0f;
+	//		}
+	//	}
+	//}
+	//const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
+	//int numPraises = 3;
+	//static char currentPraise[32] = "";
+	//static float praiseTimer = 0.0f;
+	//
+	//if (touchingRed && !inRedZone)
+	//{
+	//	// Remove ONE box
+	//	if (boxCount > 0 && boxes[0].removing == 0)
+	//	{
+	//		boxes[0].removing = 1;
+	//		boxes[0].removeSpeed = 300.0f;
+	//	}
+	//	int idx = rand() % numPraises;
+	//	snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
+	//	praiseTimer = 1.0f; // show for 1 second
+	//	inRedZone = 1;
+	//}
+	//else if (!touchingRed)
+	//{
+	//	inRedZone = 0;
+	//}
+	//
+	//if (praiseTimer > 0.0f)
+	//{
+	//	CP_Settings_TextSize(80);
+	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	//	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
+	//
+	//	float screenW = (float)CP_System_GetWindowWidth();
+	//	float screenH = (float)CP_System_GetWindowHeight();
+	//	CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
+	//
+	//	praiseTimer -= CP_System_GetDt();
+	//}
+	//
+	//spawnTimer += dt;
+	//
+	//// Spawn every 2 seconds
+	//if (spawnTimer >= 20.0f) {
+	//	spawn_box();
+	//	spawnTimer = 0.0f;
+	//}
+	//
+	//for (int i = 0; i < boxCount; i++) {
+	//
+	//	if (boxes[i].removing)
+	//	{
+	//		boxes[i].y -= boxes[i].removeSpeed * dt;
+	//
+	//		// If off-screen, delete it
+	//		if (boxes[i].y + boxes[i].height < 0)
+	//		{
+	//			// shift boxes down
+	//			for (int j = 1; j < boxCount; j++)
+	//				boxes[j - 1] = boxes[j];
+	//
+	//			boxCount--;
+	//			i--; // loop checks next box correctly
+	//			continue;
+	//		}
+	//	}
+	//
+	//	if (boxes[i].x > boxes[i].targetX) {
+	//		boxes[i].x -= boxes[i].speed;
+	//		if (boxes[i].x < boxes[i].targetX)
+	//			boxes[i].x = boxes[i].targetX;
+	//	}
+	//
+	//	CP_Settings_ImageMode(CP_POSITION_CORNER);
+	//	CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
+	//	float timeLeft = boxes[i].lateTimer;
+	//	if (timeLeft < 0) timeLeft = 0;
+	//
+	//	CP_Settings_TextSize(50);
+	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	//	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+	//
+	//	char timerStr[8];
+	//	snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+	//
+	//	CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+	//}
 
 
-
-
-
-    CP_Settings_Fill(CP_Color_Create(164,147,147, 255));
-    float potX = CP_System_GetWindowWidth() / 2.0f;
-    float potY = CP_System_GetWindowHeight() / 2.0f;
-    CP_Graphics_DrawCircle(potX, potY, 120.0f);
-
-    float rectWidth = 60;
-    float rectHeight = 30;
-    float potRadius = 120.0f;
-    int count = 5; // how many rectangles to draw
-
-    float spacing = 0.0f;
-   
-    float totalWidth = count * rectWidth + (count - 1) * spacing;
-
-   
-    float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-    float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-
-    if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
-
-        for (int i = 0; i < count; i++)
-        {   // water
-            float x = (rectX + i * (rectWidth + spacing)) -82;
-            CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
-            CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-            // sun box
-            CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-            CP_Graphics_DrawRect(x, rectY-rectHeight-8, rectWidth, rectHeight);
-        }
-        
-    }
-
-
-
-
-
-
-
-
-
-
-
-    // if Q is pressed, go back main menu page
-    if (CP_Input_KeyDown(KEY_ESCAPE)) { CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
+	//--------------------- Water & Sun Bar ---------------------//
+	//float rectWidth = 60.0f;
+	//float rectHeight = 30.0f;
+	//float potRadius = 120.0f;
+	//int count = 5; // how many rectangles to draw
+	//
+	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
+	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
+	//
+	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
+	//	for (int i = 0; i < count; i++)
+	//	{   // water
+	//		float x = (rectX + i * rectWidth) - 82.0f;
+	//		CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
+	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+	//		// sun box
+	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
+	//	}
+	//}
 
 	//--------------------- Hold Tool ---------------------//
 	//If player is not holding anything
 	if (HAND == held_tool.tool_name) {
 		if (CP_Input_KeyReleased(KEY_Q)) {
 			//Picks up the first tool that is in range
-			for (int i = 0; i < l1_tool_size; i++) {
+			for (int i = 0; i < L1_TOOL_SIZE; i++) {
 				if (level1_tools[i].in_range) {
 					held_tool = level1_tools[i];
 					break;
@@ -465,6 +421,9 @@ void Game_Update(void)
 	//--------------------- Timer ---------------------//
 	//render timer on top
 	start_timer();
+
+	// if ESC is pressed, go back main menu page
+	if (CP_Input_KeyDown(KEY_ESCAPE)) { CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
 }
 
 void Game_Exit(void)
@@ -474,13 +433,13 @@ void Game_Exit(void)
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
-	for (int i = 0; i < l1_tool_size; i++) {
+	for (int i = 0; i < L1_TOOL_SIZE; i++) {
 		CP_Image_Free(level1_tools[i].tool_sprite);
-        
 	}
- 
-    CP_Image_Free(requestbg);
-    CP_Sound_Free(customerNoti);
+	CP_Image_Free(requestbg);
+	CP_Sound_Free(customerNoti);
+
+	//rmb free my imgs
 }
 
 void start_timer() {
@@ -518,8 +477,8 @@ void start_timer() {
 		timer_width = CP_Math_ClampFloat(timer_width, CP_System_GetWindowWidth() / 8.0f * 0.9f, CP_System_GetWindowWidth() / 8.0f * 1.1f);
 		timer_height = CP_Math_ClampFloat(timer_height, 70.0f * 0.9f, 70.0f * 1.1f);
 	}
-    CP_Settings_ImageMode(CP_POSITION_CENTER);
-    CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE); // center text
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE); // center text
 	//Timer background
 	CP_Image_Draw(timer_bg_blue, timer_pos_x, timer_pos_y, timer_width, timer_height, 255);
 	CP_Image_Draw(timer_bg_red, timer_pos_x, timer_pos_y, timer_width, timer_height, timer_red_alpha);
@@ -560,6 +519,7 @@ void move_tool(float* posx, float* posy, float* rotation) {
 	*rotation = player.rotation - 180.0f;
 }
 
+//only called when player is holding tool
 void handle_tool_interaction(Tool* tool) {
 	//if player is back at where he picked up the tool
 	if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
@@ -576,36 +536,51 @@ void handle_tool_interaction(Tool* tool) {
 	else tool->in_range = false;
 
 	//--------------------- Plant Interaction ---------------------//
-	//will check for plant intersection, nxt time
-	//if (CP_Input_KeyDown(KEY_E)) {
-
-	//}
-   
+	for (int i = 0; i < L1_POT_SIZE; ++i) {
+		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
+			switch (held_tool.tool_name) {
+			case WATERING_CAN:
+				if (level1_pots[i].plant.seed_type != EMPTY) { grow_plant(&level1_pots[i].plant.growth_stage); }
+				break;
+			case SOIL:
+				level1_pots[i].filled = true;
+				break;
+			case SEEDS:
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant); }
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }
 
 void spawn_box(void) {
-    if (boxCount >= MAX_BOXES) return;
+	if (boxCount >= MAX_BOXES) return;
 
-    float screenW = (float)CP_System_GetWindowWidth();
+	float screenW = (float)CP_System_GetWindowWidth();
 
-    //  Shift all existing boxes left
-    for (int i = 0; i < boxCount; i++) {
-        boxes[i].targetX -= (boxes[i].width + 10);  // push left
-    }
+	//  Shift all existing boxes left
+	for (int i = 0; i < boxCount; i++) {
+		boxes[i].targetX -= (boxes[i].width + 10);  // push left
+	}
 
-    //  Create new box on the right
-    Box newBox;
-    newBox.width = 300; // size of req box
-    newBox.height = 250;
-    newBox.x = screenW;        // start off-screen right
-    newBox.y = 10.0f;          // top position
-    newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
-    newBox.speed = 5.0f;
+	//  Create new box on the right
+	Box newBox;
+	newBox.width = 300; // size of req box
+	newBox.height = 250;
+	newBox.x = screenW;        // start off-screen right
+	newBox.y = 10.0f;          // top position
+	newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
+	newBox.speed = 5.0f;
 
-    newBox.removing = 0;        
-    newBox.removeSpeed = 0.0f;  
-    newBox.lateTimer = 8.0f;
-    // Add new box to array
-    boxes[boxCount++] = newBox;
-    CP_Sound_Play(customerNoti);
+	newBox.removing = 0;
+	newBox.removeSpeed = 0.0f;
+	newBox.lateTimer = 8.0f;
+	// Add new box to array
+	boxes[boxCount++] = newBox;
+	CP_Sound_Play(customerNoti);
 }
+
+//FOR ME: pots maybe nid another script :(
+//pots need: soil, no soil
