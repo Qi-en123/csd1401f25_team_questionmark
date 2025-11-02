@@ -58,6 +58,129 @@ float spawnTimer = 0.0f;
 
 int carrying = 0;
 
+//-----------------------------------------------------------------------------------------
+// draw background
+//image
+CP_Image spriteSheetTiles;
+
+#define TILE_SIZE 30
+#define TILE_COLS 15
+#define TILE_ROWS 10
+// each number is a tile here
+int map[TILE_ROWS][TILE_COLS] = {
+    {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+
+
+
+void draw_tile(int tile_index, float x, float y, float w, float h)
+{
+    // coordinates to draw each tile in spriteSheetTiles
+    int left, top, right, bottom;
+
+    switch (tile_index)
+    {
+    case 1: // horizontal path
+        left = 278; top = 194; right = 288; bottom = 204; break;
+
+    case 2: // vertical path
+        left = 289; top = 205; right = 299; bottom = 215; break;
+
+    case 3: // top-left corner path
+        left = 267; top = 205; right = 277; bottom = 215; break;
+
+    case 4: // top-right corner path
+        left = 311; top = 194; right = 321; bottom = 204; break;
+
+    case 5: // bottom-left corner path
+        left = 267; top = 216; right = 277; bottom = 226; break;
+
+    case 6: // bottom-right corner path
+        left = 311; top = 205; right = 321; bottom = 215; break;
+
+
+
+    case 7: //top left grass patch
+        left = 159; top = 239; right = 168; bottom = 248; break;
+    case 8: // top horizontal grass patch
+        left = 169; top = 239; right = 179; bottom = 248; break;
+
+    case 9: //top right grass patch
+        left = 180; top = 239; right = 189; bottom = 248; break;
+
+    case 10: //bottom left grass patch
+        left = 159; top = 261; right = 168; bottom = 269; break;
+
+    case 11: //bottom right grass patch
+        left = 180; top = 261; right = 189; bottom = 269; break;
+
+    case 12: //left vertical grass patch
+        left = 159; top = 249; right = 168; bottom = 259; break;
+
+    case 13: //right vertical grass patch
+        left = 180; top = 249; right = 189; bottom = 259; break;
+
+    case 14: //bottom horizontal grass patch
+        left = 169; top = 261; right = 179; bottom = 269; break;
+
+
+    default:
+        // change middle tiles
+        //left = 169; top = 249; right = 179; bottom = 259; break;
+        left = 147; top = 96; right = 157; bottom = 106; break;
+    }
+
+    // Shrink the rectangle by 1 pixel inside to avoid texture bleeding
+    left += 1;
+    top += 1;
+    right -= 1;
+    bottom -= 1;
+
+    CP_Image_DrawSubImage(spriteSheetTiles,
+        x, y, w, h,
+        left, top, right, bottom,
+        255);
+}
+
+// ------------------------------------------
+// draw entire tile map
+// ------------------------------------------
+void draw_tile_map(void)
+{
+    // Get current window size
+    int screen_w = CP_System_GetWindowWidth();
+    int screen_h = CP_System_GetWindowHeight();
+
+    // Calculate tile size so map fills the whole screen
+    int tile_w = screen_w / TILE_COLS;
+    int tile_h = screen_h / TILE_ROWS;
+
+    // Loop through map and draw each tile
+    for (int row = 0; row < TILE_ROWS; row++)
+    {
+        for (int col = 0; col < TILE_COLS; col++)
+        {
+            int tile = map[row][col];
+
+            // Use integer positions to avoid gaps
+            int x = col * tile_w;
+            int y = row * tile_h;
+
+            draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
+        }
+    }
+}
+//------------------------------------------------------------------------------
 
 void Game_Init(void)
 {
@@ -66,7 +189,7 @@ void Game_Init(void)
 	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
 
-
+    spriteSheetTiles = CP_Image_Load("Assets/preview.png");
     //ahmad
     srand((unsigned int)time(NULL));
     //useless alrdy : timerbackground = CP_Image_Load("Assets/button_rectangle_depth_border.png");
@@ -115,8 +238,15 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
-	CP_Graphics_ClearBackground(CP_Color_Create(150, 150, 150, 255));
+
+
+
  
+    CP_Settings_ImageMode(CP_POSITION_CORNER);
+    CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
+    CP_Graphics_ClearBackground(CP_Color_Create(0, 0, 0, 255));
+    draw_tile_map();
+
     //create blue colour for small circle
     CP_Color blue = CP_Color_Create(0, 0, 255, 255);
     //create red colour for health bar
@@ -128,9 +258,7 @@ void Game_Update(void)
     //create green colour for big circle 2
     CP_Color green = CP_Color_Create(100, 220, 100, 255);
     //create gray colour for background
-    CP_Color gray = CP_Color_Create(210, 210, 210, 255);
-    //set background colour to gray
-    CP_Graphics_ClearBackground(gray);
+
 
 	//--------------------- Tools ---------------------//
 	render_tools(level1_tools, l1_tool_size, player.position.x, player.position.y, held_tool.tool_name);
@@ -341,6 +469,7 @@ void Game_Update(void)
 
 void Game_Exit(void)
 {
+    CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
