@@ -279,28 +279,74 @@ void Game_Update(void)
     float rectHeight = 30;
     float potRadius = 120.0f;
     int count = 5; // how many rectangles to draw
-
     float spacing = 0.0f;
    
     float totalWidth = count * rectWidth + (count - 1) * spacing;
 
+    static float fillProgress = 0.0f; // 0 = empty, 1 = full
+    const int potBarSegments = 5; // number of segments
+    float fillSpeed = 0.4f; // fill per second
    
     float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
     float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
 
-    if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
-
-        for (int i = 0; i < count; i++)
-        {   // water
-            float x = (rectX + i * (rectWidth + spacing)) -82;
-            CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
-            CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-            // sun box
-            CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-            CP_Graphics_DrawRect(x, rectY-rectHeight-8, rectWidth, rectHeight);
-        }
+   if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
+{
+    // Fill while holding L
+    if (CP_Input_KeyDown(KEY_L))
+    {
+        fillProgress += fillSpeed * dt;
+        if (fillProgress > 1.0f) fillProgress = 1.0f;
         
     }
+
+    float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+    float filledWidth = totalBarWidth * fillProgress;
+
+    float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
+
+    for (int i = 0; i < potBarSegments; i++)
+    {
+        float x = rectX + i * (rectWidth + spacing) - 82;
+
+        // Grey background
+        CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+        CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+
+        // Fill calculation
+        float segmentStart = i * (rectWidth + spacing);
+        float segmentFill = filledWidth - segmentStart;
+        if (segmentFill > 0.0f)
+        {
+            if (segmentFill > rectWidth) segmentFill = rectWidth;
+
+            // Smooth transition: calculate red intensity
+            CP_Color fillColor;
+            if (filledWidth <= thresholdWidth)
+            {
+                fillColor = CP_Color_Create(0, 0, 255, 255); // blue
+            }
+            else
+            {
+                // progress past threshold (0..1)
+                float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+                if (redAmount > 1.0f) redAmount = 1.0f;
+                int r = (int)(255.0f * redAmount);
+                int g = (int)(0.0f);
+                int b = (int)(255.0f * (1.0f - redAmount));
+                fillColor = CP_Color_Create(r, g, b, 255);
+            }
+
+            CP_Settings_Fill(fillColor);
+            CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+        }
+
+        // Yellow bar above (sun box)
+        CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+        CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
+    }
+}
+
 
 
 
