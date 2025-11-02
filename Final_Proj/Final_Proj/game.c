@@ -59,21 +59,42 @@ float spawnTimer;
 //image
 CP_Image spriteSheetTiles;
 
-#define TILE_SIZE 30
-#define TILE_COLS 15
-#define TILE_ROWS 10
+
+#define TILE_COLS 30
+#define TILE_ROWS 20
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
-    {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    //{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
 
@@ -87,7 +108,7 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
     switch (tile_index)
     {
     case 1: // horizontal path
-        left = 278; top = 194; right = 288; bottom = 204; break;
+        left = 126; top = 85; right = 135; bottom = 95; break;
 
     case 2: // vertical path
         left = 289; top = 205; right = 299; bottom = 215; break;
@@ -103,32 +124,6 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 
     case 6: // bottom-right corner path
         left = 311; top = 205; right = 321; bottom = 215; break;
-
-
-
-    case 7: //top left grass patch
-        left = 159; top = 239; right = 168; bottom = 248; break;
-    case 8: // top horizontal grass patch
-        left = 169; top = 239; right = 179; bottom = 248; break;
-
-    case 9: //top right grass patch
-        left = 180; top = 239; right = 189; bottom = 248; break;
-
-    case 10: //bottom left grass patch
-        left = 159; top = 261; right = 168; bottom = 269; break;
-
-    case 11: //bottom right grass patch
-        left = 180; top = 261; right = 189; bottom = 269; break;
-
-    case 12: //left vertical grass patch
-        left = 159; top = 249; right = 168; bottom = 259; break;
-
-    case 13: //right vertical grass patch
-        left = 180; top = 249; right = 189; bottom = 259; break;
-
-    case 14: //bottom horizontal grass patch
-        left = 169; top = 261; right = 179; bottom = 269; break;
-
 
     default:
         // change middle tiles
@@ -154,12 +149,12 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 void draw_tile_map(void)
 {
     // Get current window size
-    int screen_w = CP_System_GetWindowWidth();
-    int screen_h = CP_System_GetWindowHeight();
+    float screen_w = CP_System_GetWindowWidth();
+    float screen_h = CP_System_GetWindowHeight();
 
     // Calculate tile size so map fills the whole screen
-    int tile_w = screen_w / TILE_COLS;
-    int tile_h = screen_h / TILE_ROWS;
+    float tile_w = screen_w / TILE_COLS;
+    float tile_h = screen_h / TILE_ROWS;
 
     // Loop through map and draw each tile
     for (int row = 0; row < TILE_ROWS; row++)
@@ -169,8 +164,8 @@ void draw_tile_map(void)
             int tile = map[row][col];
 
             // Use integer positions to avoid gaps
-            int x = col * tile_w;
-            int y = row * tile_h;
+            float x = col * tile_w;
+            float y = row * tile_h;
 
             draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
         }
@@ -271,16 +266,16 @@ void Game_Update(void)
 	}
 
 	/*-----------------------------------------------------------------------*/
-	//CP_Settings_Fill(red);
+	CP_Settings_Fill(red);
 	////initialise the x and y coordinate of red circle
-	//float red_circlex = CP_System_GetWindowWidth() / 4.0f;
-	//float red_circley = CP_System_GetWindowHeight() / 2.0f;
+	float red_circlex = 500.0f;
+	float red_circley = 600.0f;
 	////draw first big circle at the middle height of screen and 1/4 width from the left
-	//CP_Graphics_DrawCircle(red_circlex, red_circley, 400.0f);
+	CP_Graphics_DrawCircle(red_circlex, red_circley, 100.0f);
 	//
-	//static int inRedZone = 0;
+	static int inRedZone = 0;
 	////if small circle is intersecting red circle
-	//int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 400.0f / 2.0f);
+	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
 	//for (int i = 0; i < boxCount; i++) {
 	//	if (!boxes[i].removing)
 	//	{
@@ -398,13 +393,28 @@ void Game_Update(void)
 	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
 	//	}
 	//}
-            if (boxes[i].lateTimer <= 0.0f)
+          /*  if (boxes[i].lateTimer <= 0.0f)
             {
                 boxes[i].removing = 1;
                 boxes[i].removeSpeed = 300.0f;
             }
         }
-    }
+    }*/
+
+	for (int i = 0; i < boxCount; i++) {
+			if (!boxes[i].removing)
+			{
+				boxes[i].lateTimer -= dt;
+		
+				if (boxes[i].lateTimer <= 0.0f)
+				{
+					boxes[i].removing = 1;
+					boxes[i].removeSpeed = 300.0f;
+				}
+			}
+		}
+
+
     const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
     int numPraises = 3;
     static char currentPraise[32] = "";
@@ -530,6 +540,7 @@ void Game_Update(void)
     // Fill while holding L
     if (CP_Input_KeyDown(KEY_L))
     {
+		CP_Settings_RectMode(CP_POSITION_CORNER);
         fillProgress += fillSpeed * dt;
         if (fillProgress > 1.0f) fillProgress = 1.0f;
         

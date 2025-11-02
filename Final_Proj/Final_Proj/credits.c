@@ -116,6 +116,7 @@ void Credits_Update(void)
     }
 
     // --- Draw semi-transparent overlay to tint background only ---
+    CP_Settings_ImageMode(CP_POSITION_CENTER);
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 100)); // black with alpha 100
     CP_Graphics_DrawRect(screenW / 2, screenH / 2, screenW, screenH);
 

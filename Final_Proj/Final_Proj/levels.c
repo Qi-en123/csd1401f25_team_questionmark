@@ -96,7 +96,9 @@ void Level_Update(void)
         CP_Image_DrawSubImage(spriteSheet_level, cloudX_level[i], screenH / 6, 300, 250, // x, y , width, height
             0, 218, 251, 363, 255); // left, top, right, bottom, alpha
     }
-    // --- Draw semi-transparent overlay to tint background only ---
+    // --- Draw semi-transparent overlay to tint background only ---\
+    
+    CP_Settings_ImageMode(CP_POSITION_CENTER);
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 100)); // black with alpha 100
     CP_Graphics_DrawRect(screenW / 2, screenH / 2, screenW, screenH);
    
