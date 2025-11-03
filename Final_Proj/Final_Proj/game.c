@@ -64,16 +64,16 @@ CP_Image spriteSheetTiles;
 #define TILE_ROWS 20
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
-    //{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	//{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	//{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -97,50 +97,47 @@ int map[TILE_ROWS][TILE_COLS] = {
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-
-
-
 void draw_tile(int tile_index, float x, float y, float w, float h)
 {
-    // coordinates to draw each tile in spriteSheetTiles
-    int left, top, right, bottom;
+	// coordinates to draw each tile in spriteSheetTiles
+	int left, top, right, bottom;
 
-    switch (tile_index)
-    {
-    case 1: // horizontal path
-        left = 126; top = 85; right = 135; bottom = 95; break;
+	switch (tile_index)
+	{
+	case 1: // horizontal path
+		left = 126; top = 85; right = 135; bottom = 95; break;
 
-    case 2: // vertical path
-        left = 289; top = 205; right = 299; bottom = 215; break;
+	case 2: // vertical path
+		left = 289; top = 205; right = 299; bottom = 215; break;
 
-    case 3: // top-left corner path
-        left = 267; top = 205; right = 277; bottom = 215; break;
+	case 3: // top-left corner path
+		left = 267; top = 205; right = 277; bottom = 215; break;
 
-    case 4: // top-right corner path
-        left = 311; top = 194; right = 321; bottom = 204; break;
+	case 4: // top-right corner path
+		left = 311; top = 194; right = 321; bottom = 204; break;
 
-    case 5: // bottom-left corner path
-        left = 267; top = 216; right = 277; bottom = 226; break;
+	case 5: // bottom-left corner path
+		left = 267; top = 216; right = 277; bottom = 226; break;
 
-    case 6: // bottom-right corner path
-        left = 311; top = 205; right = 321; bottom = 215; break;
+	case 6: // bottom-right corner path
+		left = 311; top = 205; right = 321; bottom = 215; break;
 
-    default:
-        // change middle tiles
-        //left = 169; top = 249; right = 179; bottom = 259; break;
-        left = 147; top = 96; right = 157; bottom = 106; break;
-    }
+	default:
+		// change middle tiles
+		//left = 169; top = 249; right = 179; bottom = 259; break;
+		left = 147; top = 96; right = 157; bottom = 106; break;
+	}
 
-    // Shrink the rectangle by 1 pixel inside to avoid texture bleeding
-    left += 1;
-    top += 1;
-    right -= 1;
-    bottom -= 1;
+	// Shrink the rectangle by 1 pixel inside to avoid texture bleeding
+	left += 1;
+	top += 1;
+	right -= 1;
+	bottom -= 1;
 
-    CP_Image_DrawSubImage(spriteSheetTiles,
-        x, y, w, h,
-        left, top, right, bottom,
-        255);
+	CP_Image_DrawSubImage(spriteSheetTiles,
+		x, y, w, h,
+		left, top, right, bottom,
+		255);
 }
 
 // ------------------------------------------
@@ -148,30 +145,31 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 // ------------------------------------------
 void draw_tile_map(void)
 {
-    // Get current window size
-    float screen_w = CP_System_GetWindowWidth();
-    float screen_h = CP_System_GetWindowHeight();
+	// Get current window size
+	float screen_w = CP_System_GetWindowWidth();
+	float screen_h = CP_System_GetWindowHeight();
 
-    // Calculate tile size so map fills the whole screen
-    float tile_w = screen_w / TILE_COLS;
-    float tile_h = screen_h / TILE_ROWS;
+	// Calculate tile size so map fills the whole screen
+	float tile_w = screen_w / TILE_COLS;
+	float tile_h = screen_h / TILE_ROWS;
 
-    // Loop through map and draw each tile
-    for (int row = 0; row < TILE_ROWS; row++)
-    {
-        for (int col = 0; col < TILE_COLS; col++)
-        {
-            int tile = map[row][col];
+	// Loop through map and draw each tile
+	for (int row = 0; row < TILE_ROWS; row++)
+	{
+		for (int col = 0; col < TILE_COLS; col++)
+		{
+			int tile = map[row][col];
 
-            // Use integer positions to avoid gaps
-            float x = col * tile_w;
-            float y = row * tile_h;
+			// Use integer positions to avoid gaps
+			float x = col * tile_w;
+			float y = row * tile_h;
 
-            draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
-        }
-    }
+			draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
+		}
+	}
 }
 //------------------------------------------------------------------------------
+
 //--------------------- Pots ---------------------//
 #define L1_POT_SIZE 4
 Pot level1_pots[L1_POT_SIZE];
@@ -181,18 +179,14 @@ void Game_Init(void)
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
+
+	spriteSheetTiles = CP_Image_Load("Assets/preview.png");
+
+	//ahmad
 	srand((unsigned int)time(NULL));
 	requestbg = CP_Image_Load("Assets/button_square_gradient.png");
 	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
-	CP_Settings_ImageMode(CP_POSITION_CORNER);
-
-    spriteSheetTiles = CP_Image_Load("Assets/preview.png");
-    //ahmad
-    srand((unsigned int)time(NULL));
-    //useless alrdy : timerbackground = CP_Image_Load("Assets/button_rectangle_depth_border.png");
-    requestbg = CP_Image_Load("Assets/button_square_gradient.png");
-    customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
-    CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_System_SetFrameRate(60);
 	boxCount = 0;
 	spawnTimer = 0;
@@ -228,33 +222,43 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
+	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-
-
- 
-    CP_Settings_ImageMode(CP_POSITION_CORNER);
-    CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
-
-    draw_tile_map();
-
-
-
+	draw_tile_map();
 
 	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
 	CP_Color red = CP_Color_Create(220, 100, 100, 255);
 	CP_Color green = CP_Color_Create(100, 220, 100, 255);
 	CP_Color gray = CP_Color_Create(210, 210, 210, 255);
 
-
 	//--------------------- Pots ---------------------//
 	render_pots(level1_pots, L1_POT_SIZE, player.position.x, player.position.y);
-
 
 	//--------------------- Tools ---------------------//
 	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool.tool_name);
 	//Render tool behind player if player facing Left or Up
 	if (held_tool.tool_name != HAND && (90 == player.rotation || 180 == player.rotation)) {
 		render_held_tool(&held_tool);
+	}
+
+	//--------------------- Hold Tool ---------------------//
+	//If player is not holding anything
+	if (HAND == held_tool.tool_name) {
+		if (CP_Input_KeyReleased(KEY_Q)) {
+			//Picks up the first tool that is in range
+			for (int i = 0; i < L1_TOOL_SIZE; ++i) {
+				if (level1_tools[i].in_range) {
+					held_tool = level1_tools[i];
+					break;
+				}
+			}
+		}
+	}
+	//If player is holding something
+	else {
+		move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
+		handle_tool_interaction(&held_tool);
 	}
 
 	//--------------------- Player ---------------------//
@@ -267,14 +271,14 @@ void Game_Update(void)
 
 	/*-----------------------------------------------------------------------*/
 	CP_Settings_Fill(red);
-	////initialise the x and y coordinate of red circle
+	//initialise the x and y coordinate of red circle
 	float red_circlex = 500.0f;
 	float red_circley = 600.0f;
-	////draw first big circle at the middle height of screen and 1/4 width from the left
+	//draw first big circle at the middle height of screen and 1/4 width from the left
 	CP_Graphics_DrawCircle(red_circlex, red_circley, 100.0f);
-	//
+	
 	static int inRedZone = 0;
-	////if small circle is intersecting red circle
+	//if small circle is intersecting red circle
 	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
 	//for (int i = 0; i < boxCount; i++) {
 	//	if (!boxes[i].removing)
@@ -393,237 +397,194 @@ void Game_Update(void)
 	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
 	//	}
 	//}
-          /*  if (boxes[i].lateTimer <= 0.0f)
-            {
-                boxes[i].removing = 1;
-                boxes[i].removeSpeed = 300.0f;
-            }
-        }
-    }*/
-
-	for (int i = 0; i < boxCount; i++) {
-			if (!boxes[i].removing)
+		  /*  if (boxes[i].lateTimer <= 0.0f)
 			{
-				boxes[i].lateTimer -= dt;
-		
-				if (boxes[i].lateTimer <= 0.0f)
-				{
-					boxes[i].removing = 1;
-					boxes[i].removeSpeed = 300.0f;
-				}
+				boxes[i].removing = 1;
+				boxes[i].removeSpeed = 300.0f;
 			}
 		}
+	}*/
 
 
-    const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-    int numPraises = 3;
-    static char currentPraise[32] = "";
-    static float praiseTimer = 0.0f;
+	for (int i = 0; i < boxCount; i++) {
+		if (!boxes[i].removing)
+		{
+			boxes[i].lateTimer -= dt;
 
-    if (touchingRed && !inRedZone)
-    {
-
-        // Remove ONE box
-        if (boxCount > 0 && boxes[0].removing == 0)
-        {
-            boxes[0].removing = 1;
-            boxes[0].removeSpeed = 300.0f;
-        }
-        int idx = rand() % numPraises;
-        snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-        praiseTimer = 1.0f; // show for 1 second
-        inRedZone = 1;
-    }
-    else if (!touchingRed)
-    {
-        inRedZone = 0;
-    }
-
-    if (praiseTimer > 0.0f)
-    {
-        CP_Settings_TextSize(80);
-        CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-
-        float screenW = (float)CP_System_GetWindowWidth();
-        float screenH = (float)CP_System_GetWindowHeight();
-        CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-
-        praiseTimer -= CP_System_GetDt();
-    }
-
-    
-
-
-
-
-
-
-
-    //ahmad
-    spawnTimer += dt;
-    
-    // Spawn every 2 seconds
-    if (spawnTimer >= 20.0f) {
-        spawn_box();
-        spawnTimer = 0.0f;
-    }
-
-    
-    for (int i = 0; i < boxCount; i++) {
-        
-        if (boxes[i].removing)
-        {
-            boxes[i].y -= boxes[i].removeSpeed * dt;
-
-            // If off-screen, delete it
-            if (boxes[i].y + boxes[i].height < 0)
-            {
-                // shift boxes down
-                for (int j = 1; j < boxCount; j++)
-                    boxes[j - 1] = boxes[j];
-
-                boxCount--;
-                i--; // loop checks next box correctly
-                continue;
-            }
-        }
-
-        if (boxes[i].x > boxes[i].targetX) {
-            boxes[i].x -= boxes[i].speed;
-            if (boxes[i].x < boxes[i].targetX)
-                boxes[i].x = boxes[i].targetX;
-        }
-
-        CP_Settings_ImageMode(CP_POSITION_CORNER);
-        CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-        float timeLeft = boxes[i].lateTimer;
-        if (timeLeft < 0) timeLeft = 0;
-
-        CP_Settings_TextSize(50);
-        CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-        char timerStr[8];
-        snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-        CP_Font_DrawText(timerStr,boxes[i].x + boxes[i].width / 2,boxes[i].y + boxes[i].height + 20);
-    }
-    //ahmad
-
-
-
-
-
-    CP_Settings_Fill(CP_Color_Create(164,147,147, 255));
-    float potX = CP_System_GetWindowWidth() / 2.0f;
-    float potY = CP_System_GetWindowHeight() / 2.0f;
-    CP_Graphics_DrawCircle(potX, potY, 120.0f);
-
-    float rectWidth = 60;
-    float rectHeight = 30;
-    float potRadius = 120.0f;
-    int count = 5; // how many rectangles to draw
-    float spacing = 0.0f;
-   
-    float totalWidth = count * rectWidth + (count - 1) * spacing;
-
-    static float fillProgress = 0.0f; // 0 = empty, 1 = full
-    const int potBarSegments = 5; // number of segments
-    float fillSpeed = 0.4f; // fill per second
-   
-    float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-    float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-
-   if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
-{
-    // Fill while holding L
-    if (CP_Input_KeyDown(KEY_L))
-    {
-		CP_Settings_RectMode(CP_POSITION_CORNER);
-        fillProgress += fillSpeed * dt;
-        if (fillProgress > 1.0f) fillProgress = 1.0f;
-        
-    }
-
-    float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-    float filledWidth = totalBarWidth * fillProgress;
-
-    float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
-
-    for (int i = 0; i < potBarSegments; i++)
-    {
-        float x = rectX + i * (rectWidth + spacing) - 82;
-
-        // Grey background
-        CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
-        CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-
-        // Fill calculation
-        float segmentStart = i * (rectWidth + spacing);
-        float segmentFill = filledWidth - segmentStart;
-        if (segmentFill > 0.0f)
-        {
-            if (segmentFill > rectWidth) segmentFill = rectWidth;
-
-            // Smooth transition: calculate red intensity
-            CP_Color fillColor;
-            if (filledWidth <= thresholdWidth)
-            {
-                fillColor = CP_Color_Create(0, 0, 255, 255); // blue
-            }
-            else
-            {
-                // progress past threshold (0..1)
-                float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
-                if (redAmount > 1.0f) redAmount = 1.0f;
-                int r = (int)(255.0f * redAmount);
-                int g = (int)(0.0f);
-                int b = (int)(255.0f * (1.0f - redAmount));
-                fillColor = CP_Color_Create(r, g, b, 255);
-            }
-
-            CP_Settings_Fill(fillColor);
-            CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
-        }
-
-        // Yellow bar above (sun box)
-        CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-        CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-    // if Q is pressed, go back main menu page
-    if (CP_Input_KeyDown(KEY_ESCAPE)) { CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
-
-	//--------------------- Hold Tool ---------------------//
-	//If player is not holding anything
-	if (HAND == held_tool.tool_name) {
-		if (CP_Input_KeyReleased(KEY_Q)) {
-			//Picks up the first tool that is in range
-			for (int i = 0; i < L1_TOOL_SIZE; i++) {
-				if (level1_tools[i].in_range) {
-					held_tool = level1_tools[i];
-					break;
-				}
+			if (boxes[i].lateTimer <= 0.0f)
+			{
+				boxes[i].removing = 1;
+				boxes[i].removeSpeed = 300.0f;
 			}
 		}
 	}
-	//If player is holding something
-	else {
-		move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
-		handle_tool_interaction(&held_tool);
+
+
+	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
+	int numPraises = 3;
+	static char currentPraise[32] = "";
+	static float praiseTimer = 0.0f;
+
+	if (touchingRed && !inRedZone)
+	{
+
+		// Remove ONE box
+		if (boxCount > 0 && boxes[0].removing == 0)
+		{
+			boxes[0].removing = 1;
+			boxes[0].removeSpeed = 300.0f;
+		}
+		int idx = rand() % numPraises;
+		snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
+		praiseTimer = 1.0f; // show for 1 second
+		inRedZone = 1;
+	}
+	else if (!touchingRed)
+	{
+		inRedZone = 0;
+	}
+
+	if (praiseTimer > 0.0f)
+	{
+		CP_Settings_TextSize(80);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
+
+		float screenW = (float)CP_System_GetWindowWidth();
+		float screenH = (float)CP_System_GetWindowHeight();
+		CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
+
+		praiseTimer -= CP_System_GetDt();
+	}
+
+
+	//ahmad
+	spawnTimer += dt;
+
+	// Spawn every 2 seconds
+	if (spawnTimer >= 20.0f) {
+		spawn_box();
+		spawnTimer = 0.0f;
+	}
+
+	for (int i = 0; i < boxCount; i++) {
+
+		if (boxes[i].removing)
+		{
+			boxes[i].y -= boxes[i].removeSpeed * dt;
+
+			// If off-screen, delete it
+			if (boxes[i].y + boxes[i].height < 0)
+			{
+				// shift boxes down
+				for (int j = 1; j < boxCount; j++)
+					boxes[j - 1] = boxes[j];
+
+				boxCount--;
+				i--; // loop checks next box correctly
+				continue;
+			}
+		}
+
+		if (boxes[i].x > boxes[i].targetX) {
+			boxes[i].x -= boxes[i].speed;
+			if (boxes[i].x < boxes[i].targetX)
+				boxes[i].x = boxes[i].targetX;
+		}
+
+		CP_Settings_ImageMode(CP_POSITION_CORNER);
+		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
+		float timeLeft = boxes[i].lateTimer;
+		if (timeLeft < 0) timeLeft = 0;
+
+		CP_Settings_TextSize(50);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+
+		char timerStr[8];
+		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+
+		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+	}
+	//ahmad
+
+
+	CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
+	float potX = CP_System_GetWindowWidth() / 2.0f;
+	float potY = CP_System_GetWindowHeight() / 2.0f;
+	CP_Graphics_DrawCircle(potX, potY, 120.0f);
+
+	float rectWidth = 60;
+	float rectHeight = 30;
+	float potRadius = 120.0f;
+	int count = 5; // how many rectangles to draw
+	float spacing = 0.0f;
+
+	float totalWidth = count * rectWidth + (count - 1) * spacing;
+
+	static float fillProgress = 0.0f; // 0 = empty, 1 = full
+	const int potBarSegments = 5; // number of segments
+	float fillSpeed = 0.4f; // fill per second
+
+	float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
+	float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
+
+	if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
+	{
+		// Fill while holding L
+		if (CP_Input_KeyDown(KEY_L))
+		{
+			CP_Settings_RectMode(CP_POSITION_CORNER);
+			fillProgress += fillSpeed * dt;
+			if (fillProgress > 1.0f) fillProgress = 1.0f;
+
+		}
+
+		float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+		float filledWidth = totalBarWidth * fillProgress;
+
+		float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
+
+		for (int i = 0; i < potBarSegments; i++)
+		{
+			float x = rectX + i * (rectWidth + spacing) - 82;
+
+			// Grey background
+			CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+			CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+
+			// Fill calculation
+			float segmentStart = i * (rectWidth + spacing);
+			float segmentFill = filledWidth - segmentStart;
+			if (segmentFill > 0.0f)
+			{
+				if (segmentFill > rectWidth) segmentFill = rectWidth;
+
+				// Smooth transition: calculate red intensity
+				CP_Color fillColor;
+				if (filledWidth <= thresholdWidth)
+				{
+					fillColor = CP_Color_Create(0, 0, 255, 255); // blue
+				}
+				else
+				{
+					// progress past threshold (0..1)
+					float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+					if (redAmount > 1.0f) redAmount = 1.0f;
+					int r = (int)(255.0f * redAmount);
+					int g = (int)(0.0f);
+					int b = (int)(255.0f * (1.0f - redAmount));
+					fillColor = CP_Color_Create(r, g, b, 255);
+				}
+
+				CP_Settings_Fill(fillColor);
+				CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+			}
+
+			// Yellow bar above (sun box)
+			CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+			CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
+		}
 	}
 
 	//--------------------- Timer ---------------------//
@@ -636,7 +597,7 @@ void Game_Update(void)
 
 void Game_Exit(void)
 {
-    CP_Image_Free(spriteSheetTiles);
+	CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
@@ -704,20 +665,20 @@ void move_tool(float* posx, float* posy, float* rotation) {
 	//Have to make it look like the player is holding it (right handed)
 	switch (player.rotation) {
 	case 0: //DOWN
-		offset_x = -20.0f;
-		offset_y = 28.0f;
+		offset_x = 0.0f;
+		offset_y = 44.0f;
 		break;
 	case 90: //LEFT
-		offset_x = -12.0f;
-		offset_y = 15.0f;
+		offset_x = 0.0f;
+		offset_y = 30.0f;
 		break;
 	case 180: //UP
-		offset_x = 20.0f;
-		offset_y = 10.0f;
+		offset_x = 35.0f;
+		offset_y = 15.0f;
 		break;
 	case 270: //RIGHT
-		offset_x = 10.0f;
-		offset_y = 20.0f;
+		offset_x = 25.0f;
+		offset_y = 38.0f;
 		break;
 	default:
 		break;
@@ -789,6 +750,3 @@ void spawn_box(void) {
 	boxes[boxCount++] = newBox;
 	CP_Sound_Play(customerNoti);
 }
-
-//FOR ME: pots maybe nid another script :(
-//pots need: soil, no soil

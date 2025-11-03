@@ -129,6 +129,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 		}
 	}
 
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	//render player
 	CP_Image_DrawSubImage(spritesheet, pos_x, pos_y, SPRITE_WIDTH*4.0f, SPRITE_HEIGHT*4.0f, //sprite settings
 		img_x + (current_frame * SPRITE_WIDTH * 4), 0.0f,  //start of sub img

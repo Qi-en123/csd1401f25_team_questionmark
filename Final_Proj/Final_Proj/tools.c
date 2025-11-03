@@ -65,7 +65,6 @@ void render_tools(Tool* tools, int size, float player_posx, float player_posy, T
 
 //renders the held tool seperately
 void render_held_tool(Tool* tool) {
-	
 	CP_Image_DrawAdvanced(tool->tool_sprite, tool->position.x, tool->position.y,
 		SPRITE_WIDTH * 2.1f, SPRITE_HEIGHT * 2.1f, 255, tool->rotation * tool->rotatable);
 }
