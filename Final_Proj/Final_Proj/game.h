@@ -11,3 +11,4 @@ void start_timer();
 void move_tool(float* posx, float* posy, float* rotation);
 void handle_tool_interaction(Tool* tool);
 void spawn_box(void);
+void move_pot(float* posx, float* posy);

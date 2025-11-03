@@ -154,5 +154,7 @@ void Main_Menu_Exit(void)
     //free image and font
     CP_Image_Free(spriteSheet);
     CP_Image_Free(mainmenu_bg);
+    CP_Image_Free(button_white);
+    CP_Image_Free(button_green);
     CP_Font_Free(font);
 }

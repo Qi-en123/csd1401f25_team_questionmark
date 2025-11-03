@@ -167,5 +167,8 @@ void Credits_Exit(void)
     //free image and font_credits
     CP_Image_Free(spriteSheet_credits);
     CP_Image_Free(mainmenu_bg_credits);
+    CP_Image_Free(button_exitW_credits);
+    CP_Image_Free(button_exitG_credits);
+
     CP_Font_Free(font_credits);
 }

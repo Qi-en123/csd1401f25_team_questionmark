@@ -1,7 +1,8 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#define tool_range 30
+#define TOOL_RANGE 6
+#define TOOL_RANGE_Y_OFFSET 30
 
 #include "utils.h" //to use Vector2
 #include "cprocessing.h" //to use CP_color
@@ -10,6 +11,7 @@ typedef enum Tool_name {
 	WATERING_CAN,
 	SOIL,
 	SEEDS,//MIGHT BE IN ANOTHER FUNCTION???? 
+	POT,
 	HAND, //means nothing (only used to check what player is holding)
 
 }Tool_name;

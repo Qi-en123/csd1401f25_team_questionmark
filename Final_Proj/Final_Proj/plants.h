@@ -33,11 +33,13 @@ typedef struct Pot {
 	Plant plant;
 }Pot;
 
-void initialize_pots(Pot *pots, int size);
-void render_pots(Pot* pots, int size, float player_posx, float player_posy);
+void initialize_pots(Pot* pots, int size);
+void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_posx, float player_posy, Pot* held_pot);
+void render_held_pot(Pot* pot, CP_Image pot_spritesheet);
 
-void initialize_plant(Plant *plant);
+
+void initialize_plant(Plant* plant);
 void render_plant(Plant plant, float posx, float posy);
-void grow_plant(GROWTH_STAGE *growth_stage);
+void grow_plant(GROWTH_STAGE* growth_stage);
 
 #endif // !PLANT_H

@@ -15,12 +15,10 @@ void initialize_pots(Pot *pots, int size) {
 	}
 }
 
+#define POT_WIDTH 19
+#define POT_HEIGHT 19
 //Draws all the pots, checks if player is close-by
-void render_pots(Pot* pots, int size, float player_posx, float player_posy) {
-#define pot_width 19
-#define pot_height 19
-
-	CP_Image pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
+void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_posx, float player_posy, Pot* pot) {
 
 	//ensures only 1 pot can be selected at all times
 	bool pot_selected = false;
@@ -31,6 +29,7 @@ void render_pots(Pot* pots, int size, float player_posx, float player_posy) {
 	}
 
 	for (int i = 0; i < size; ++i) {
+		if (&pots[i] == pot) { continue; }
 		if (AreCirclesIntersecting(player_posx, player_posy, 9.0f, //player pos and radius
 			pots[i].position.x, pots[i].position.y, 50.0f)) { //pot pos and range
 			if (!pot_selected) {
@@ -42,15 +41,28 @@ void render_pots(Pot* pots, int size, float player_posx, float player_posy) {
 			pots[i].selected = false;
 		}
 
-		float start_x = pot_width * pots[i].selected; //changes sprite subimg to highlighted version
-		float start_y = pot_height - pot_height * pots[i].filled; //changes to filled version (in this version its dug hole)
+		float start_x = POT_WIDTH * pots[i].selected; //changes sprite subimg to highlighted version
+		float start_y = POT_HEIGHT - POT_HEIGHT * pots[i].filled; //changes to filled version (in this version its dug hole)
 
-		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, pot_width * 3.4f, pot_height * 3.4f,
-			start_x, start_y, start_x + pot_width, start_y + pot_height, 255);
+		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
+			start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
 		if (pots[i].plant.seed_type != EMPTY) {
 			render_plant(pots[i].plant, pots[i].position.x, pots[i].position.y);
 		}
+	}
+}
+
+void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
+
+	float start_x = POT_WIDTH * pot->selected; //changes sprite subimg to highlighted version
+	float start_y = POT_HEIGHT - POT_HEIGHT * pot->filled; //changes to filled version (in this version its dug hole)
+
+	CP_Image_DrawSubImage(pot_spritesheet, pot->position.x, pot->position.y, POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
+		start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
+
+	if (pot->plant.seed_type != EMPTY) {
+		render_plant(pot->plant, pot->position.x, pot->position.y);
 	}
 }
 
@@ -69,7 +81,7 @@ void render_plant(Plant plant, float posx, float posy) {
 #define plant_height 19
 
 	CP_Image_DrawSubImage(plant.plant_spritesheet, posx + plant_offsetx, posy + plant_offsety,
-		pot_width * 3.4f, pot_height * 3.4f,
+		POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
 		19.0f * plant.growth_stage, 0.0f, plant_width + 19.0f * plant.growth_stage, plant_height, 255);
 }
 

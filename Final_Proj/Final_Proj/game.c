@@ -24,7 +24,14 @@ CP_Image player_spritesheet;
 #define L1_TOOL_SIZE 3
 Tool level1_tools[L1_TOOL_SIZE];
 Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEEDS };
-Tool held_tool;
+Tool held_tool; // a copy of the tool to be held
+
+//--------------------- Pots ---------------------//
+#define L1_POT_SIZE 4
+Pot level1_pots[L1_POT_SIZE];
+Pot* held_pot; // a pointer to the pot held (realised i could do it this way)
+CP_Image pot_spritesheet = NULL;
+
 
 //--------------------- Timer ---------------------//
 float stage_timer;
@@ -64,17 +71,6 @@ CP_Image spriteSheetTiles;
 #define TILE_ROWS 20
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
-	//{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -170,9 +166,6 @@ void draw_tile_map(void)
 }
 //------------------------------------------------------------------------------
 
-//--------------------- Pots ---------------------//
-#define L1_POT_SIZE 4
-Pot level1_pots[L1_POT_SIZE];
 
 void Game_Init(void)
 {
@@ -217,6 +210,8 @@ void Game_Init(void)
 
 	//Pots
 	initialize_pots(level1_pots, L1_POT_SIZE);
+	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
+	held_pot = NULL;
 }
 
 
@@ -233,13 +228,14 @@ void Game_Update(void)
 	CP_Color gray = CP_Color_Create(210, 210, 210, 255);
 
 	//--------------------- Pots ---------------------//
-	render_pots(level1_pots, L1_POT_SIZE, player.position.x, player.position.y);
+	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot);
 
 	//--------------------- Tools ---------------------//
 	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool.tool_name);
 	//Render tool behind player if player facing Left or Up
 	if (held_tool.tool_name != HAND && (90 == player.rotation || 180 == player.rotation)) {
 		render_held_tool(&held_tool);
+		if (held_tool.tool_name == POT) { render_held_pot(held_pot, pot_spritesheet); }
 	}
 
 	//--------------------- Hold Tool ---------------------//
@@ -253,12 +249,25 @@ void Game_Update(void)
 					break;
 				}
 			}
+			//Picks up first pot that is in range
+			for (int i = 0; i < L1_POT_SIZE; ++i) {
+				if (level1_pots[i].selected) {
+					held_tool.tool_name = POT;
+					held_pot = &level1_pots[i];
+					break;
+				}
+			}
 		}
 	}
 	//If player is holding something
 	else {
-		move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
-		handle_tool_interaction(&held_tool);
+		if (held_pot) {
+			move_pot(&held_pot->position.x, &held_pot->position.y);
+		}
+		else {
+			move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
+			handle_tool_interaction(&held_tool);
+		}
 	}
 
 	//--------------------- Player ---------------------//
@@ -267,6 +276,7 @@ void Game_Update(void)
 	//Render tool infront if player facing Right or Down
 	if (held_tool.tool_name != HAND && (0 == player.rotation || 270 == player.rotation)) {
 		render_held_tool(&held_tool);
+		if (held_tool.tool_name == POT) { render_held_pot(held_pot, pot_spritesheet); } 
 	}
 
 	/*-----------------------------------------------------------------------*/
@@ -280,131 +290,6 @@ void Game_Update(void)
 	static int inRedZone = 0;
 	//if small circle is intersecting red circle
 	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
-	//for (int i = 0; i < boxCount; i++) {
-	//	if (!boxes[i].removing)
-	//	{
-	//		boxes[i].lateTimer -= dt;
-	//
-	//		if (boxes[i].lateTimer <= 0.0f)
-	//		{
-	//			boxes[i].removing = 1;
-	//			boxes[i].removeSpeed = 300.0f;
-	//		}
-	//	}
-	//}
-	//const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-	//int numPraises = 3;
-	//static char currentPraise[32] = "";
-	//static float praiseTimer = 0.0f;
-	//
-	//if (touchingRed && !inRedZone)
-	//{
-	//	// Remove ONE box
-	//	if (boxCount > 0 && boxes[0].removing == 0)
-	//	{
-	//		boxes[0].removing = 1;
-	//		boxes[0].removeSpeed = 300.0f;
-	//	}
-	//	int idx = rand() % numPraises;
-	//	snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-	//	praiseTimer = 1.0f; // show for 1 second
-	//	inRedZone = 1;
-	//}
-	//else if (!touchingRed)
-	//{
-	//	inRedZone = 0;
-	//}
-	//
-	//if (praiseTimer > 0.0f)
-	//{
-	//	CP_Settings_TextSize(80);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-	//
-	//	float screenW = (float)CP_System_GetWindowWidth();
-	//	float screenH = (float)CP_System_GetWindowHeight();
-	//	CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-	//
-	//	praiseTimer -= CP_System_GetDt();
-	//}
-	//
-	//spawnTimer += dt;
-	//
-	//// Spawn every 2 seconds
-	//if (spawnTimer >= 20.0f) {
-	//	spawn_box();
-	//	spawnTimer = 0.0f;
-	//}
-	//
-	//for (int i = 0; i < boxCount; i++) {
-	//
-	//	if (boxes[i].removing)
-	//	{
-	//		boxes[i].y -= boxes[i].removeSpeed * dt;
-	//
-	//		// If off-screen, delete it
-	//		if (boxes[i].y + boxes[i].height < 0)
-	//		{
-	//			// shift boxes down
-	//			for (int j = 1; j < boxCount; j++)
-	//				boxes[j - 1] = boxes[j];
-	//
-	//			boxCount--;
-	//			i--; // loop checks next box correctly
-	//			continue;
-	//		}
-	//	}
-	//
-	//	if (boxes[i].x > boxes[i].targetX) {
-	//		boxes[i].x -= boxes[i].speed;
-	//		if (boxes[i].x < boxes[i].targetX)
-	//			boxes[i].x = boxes[i].targetX;
-	//	}
-	//
-	//	CP_Settings_ImageMode(CP_POSITION_CORNER);
-	//	CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-	//	float timeLeft = boxes[i].lateTimer;
-	//	if (timeLeft < 0) timeLeft = 0;
-	//
-	//	CP_Settings_TextSize(50);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-	//
-	//	char timerStr[8];
-	//	snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-	//
-	//	CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	//}
-
-
-	//--------------------- Water & Sun Bar ---------------------//
-	//float rectWidth = 60.0f;
-	//float rectHeight = 30.0f;
-	//float potRadius = 120.0f;
-	//int count = 5; // how many rectangles to draw
-	//
-	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-	//
-	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
-	//	for (int i = 0; i < count; i++)
-	//	{   // water
-	//		float x = (rectX + i * rectWidth) - 82.0f;
-	//		CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
-	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-	//		// sun box
-	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-	//	}
-	//}
-		  /*  if (boxes[i].lateTimer <= 0.0f)
-			{
-				boxes[i].removing = 1;
-				boxes[i].removeSpeed = 300.0f;
-			}
-		}
-	}*/
-
 
 	for (int i = 0; i < boxCount; i++) {
 		if (!boxes[i].removing)
@@ -418,7 +303,6 @@ void Game_Update(void)
 			}
 		}
 	}
-
 
 	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
 	int numPraises = 3;
@@ -602,13 +486,16 @@ void Game_Exit(void)
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
-	for (int i = 0; i < L1_TOOL_SIZE; i++) {
+	for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 		CP_Image_Free(level1_tools[i].tool_sprite);
+	}
+	CP_Image_Free(held_tool.tool_sprite);
+	CP_Image_Free(pot_spritesheet);
+	for (int i = 0; i < L1_POT_SIZE; ++i) {
+		CP_Image_Free(level1_pots[i].plant.plant_spritesheet);
 	}
 	CP_Image_Free(requestbg);
 	CP_Sound_Free(customerNoti);
-
-	//rmb free my imgs
 }
 
 void start_timer() {
@@ -688,11 +575,17 @@ void move_tool(float* posx, float* posy, float* rotation) {
 	*rotation = player.rotation - 180.0f;
 }
 
+//moves pot along with player
+void move_pot(float *posx, float *posy) {
+	*posx = player.position.x;
+	*posy = player.position.y;
+}
+
 //only called when player is holding tool
 void handle_tool_interaction(Tool* tool) {
 	//if player is back at where he picked up the tool
 	if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
-		tool->initial_pos.x, tool->initial_pos.y, 40.0f + tool_range)) {
+		tool->initial_pos.x, tool->initial_pos.y - TOOL_RANGE_Y_OFFSET, 40.0f + TOOL_RANGE)) {
 
 		tool->in_range = true;
 
