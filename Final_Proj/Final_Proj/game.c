@@ -66,32 +66,40 @@ float spawnTimer;
 //image
 CP_Image spriteSheetTiles;
 
+typedef struct Tile {
+	float x;
+	float y;
+	int tile_index;
+	bool placeable;
+}Tile;
 
 #define TILE_COLS 30
 #define TILE_ROWS 20
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //0
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //5
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //10
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //15
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}  //19
 };
+
+Tile map_tiles[TILE_ROWS][TILE_COLS];
 
 void draw_tile(int tile_index, float x, float y, float w, float h)
 {
@@ -139,7 +147,7 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 // ------------------------------------------
 // draw entire tile map
 // ------------------------------------------
-void draw_tile_map(void)
+void draw_tile_map(Tile* map_tile)
 {
 	// Get current window size
 	float screen_w = CP_System_GetWindowWidth();
@@ -149,18 +157,24 @@ void draw_tile_map(void)
 	float tile_w = screen_w / TILE_COLS;
 	float tile_h = screen_h / TILE_ROWS;
 
+
 	// Loop through map and draw each tile
 	for (int row = 0; row < TILE_ROWS; row++)
 	{
 		for (int col = 0; col < TILE_COLS; col++)
 		{
-			int tile = map[row][col];
+			Tile* tile = &map_tiles[row][col];
+			//int tile = map[row][col];
+			tile->tile_index = map[row][col];
 
 			// Use integer positions to avoid gaps
-			float x = col * tile_w;
-			float y = row * tile_h;
+			//float x = col * tile_w;
+			//float y = row * tile_h;
+			tile->x = col * tile_w;
+			tile->y = row * tile_h;
 
-			draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
+			//draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
+			draw_tile(tile->tile_index, tile->x, tile->y, tile_w, tile_h);
 		}
 	}
 }
@@ -175,6 +189,7 @@ void Game_Init(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 	spriteSheetTiles = CP_Image_Load("Assets/preview.png");
+	draw_tile_map();
 
 	//ahmad
 	srand((unsigned int)time(NULL));
@@ -263,6 +278,7 @@ void Game_Update(void)
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y);
+			handle_pot_interaction(held_pot);
 		}
 		else {
 			move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
@@ -575,12 +591,6 @@ void move_tool(float* posx, float* posy, float* rotation) {
 	*rotation = player.rotation - 180.0f;
 }
 
-//moves pot along with player
-void move_pot(float *posx, float *posy) {
-	*posx = player.position.x;
-	*posy = player.position.y;
-}
-
 //only called when player is holding tool
 void handle_tool_interaction(Tool* tool) {
 	//if player is back at where he picked up the tool
@@ -612,6 +622,69 @@ void handle_tool_interaction(Tool* tool) {
 				break;
 			default:
 				break;
+			}
+		}
+	}
+}
+
+//moves pot along with player
+void move_pot(float* posx, float* posy) {
+	float offset_x = 0.0f;
+	float offset_y = 0.0f;
+
+	//Rough offset for now
+	switch (player.rotation) {
+	case 0: //DOWN
+		offset_x += 5.0f;
+		offset_y += 10.0f;
+		break;
+	case 180: //UP
+		offset_x += 5.0f;
+		offset_y -= 12.0f;
+		break;
+	case 90: //LEFT
+		offset_x -= 40.0f;
+		offset_y += 6.0f;
+		break;
+	case 270: //RIGHT
+		offset_x += 40.0f;
+		offset_y += 6.0f;
+		break;
+	default:
+		break;
+	}
+
+
+	*posx = player.position.x + offset_x;
+	*posy = player.position.y + offset_y;
+}
+
+//only called when player is holding pot
+void handle_pot_interaction(Pot* pot) {
+	//For qien: can split draw_map into Init_tiles and Draw_tiles
+	//Init to store tile positions, tile index and whether the grid is walkable/placeable etc.
+	//Idm dng oso :,)
+	for (int row = 0; row < TILE_ROWS; ++row) {
+		for (int col = 0; col < TILE_COLS; ++col) {
+			Tile* const tile = &map_tiles[row][col];
+
+			//MIGHT NEED A CIRCLE-RECT INTERSECTING
+			//BUG: Grid not detected at corners (cuz is circle intersecting)
+			if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
+				tile->x, tile->y, CP_System_GetWindowHeight() / TILE_COLS / 2.0f)) {
+
+				CP_Settings_RectMode(CP_POSITION_CORNER);
+				CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
+				CP_Graphics_DrawRect(tile->x, tile->y, 
+					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
+
+				if (CP_Input_KeyReleased(KEY_Q) && 0 == tile->tile_index) {
+
+					held_tool.tool_name = HAND;
+					held_pot = NULL;
+					pot->position.x = tile->x;
+					pot->position.y = tile->y;
+				}
 			}
 		}
 	}

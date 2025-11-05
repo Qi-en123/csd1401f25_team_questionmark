@@ -3,12 +3,12 @@
 
 //Initialize all the pot values, based on how many in the level
 void initialize_pots(Pot *pots, int size) {
-	float potX = 350.0f;
-	float potY = 400.0f;
+	float posx = 300.0f;
+	float posy = 400.0f;
 
 	for (int i = 0; i < size; i++) {
-		pots[i].position.x = potX + (i * 100.0f);
-		pots[i].position.y = potY;
+		pots[i].position.x = posx + (i * 100.0f);
+		pots[i].position.y = posy;
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
