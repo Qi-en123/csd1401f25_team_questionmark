@@ -60,41 +60,44 @@ float spawnTimer;
 CP_Image spriteSheetTiles;
 
 
-#define TILE_COLS 30
-#define TILE_ROWS 20
+#define TILE_COLS 20
+#define TILE_ROWS 15
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
-	//{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+{6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+{6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 6, 6},
+	{1,1,2,1,2,2,1,2,1,2,1,1,2,1,2,2,1,1,1,2},
+	{2,1,1,1,2,1,2,2,1,2,1,1,2,2,1,2,1,1,2,1},
+	{1,2,1,1,2,2,1,2,1,2,2,1,1,1,2,1,2,1,1,2},
+	{2,2,1,2,1,1,2,1,1,2,1,1,1,2,1,2,2,1,2,1},
+	{1,1,2,1,1,2,2,1,1,2,2,1,1,2,1,2,1,2,1,2},
+	{2,1,2,1,1,1,1,2,2,1,1,2,2,1,2,1,1,1,2,1},
+	{1,2,2,2,1,2,1,2,1,1,1,2,2,1,1,1,2,2,1,2},
+	{2,1,1,1,2,2,1,1,2,1,1,2,1,1,2,2,1,2,1,2},
+	{1,1,2,2,1,1,1,2,2,2,1,1,2,1,1,2,1,2,2,1},
+	{2,1,1,2,2,1,2,1,1,2,2,1,1,2,1,1,2,1,1,2},
+	{1,2,1,1,2,1,1,1,2,2,1,2,2,1,2,1,1,1,2,2},
+	{2,2,1,1,1,2,1,2,1,1,2,2,1,1,1,2,1,2,2,1},
+	{1,1,2,2,1,1,2,1,1,2,2,1,1,2,1,2,1,1,2,1}
+};
+int modified_map[TILE_ROWS][TILE_COLS] = {
+
+{6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 5, 0, 0},
+	{1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2},
+	{2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
+	{1, 2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2},
+	{2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1},
+	{1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2},
+	{2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 1},
+	{1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 2},
+	{2, 1, 1, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2},
+	{1, 2, 2, 2, 1, 1, 1, 2, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1},
+	{2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2},
+	{1, 1, 1, 2, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2},
+	{2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 1},
+	{1, 1, 2, 2, 1, 1, 2, 1, 1, 2, 2, 1, 1, 2, 1, 2, 1, 1, 2, 1}
 };
 
 void draw_tile(int tile_index, float x, float y, float w, float h)
@@ -103,29 +106,34 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 	int left, top, right, bottom;
 
 	switch (tile_index)
-	{
-	case 1: // horizontal path
-		left = 126; top = 85; right = 135; bottom = 95; break;
+	{//16*16
+	case 1: // normal green path
+		left = 0; top = 0; right = 16; bottom = 16; break;
 
-	case 2: // vertical path
-		left = 289; top = 205; right = 299; bottom = 215; break;
+	case 2: // grass path
+		left = 17; top = 0; right = 33; bottom = 16; break;
 
-	case 3: // top-left corner path
-		left = 267; top = 205; right = 277; bottom = 215; break;
+	case 3: // normal green path
+		left = 169; top = 55; right = 182; bottom = 67; break;
 
-	case 4: // top-right corner path
-		left = 311; top = 194; right = 321; bottom = 204; break;
 
-	case 5: // bottom-left corner path
-		left = 267; top = 216; right = 277; bottom = 226; break;
 
-	case 6: // bottom-right corner path
-		left = 311; top = 205; right = 321; bottom = 215; break;
+	case 4: // left opening fence
+		left = 139; top = 82; right = 152; bottom = 95; break;
+
+	case 5: // right opening fence
+		left = 151; top = 82; right = 164, bottom = 95; break;
+
+	case 6: // dirt path
+		left = 14; top = 26; right = 30; bottom = 42; break;
+
+	case 7: // bottom dirt path
+		left = 17; top = 48; right = 33, bottom = 64; break;
+
 
 	default:
-		// change middle tiles
-		//left = 169; top = 249; right = 179; bottom = 259; break;
-		left = 147; top = 96; right = 157; bottom = 106; break;
+		// horizontal fence
+		left = 145; top = 50; right = 158; bottom = 63; break;
 	}
 
 	// Shrink the rectangle by 1 pixel inside to avoid texture bleeding
@@ -168,6 +176,26 @@ void draw_tile_map(void)
 		}
 	}
 }
+void draw_modified_map(void)
+{
+	float screen_w = CP_System_GetWindowWidth();
+	float screen_h = CP_System_GetWindowHeight();
+	float tile_w = screen_w / TILE_COLS ;
+	float tile_h = screen_h / TILE_ROWS ;
+
+	for (int row = 0; row < TILE_ROWS; row++)
+	{
+		for (int col = 0; col < TILE_COLS; col++)
+		{
+			int tile = modified_map[row][col];
+			float x = col * tile_w;
+			float y = row * tile_h;
+			draw_tile(tile, x, y, tile_w, tile_h);
+		}
+	}
+}
+
+
 //------------------------------------------------------------------------------
 
 //--------------------- Pots ---------------------//
@@ -181,7 +209,7 @@ void Game_Init(void)
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
-	spriteSheetTiles = CP_Image_Load("Assets/preview.png");
+	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 
 	//ahmad
 	srand((unsigned int)time(NULL));
@@ -225,8 +253,13 @@ void Game_Update(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-	draw_tile_map();
 
+
+
+	draw_tile_map();
+		
+	draw_modified_map();
+	
 	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
 	CP_Color red = CP_Color_Create(220, 100, 100, 255);
 	CP_Color green = CP_Color_Create(100, 220, 100, 255);
@@ -280,130 +313,7 @@ void Game_Update(void)
 	static int inRedZone = 0;
 	//if small circle is intersecting red circle
 	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
-	//for (int i = 0; i < boxCount; i++) {
-	//	if (!boxes[i].removing)
-	//	{
-	//		boxes[i].lateTimer -= dt;
-	//
-	//		if (boxes[i].lateTimer <= 0.0f)
-	//		{
-	//			boxes[i].removing = 1;
-	//			boxes[i].removeSpeed = 300.0f;
-	//		}
-	//	}
-	//}
-	//const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-	//int numPraises = 3;
-	//static char currentPraise[32] = "";
-	//static float praiseTimer = 0.0f;
-	//
-	//if (touchingRed && !inRedZone)
-	//{
-	//	// Remove ONE box
-	//	if (boxCount > 0 && boxes[0].removing == 0)
-	//	{
-	//		boxes[0].removing = 1;
-	//		boxes[0].removeSpeed = 300.0f;
-	//	}
-	//	int idx = rand() % numPraises;
-	//	snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-	//	praiseTimer = 1.0f; // show for 1 second
-	//	inRedZone = 1;
-	//}
-	//else if (!touchingRed)
-	//{
-	//	inRedZone = 0;
-	//}
-	//
-	//if (praiseTimer > 0.0f)
-	//{
-	//	CP_Settings_TextSize(80);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-	//
-	//	float screenW = (float)CP_System_GetWindowWidth();
-	//	float screenH = (float)CP_System_GetWindowHeight();
-	//	CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-	//
-	//	praiseTimer -= CP_System_GetDt();
-	//}
-	//
-	//spawnTimer += dt;
-	//
-	//// Spawn every 2 seconds
-	//if (spawnTimer >= 20.0f) {
-	//	spawn_box();
-	//	spawnTimer = 0.0f;
-	//}
-	//
-	//for (int i = 0; i < boxCount; i++) {
-	//
-	//	if (boxes[i].removing)
-	//	{
-	//		boxes[i].y -= boxes[i].removeSpeed * dt;
-	//
-	//		// If off-screen, delete it
-	//		if (boxes[i].y + boxes[i].height < 0)
-	//		{
-	//			// shift boxes down
-	//			for (int j = 1; j < boxCount; j++)
-	//				boxes[j - 1] = boxes[j];
-	//
-	//			boxCount--;
-	//			i--; // loop checks next box correctly
-	//			continue;
-	//		}
-	//	}
-	//
-	//	if (boxes[i].x > boxes[i].targetX) {
-	//		boxes[i].x -= boxes[i].speed;
-	//		if (boxes[i].x < boxes[i].targetX)
-	//			boxes[i].x = boxes[i].targetX;
-	//	}
-	//
-	//	CP_Settings_ImageMode(CP_POSITION_CORNER);
-	//	CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-	//	float timeLeft = boxes[i].lateTimer;
-	//	if (timeLeft < 0) timeLeft = 0;
-	//
-	//	CP_Settings_TextSize(50);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-	//
-	//	char timerStr[8];
-	//	snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-	//
-	//	CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	//}
-
-
-	//--------------------- Water & Sun Bar ---------------------//
-	//float rectWidth = 60.0f;
-	//float rectHeight = 30.0f;
-	//float potRadius = 120.0f;
-	//int count = 5; // how many rectangles to draw
-	//
-	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-	//
-	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
-	//	for (int i = 0; i < count; i++)
-	//	{   // water
-	//		float x = (rectX + i * rectWidth) - 82.0f;
-	//		CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
-	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-	//		// sun box
-	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-	//	}
-	//}
-		  /*  if (boxes[i].lateTimer <= 0.0f)
-			{
-				boxes[i].removing = 1;
-				boxes[i].removeSpeed = 300.0f;
-			}
-		}
-	}*/
+	
 
 
 	for (int i = 0; i < boxCount; i++) {

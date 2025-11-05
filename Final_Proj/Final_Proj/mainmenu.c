@@ -10,6 +10,8 @@ CP_Image button_white;
 CP_Image button_green;
 //font 
 CP_Font font;
+// theme sound
+
 
 // Number of clouds
 #define NUM_CLOUDS 3
@@ -43,6 +45,7 @@ void Main_Menu_Init(void)
     //load font 
     font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
+    BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX = 0;
     // Get background width
@@ -109,6 +112,14 @@ void Main_Menu_Update(void)
         }
     }
 
+    // Check if any button is clicked, play sound once
+    for (int i = 0; i < 5; i++) {
+        if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
+            CP_Sound_Play(BtnSound);
+          
+        }
+    }
+
     // if levels button is clicked, go to levels page
     if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight) == 1) {
         CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
@@ -128,6 +139,9 @@ void Main_Menu_Update(void)
     if (IsButtonClicked(btnX, btnY[4], btnWidth, btnHeight) == 1) {
         CP_Engine_Terminate();
     }
+
+
+
 
     // set font
     CP_Font_Set(font);
@@ -155,4 +169,5 @@ void Main_Menu_Exit(void)
     CP_Image_Free(spriteSheet);
     CP_Image_Free(mainmenu_bg);
     CP_Font_Free(font);
+    CP_Sound_Free(BtnSound);
 }

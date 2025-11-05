@@ -12,8 +12,10 @@ int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
         mouseY >= rectY && mouseY <= rectY + rectH)
     {
         // Check left mouse button click
-        if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
-            return 1;
+		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT)) {
+
+			return 1;
+		}
     }
 
     return 0;
