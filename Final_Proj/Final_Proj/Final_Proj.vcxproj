@@ -102,6 +102,7 @@ xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /
     <ClCompile Include="levels.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mainmenu.c" />
+    <ClCompile Include="map.c" />
     <ClCompile Include="opening.c" />
     <ClCompile Include="opening_gamename.c" />
     <ClCompile Include="plants.c" />
@@ -115,6 +116,7 @@ xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /
     <ClInclude Include="game.h" />
     <ClInclude Include="levels.h" />
     <ClInclude Include="mainmenu.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="opening.h" />
     <ClInclude Include="opening_gamename.h" />
     <ClInclude Include="plants.h" />

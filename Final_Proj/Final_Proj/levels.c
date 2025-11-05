@@ -49,7 +49,8 @@ void Level_Init(void)
     // for exit 
     button_exitW_level = CP_Image_Load("Assets/check_square_grey_cross.png");
     button_exitG_level = CP_Image_Load("Assets/check_square_green_cross.png");
-
+    // sound for button click
+    BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX_level = 0;
     // Get background width
@@ -135,6 +136,13 @@ void Level_Update(void)
         float textY = btnY + btnHeight / 2 - 3;
         CP_Font_DrawText(btnText[i], textX, textY);
     }
+    for (int i = 0; i < 5; i++) {
+        if (IsButtonClicked(btnX[i], btnY, btnWidth, btnHeight)) {
+            CP_Sound_Play(BtnSound);
+            break; // play once even if multiple buttons are clicked
+        }
+    }
+
 
     if (IsButtonClicked(btnX[0], btnY, btnWidth, btnHeight) == 1) {
         CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
@@ -167,7 +175,7 @@ void Level_Update(void)
 void Level_Exit(void)
 {
 
-    //free image and font_level
+    //free image and font_level and sound
     CP_Image_Free(spriteSheet_level);
     CP_Image_Free(mainmenu_bg_level);
     CP_Image_Free(button_white_square);
@@ -175,5 +183,6 @@ void Level_Exit(void)
     CP_Image_Free(button_exitW_level);
     CP_Image_Free(button_exitG_level);
     CP_Font_Free(font_level);
+    CP_Sound_Free(BtnSound);
 
 }

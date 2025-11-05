@@ -58,7 +58,8 @@ const char* credits[] = {
     "Mandy WONG   Johnny DEEK",
     "   ",
     "Copyrights for software, tools and libraries",
-    "   ",
+    "(C) Kenney Assets",
+    "(C) MetaDigger",
     NULL // marks end of array
 };
 
@@ -73,7 +74,8 @@ void Credits_Init(void)
     // for exit 
     button_exitW_credits = CP_Image_Load("Assets/check_square_grey_cross.png");
     button_exitG_credits = CP_Image_Load("Assets/check_square_green_cross.png");
-
+    // for button click sound
+    BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX_credits = 0;
     // Get background width
@@ -149,6 +151,10 @@ void Credits_Update(void)
     else {
         CP_Image_Draw(button_exitW_credits, 50, 50, 100, 100, 255);
     }
+    // play button click sound when exit button is clicked
+    if (IsButtonClicked(50, 50, 100, 100)) {
+        CP_Sound_Play(BtnSound);
+    }
 
     // if exit button is clicked
     if (IsButtonClicked(50, 50, 100, 100)) {
@@ -164,11 +170,12 @@ void Credits_Update(void)
 
 void Credits_Exit(void)
 {
-    //free image and font_credits
+    //free image and font_credits and sound
     CP_Image_Free(spriteSheet_credits);
     CP_Image_Free(mainmenu_bg_credits);
     CP_Image_Free(button_exitW_credits);
     CP_Image_Free(button_exitG_credits);
 
     CP_Font_Free(font_credits);
+    CP_Sound_Free(BtnSound);
 }
