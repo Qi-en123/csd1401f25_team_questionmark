@@ -2,16 +2,19 @@
 #include "cprocessing.h"
 
 //Initialize all the pot values, based on how many in the level
-void initialize_pots(Pot *pots, int size) {
-	float posx = 300.0f;
-	float posy = 400.0f;
+void initialize_pots(Pot *pots, int size, Tile* tile) {
 
 	for (int i = 0; i < size; i++) {
-		pots[i].position.x = posx + (i * 100.0f);
-		pots[i].position.y = posy;
+		int row_offset = i / 8;
+		int col_offset = i % 8;
+		int tile_index = col_offset + TILE_COLS * row_offset;
+		pots[i].position.x = tile[tile_index].x;
+		pots[i].position.y = tile[tile_index].y;
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
+		tile[i].obstructed = true;
+		pots[i].occupied_tile = &tile[i];
 	}
 }
 
@@ -28,10 +31,12 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 		pots[i].selected = false;
 	}
 
+	//highlights nearby pot
 	for (int i = 0; i < size; ++i) {
-		if (&pots[i] == pot) { continue; }
+		if (&pots[i] == pot) { continue; } //skips rendering held pot
 		if (AreCirclesIntersecting(player_posx, player_posy, 9.0f, //player pos and radius
-			pots[i].position.x, pots[i].position.y, 50.0f)) { //pot pos and range
+			pots[i].position.x, pots[i].position.y, 50.0f) && //pot pos and range
+			pot == NULL) { //if player isnt holding a pot
 			if (!pot_selected) {
 				pots[i].selected = true;
 				pot_selected = true;
@@ -44,7 +49,7 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 		float start_x = POT_WIDTH * pots[i].selected; //changes sprite subimg to highlighted version
 		float start_y = POT_HEIGHT - POT_HEIGHT * pots[i].filled; //changes to filled version (in this version its dug hole)
 
-		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
+		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 			start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
 		if (pots[i].plant.seed_type != EMPTY) {
@@ -58,7 +63,7 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
 	float start_x = POT_WIDTH * pot->selected; //changes sprite subimg to highlighted version
 	float start_y = POT_HEIGHT - POT_HEIGHT * pot->filled; //changes to filled version (in this version its dug hole)
 
-	CP_Image_DrawSubImage(pot_spritesheet, pot->position.x, pot->position.y, POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
+	CP_Image_DrawSubImage(pot_spritesheet, pot->position.x, pot->position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 		start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
 	if (pot->plant.seed_type != EMPTY) {
@@ -67,21 +72,36 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
 }
 
 //Initialize the plant for the pot
-void initialize_plant(Plant *plant) {
-	plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/plant_spritesheet_eg.png");
+void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
+	//plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
+	//plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/orangebush_spritesheet.png");
+	switch (seed_type) {
+	case BERRY_BUSH:
+		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
+		break;
+	case ORANGE_BUSH:
+		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/orangebush_spritesheet.png");
+		break;
+	case CACTUS:
+		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/cactus_spritesheet.png");
+		break;
+	default:
+		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
+		break;
+	}
 	plant->growth_stage = SEED;
-	plant->seed_type = CABBAGE; //give it a random seed type first
+	plant->seed_type = seed_type; //give it a random seed type first
 }
 
 //Draws the plant on top of the pot
 void render_plant(Plant plant, float posx, float posy) {
 #define plant_offsety -26
-#define plant_offsetx -1
+#define plant_offsetx 0
 #define plant_width 19
 #define plant_height 19
 
 	CP_Image_DrawSubImage(plant.plant_spritesheet, posx + plant_offsetx, posy + plant_offsety,
-		POT_WIDTH * 3.4f, POT_HEIGHT * 3.4f,
+		POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 		19.0f * plant.growth_stage, 0.0f, plant_width + 19.0f * plant.growth_stage, plant_height, 255);
 }
 

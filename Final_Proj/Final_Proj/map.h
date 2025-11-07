@@ -10,7 +10,9 @@ typedef struct Tile {
     float y;
     int tile_index;
     bool placeable;
+    bool obstructed;
 }Tile;
 void draw_tile(int tile_index, float x, float y, float w, float h);
 void draw_tile_map(Tile* map_tile);
 void draw_modified_map(void);
+void set_tile_placeable(Tile* map_tile, int *placeable, int size);

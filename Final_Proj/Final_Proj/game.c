@@ -21,13 +21,13 @@ float player_startpos_x, player_startpos_y;
 CP_Image player_spritesheet;
 
 //--------------------- Tools ---------------------//
-#define L1_TOOL_SIZE 3
+#define L1_TOOL_SIZE 5
 Tool level1_tools[L1_TOOL_SIZE];
-Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEEDS };
+Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2, SEED_3 };
 Tool held_tool; // a copy of the tool to be held
 
 //--------------------- Pots ---------------------//
-#define L1_POT_SIZE 4
+#define L1_POT_SIZE 40
 Pot level1_pots[L1_POT_SIZE];
 Pot* held_pot; // a pointer to the pot held (realised i could do it this way)
 CP_Image pot_spritesheet = NULL;
@@ -63,17 +63,7 @@ float spawnTimer;
 
 
 Tile map_tiles[TILE_ROWS][TILE_COLS];
-
-typedef struct Tile {
-	float x;
-	float y;
-	int tile_index;
-	bool placeable;
-}Tile;
-
-
-
-
+int placeable[] = { 1,2 };
 
 void Game_Init(void)
 {
@@ -83,7 +73,7 @@ void Game_Init(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
-	draw_tile_map();
+	draw_tile_map(map_tiles);
 
 	//ahmad
 	srand((unsigned int)time(NULL));
@@ -100,7 +90,7 @@ void Game_Init(void)
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
 
 	//Tools
-	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool);
+	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool, &map_tiles[3][1]);
 
 	//Timer
 #pragma region Timer Initialization
@@ -118,7 +108,7 @@ void Game_Init(void)
 #pragma endregion
 
 	//Pots
-	initialize_pots(level1_pots, L1_POT_SIZE);
+	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
 }
@@ -129,10 +119,8 @@ void Game_Update(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-
-
-
 	draw_tile_map(map_tiles);
+	set_tile_placeable(map_tiles, &placeable, sizeof(placeable)/sizeof(placeable[0]));
 		
 	draw_modified_map();
 	
@@ -168,6 +156,8 @@ void Game_Update(void)
 				if (level1_pots[i].selected) {
 					held_tool.tool_name = POT;
 					held_pot = &level1_pots[i];
+					//"unobstructs" grid, makes it placeable
+					level1_pots[i].occupied_tile->obstructed = false;
 					break;
 				}
 			}
@@ -498,12 +488,21 @@ void handle_tool_interaction(Tool* tool) {
 		tool->initial_pos.x, tool->initial_pos.y - TOOL_RANGE_Y_OFFSET, 40.0f + TOOL_RANGE)) {
 
 		tool->in_range = true;
+		//highlights initial grid
+		CP_Settings_RectMode(CP_POSITION_CORNER);
+		//CP_Settings_Stroke(CP_Color_Create(225, 173, 1, 255));
+		CP_Settings_NoStroke();
+		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
+		CP_Graphics_DrawRect(tool->initial_pos.x, tool->initial_pos.y,
+			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
+
 
 		if (CP_Input_KeyReleased(KEY_Q)) {
 			tool->tool_name = HAND;
 			tool->position.x = tool->initial_pos.x;
 			tool->position.y = tool->initial_pos.y;
 		}
+		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 	}
 	else tool->in_range = false;
 
@@ -517,8 +516,14 @@ void handle_tool_interaction(Tool* tool) {
 			case SOIL:
 				level1_pots[i].filled = true;
 				break;
-			case SEEDS:
-				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant); }
+			case SEED_1: //this is easier, :p
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
+				break;
+			case SEED_2:
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, CACTUS); }
+				break;
+			case SEED_3:
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
 				break;
 			default:
 				break;
@@ -561,33 +566,35 @@ void move_pot(float* posx, float* posy) {
 
 //only called when player is holding pot
 void handle_pot_interaction(Pot* pot) {
-	//For qien: can split draw_map into Init_tiles and Draw_tiles
-	//Init to store tile positions, tile index and whether the grid is walkable/placeable etc.
-	//Idm dng oso :,)
 	for (int row = 0; row < TILE_ROWS; ++row) {
 		for (int col = 0; col < TILE_COLS; ++col) {
 			Tile* const tile = &map_tiles[row][col];
 
-			//MIGHT NEED A CIRCLE-RECT INTERSECTING
-			//BUG: Grid not detected at corners (cuz is circle intersecting)
-			if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
-				tile->x, tile->y, CP_System_GetWindowHeight() / TILE_COLS / 2.0f)) {
+			if (IsWithinRect(tile->x, tile->y,
+				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+				player.position.x, player.position.y)) {
 
+				//highlights grid that pot would be placed
 				CP_Settings_RectMode(CP_POSITION_CORNER);
+				//CP_Settings_Stroke(CP_Color_Create(225, 173, 1, 255));
+				CP_Settings_NoStroke();
 				CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
 				CP_Graphics_DrawRect(tile->x, tile->y, 
 					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
-				if (CP_Input_KeyReleased(KEY_Q) && 0 == tile->tile_index) {
-
+				//place down pot if tile is placeable and not obstructed by other things
+				if (CP_Input_KeyReleased(KEY_Q) && tile->placeable && !(tile->obstructed)) {
+					tile->obstructed = true;
 					held_tool.tool_name = HAND;
 					held_pot = NULL;
 					pot->position.x = tile->x;
 					pot->position.y = tile->y;
+					pot->occupied_tile = tile;
 				}
 			}
 		}
 	}
+	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
 void spawn_box(void) {

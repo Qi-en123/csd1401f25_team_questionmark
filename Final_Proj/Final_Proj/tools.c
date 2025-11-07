@@ -1,24 +1,22 @@
 #include "tools.h"
 #include "cprocessing.h"
 #include "utils.h"
+#include "plants.h"
 
-#define TOOLSTARTPOSX 100
-#define TOOLSTARTPOSY 200
 //Initializes the tools needed/unlocked for each level
-void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_tool) {
+void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tool* held_tool, Tile* tile) {
 	//each tool diff initialpos and different sprites
 	//this function just to set the initial pos of each tool
-
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < tool_size; i++) {
 		//Setting the positions of the tools
 		Tool *tool = &tools[i];
-		tool->initial_pos.x = tool->position.x = TOOLSTARTPOSX;
-		tool->initial_pos.y = tool->position.y = TOOLSTARTPOSY + 120.0f * i;
+		tool->initial_pos.x = tool->position.x = tile->x;
+		tool->initial_pos.y = tool->position.y = tile[i+TILE_COLS*i*2].y;
 		tool->tool_name = tool_names[i];
 		tool->in_range = false;
 		tool->rotation = 0.0f;
 
-		//Setting the sprites/color of the tools
+		//Setting the sprites of the tools
 		switch (tool_names[i]) {
 		case WATERING_CAN:
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
@@ -28,7 +26,15 @@ void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_t
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/shovel.png");
 			tool->rotatable = true;
 			break;
-		case SEEDS:
+		case SEED_1:
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+			tool->rotatable = false;
+			break;
+		case SEED_2:
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+			tool->rotatable = false;
+			break;
+		case SEED_3:
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
 			tool->rotatable = false;
 			break;
@@ -57,7 +63,7 @@ void render_tools(Tool* tools, int size, float player_posx, float player_posy, T
 				tools[i].in_range = false;
 			}
 			CP_Image_Draw(tools[i].tool_sprite, tools[i].position.x, tools[i].position.y,
-				TOOL_WIDTH * 2.8f, TOOL_HEIGHT * 2.8f, 255);
+				TOOL_WIDTH * TOOL_SCALE, TOOL_HEIGHT * TOOL_SCALE, 255);
 		}
 	}
 }
@@ -66,11 +72,6 @@ void render_tools(Tool* tools, int size, float player_posx, float player_posy, T
 void render_held_tool(Tool* tool) {
 	if (tool->tool_name != POT) {
 		CP_Image_DrawAdvanced(tool->tool_sprite, tool->position.x, tool->position.y,
-			TOOL_WIDTH * 2.1f, TOOL_HEIGHT * 2.1f, 255, tool->rotation * tool->rotatable);
+			TOOL_WIDTH * TOOL_SCALE, TOOL_HEIGHT * TOOL_SCALE, 255, tool->rotation * tool->rotatable);
 	}
-}
-
-void use_tool(Tool* tool) {
-	//change rotation
-	//maybe do smth to plants here
 }

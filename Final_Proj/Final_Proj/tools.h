@@ -3,14 +3,19 @@
 
 #define TOOL_RANGE 6
 #define TOOL_RANGE_Y_OFFSET 30
+#define TOOL_SCALE 3
 
 #include "utils.h" //to use Vector2
 #include "cprocessing.h" //to use CP_color
+#include "plants.h"
+#include "map.h"
 
 typedef enum Tool_name {
 	WATERING_CAN,
 	SOIL,
-	SEEDS,//MIGHT BE IN ANOTHER FUNCTION???? 
+	SEED_1, //dun judge, dis is easier
+	SEED_2,
+	SEED_3,
 	POT,
 	HAND, //means nothing (only used to check what player is holding)
 
@@ -26,7 +31,7 @@ typedef struct Tool {
 	bool rotatable;
 }Tool;
 
-void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_tool);
+void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_tool, Tile* tile);
 
 void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool_name held_tool);
 void render_held_tool(Tool* tool);
