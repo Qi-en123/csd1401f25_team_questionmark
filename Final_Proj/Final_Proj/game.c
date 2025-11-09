@@ -63,7 +63,7 @@ float spawnTimer;
 
 
 Tile map_tiles[TILE_ROWS][TILE_COLS];
-int placeable[] = { 1,2 };
+int placeable[] = { 1,2 }; //set tiles which are placeable
 
 void Game_Init(void)
 {
@@ -511,10 +511,17 @@ void handle_tool_interaction(Tool* tool) {
 		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
 			switch (held_tool.tool_name) {
 			case WATERING_CAN:
-				if (level1_pots[i].plant.seed_type != EMPTY) { grow_plant(&level1_pots[i].plant.growth_stage); }
+				//if pot isnt empty and plant isnt fully grown
+				if (level1_pots[i].plant.seed_type != EMPTY && level1_pots[i].plant.growth_stage != ADULT) {
+					//grow_plant(&level1_pots[i].plant); 
+					//WATERING PLANT FUNCTION HERE:
+				}
 				break;
 			case SOIL:
 				level1_pots[i].filled = true;
+				if (level1_pots[i].plant.seed_type != EMPTY) {
+					kill_plant(&level1_pots[i]);
+				}
 				break;
 			case SEED_1: //this is easier, :p
 				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }

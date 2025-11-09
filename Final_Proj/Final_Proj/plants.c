@@ -52,8 +52,9 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 			start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
+		//if thrs a plant on the pot
 		if (pots[i].plant.seed_type != EMPTY) {
-			render_plant(pots[i].plant, pots[i].position.x, pots[i].position.y);
+			render_plant(&pots[i].plant, pots[i].position.x, pots[i].position.y, pots[i].selected);
 		}
 	}
 }
@@ -67,47 +68,94 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
 		start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
 	if (pot->plant.seed_type != EMPTY) {
-		render_plant(pot->plant, pot->position.x, pot->position.y);
+		render_plant(&pot->plant, pot->position.x, pot->position.y, pot->selected);
 	}
 }
 
 //Initialize the plant for the pot
 void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
-	//plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
-	//plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/orangebush_spritesheet.png");
 	switch (seed_type) {
 	case BERRY_BUSH:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
+		plant->sunlight_needed = 1.0f; //default
 		break;
 	case ORANGE_BUSH:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/orangebush_spritesheet.png");
+		plant->sunlight_needed = 1.5f;
 		break;
 	case CACTUS:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/cactus_spritesheet.png");
+		plant->sunlight_needed = 3.0f;
 		break;
 	default:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
+		plant->sunlight_needed = 1.0f; //default
 		break;
 	}
 	plant->growth_stage = SEED;
 	plant->seed_type = seed_type; //give it a random seed type first
+	plant->sunlight_amount = 0;
 }
 
 //Draws the plant on top of the pot
-void render_plant(Plant plant, float posx, float posy) {
-#define plant_offsety -26
-#define plant_offsetx 0
-#define plant_width 19
-#define plant_height 19
+void render_plant(Plant* plant, float posx, float posy, bool selected) {
+#define PLANT_OFFSETY -26 //makes plant appear on top of pot
+#define PLANT_OFFSETX 0
+#define PLANT_WIDTH 19
+#define PLANT_HEIGHT 19
 
-	CP_Image_DrawSubImage(plant.plant_spritesheet, posx + plant_offsetx, posy + plant_offsety,
+	//sprites are in order (seed, seedling, youth, adult): growth_stage 0 == seed; x=0 etc.
+	//y=0, non-highlighted, y=1, highlighted
+	CP_Image_DrawSubImage(plant->plant_spritesheet, posx + PLANT_OFFSETX, posy + PLANT_OFFSETY,
 		POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
-		19.0f * plant.growth_stage, 0.0f, plant_width + 19.0f * plant.growth_stage, plant_height, 255);
+		PLANT_WIDTH * plant->growth_stage, PLANT_HEIGHT * selected,
+		PLANT_WIDTH + PLANT_WIDTH * plant->growth_stage, PLANT_HEIGHT + PLANT_HEIGHT * selected, 255);
+
+	//Increase sunlight bar
+	plant->sunlight_amount += dt / plant->sunlight_needed / 2.0f;
+	plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
+
+	if (plant->sunlight_amount >= 1.0f) {
+		grow_plant(plant);
+	}
+
+	if (selected) {
+		//SUNLIGHT AND WATER BAR HERE:
+		render_sunlight_bar(plant, posx, posy);
+	}
 }
 
 //Increments the plant's growth stage to the next
-void grow_plant(GROWTH_STAGE *growth_stage) {
+void grow_plant(Plant* plant) {
 	//CONTENTS TO BE REPLACED WITH WATERING AND SUNLIGHT FUNCTIONS
+	GROWTH_STAGE* growth_stage = &plant->growth_stage;
 	*growth_stage = *growth_stage >= ADULT ? *growth_stage : *growth_stage + 1;
+	
+	if (growth_stage != ADULT) {
+		plant->sunlight_amount = 0; //reset sunlight bar
+		plant->sunlight_needed *= 1.2f; //increase sunlight needed per growth stage
+	}
+}
+
+
+//Renders sunlight bar on top of selected/nearest plant
+void render_sunlight_bar(Plant* plant, float posx, float posy) {
+	//Bar background
+	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 120));
+	CP_Graphics_DrawRect(posx, posy - 30.0f, 80.0f, 20.0f);
+
+	//Sunlight bar
+	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 180));
+	CP_Graphics_DrawRect(posx, posy - 30.0f, 80.0f * plant->sunlight_amount, 20.0f);
+}
+
+void kill_plant(Pot* pot) {
+	Plant* plant = &pot->plant;
+	plant->seed_type = EMPTY;
+	plant->growth_stage = SEED;
+	plant->plant_spritesheet = NULL;
+	plant->sunlight_amount = 0;
+	plant->sunlight_needed = 0;
+	plant->water_amount = 0;
 }
 

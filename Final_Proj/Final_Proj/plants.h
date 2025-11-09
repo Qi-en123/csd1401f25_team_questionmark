@@ -24,7 +24,7 @@ typedef enum GROWTH_STAGE {
 typedef struct Plant {
 	SEED_TYPE seed_type;
 	float water_amount;
-	float sunlight_amount;
+	float sunlight_amount, sunlight_needed;
 	CP_Image plant_spritesheet; //plant growth stages
 	GROWTH_STAGE growth_stage;
 }Plant;
@@ -43,7 +43,10 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet);
 
 
 void initialize_plant(Plant* plant, SEED_TYPE seed_type);
-void render_plant(Plant plant, float posx, float posy);
-void grow_plant(GROWTH_STAGE* growth_stage);
+void render_plant(Plant* plant, float posx, float posy, bool selected);
+void grow_plant(Plant* plant);
+void render_sunlight_bar(Plant* plant, float posx, float posy);
+
+void kill_plant(Pot* pot);
 
 #endif // !PLANT_H
