@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "Pest.h"
+
+
 CP_Font myFont;
 
 //--------------------- Player ---------------------//
@@ -64,16 +67,6 @@ CP_Image spriteSheetTiles;
 #define TILE_ROWS 20
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
-	//{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -217,6 +210,10 @@ void Game_Init(void)
 
 	//Pots
 	initialize_pots(level1_pots, L1_POT_SIZE);
+
+	// pest
+	initialize_pests();
+
 }
 
 
@@ -280,130 +277,6 @@ void Game_Update(void)
 	static int inRedZone = 0;
 	//if small circle is intersecting red circle
 	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
-	//for (int i = 0; i < boxCount; i++) {
-	//	if (!boxes[i].removing)
-	//	{
-	//		boxes[i].lateTimer -= dt;
-	//
-	//		if (boxes[i].lateTimer <= 0.0f)
-	//		{
-	//			boxes[i].removing = 1;
-	//			boxes[i].removeSpeed = 300.0f;
-	//		}
-	//	}
-	//}
-	//const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-	//int numPraises = 3;
-	//static char currentPraise[32] = "";
-	//static float praiseTimer = 0.0f;
-	//
-	//if (touchingRed && !inRedZone)
-	//{
-	//	// Remove ONE box
-	//	if (boxCount > 0 && boxes[0].removing == 0)
-	//	{
-	//		boxes[0].removing = 1;
-	//		boxes[0].removeSpeed = 300.0f;
-	//	}
-	//	int idx = rand() % numPraises;
-	//	snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-	//	praiseTimer = 1.0f; // show for 1 second
-	//	inRedZone = 1;
-	//}
-	//else if (!touchingRed)
-	//{
-	//	inRedZone = 0;
-	//}
-	//
-	//if (praiseTimer > 0.0f)
-	//{
-	//	CP_Settings_TextSize(80);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-	//
-	//	float screenW = (float)CP_System_GetWindowWidth();
-	//	float screenH = (float)CP_System_GetWindowHeight();
-	//	CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-	//
-	//	praiseTimer -= CP_System_GetDt();
-	//}
-	//
-	//spawnTimer += dt;
-	//
-	//// Spawn every 2 seconds
-	//if (spawnTimer >= 20.0f) {
-	//	spawn_box();
-	//	spawnTimer = 0.0f;
-	//}
-	//
-	//for (int i = 0; i < boxCount; i++) {
-	//
-	//	if (boxes[i].removing)
-	//	{
-	//		boxes[i].y -= boxes[i].removeSpeed * dt;
-	//
-	//		// If off-screen, delete it
-	//		if (boxes[i].y + boxes[i].height < 0)
-	//		{
-	//			// shift boxes down
-	//			for (int j = 1; j < boxCount; j++)
-	//				boxes[j - 1] = boxes[j];
-	//
-	//			boxCount--;
-	//			i--; // loop checks next box correctly
-	//			continue;
-	//		}
-	//	}
-	//
-	//	if (boxes[i].x > boxes[i].targetX) {
-	//		boxes[i].x -= boxes[i].speed;
-	//		if (boxes[i].x < boxes[i].targetX)
-	//			boxes[i].x = boxes[i].targetX;
-	//	}
-	//
-	//	CP_Settings_ImageMode(CP_POSITION_CORNER);
-	//	CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-	//	float timeLeft = boxes[i].lateTimer;
-	//	if (timeLeft < 0) timeLeft = 0;
-	//
-	//	CP_Settings_TextSize(50);
-	//	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-	//
-	//	char timerStr[8];
-	//	snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-	//
-	//	CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	//}
-
-
-	//--------------------- Water & Sun Bar ---------------------//
-	//float rectWidth = 60.0f;
-	//float rectHeight = 30.0f;
-	//float potRadius = 120.0f;
-	//int count = 5; // how many rectangles to draw
-	//
-	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-	//
-	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f)) {
-	//	for (int i = 0; i < count; i++)
-	//	{   // water
-	//		float x = (rectX + i * rectWidth) - 82.0f;
-	//		CP_Settings_Fill(CP_Color_Create(0, 0, 155, 255));
-	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-	//		// sun box
-	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-	//	}
-	//}
-		  /*  if (boxes[i].lateTimer <= 0.0f)
-			{
-				boxes[i].removing = 1;
-				boxes[i].removeSpeed = 300.0f;
-			}
-		}
-	}*/
 
 
 	for (int i = 0; i < boxCount; i++) {
@@ -509,83 +382,99 @@ void Game_Update(void)
 	//ahmad
 
 
-	CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
-	float potX = CP_System_GetWindowWidth() / 2.0f;
-	float potY = CP_System_GetWindowHeight() / 2.0f;
-	CP_Graphics_DrawCircle(potX, potY, 120.0f);
+	//CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
+	//float potX = CP_System_GetWindowWidth() / 2.0f;
+	//float potY = CP_System_GetWindowHeight() / 2.0f;
+	//CP_Graphics_DrawCircle(potX, potY, 120.0f);
 
-	float rectWidth = 60;
-	float rectHeight = 30;
-	float potRadius = 120.0f;
-	int count = 5; // how many rectangles to draw
-	float spacing = 0.0f;
+	//float rectWidth = 60;
+	//float rectHeight = 30;
+	//float potRadius = 120.0f;
+	//int count = 5; // how many rectangles to draw
+	//float spacing = 0.0f;
 
-	float totalWidth = count * rectWidth + (count - 1) * spacing;
+	//float totalWidth = count * rectWidth + (count - 1) * spacing;
 
-	static float fillProgress = 0.0f; // 0 = empty, 1 = full
-	const int potBarSegments = 5; // number of segments
-	float fillSpeed = 0.4f; // fill per second
+	//static float fillProgress = 0.0f; // 0 = empty, 1 = full
+	//const int potBarSegments = 5; // number of segments
+	//float fillSpeed = 0.4f; // fill per second
 
-	float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-	float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
+	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
+	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
 
-	if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
-	{
-		// Fill while holding L
-		if (CP_Input_KeyDown(KEY_L))
-		{
-			CP_Settings_RectMode(CP_POSITION_CORNER);
-			fillProgress += fillSpeed * dt;
-			if (fillProgress > 1.0f) fillProgress = 1.0f;
+	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
+	//{
+	//	// Fill while holding L
+	//	if (CP_Input_KeyDown(KEY_L))
+	//	{
+	//		CP_Settings_RectMode(CP_POSITION_CORNER);
+	//		fillProgress += fillSpeed * dt;
+	//		if (fillProgress > 1.0f) fillProgress = 1.0f;
 
-		}
+	//	}
 
-		float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-		float filledWidth = totalBarWidth * fillProgress;
+	//	float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+	//	float filledWidth = totalBarWidth * fillProgress;
 
-		float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
+	//	float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
 
-		for (int i = 0; i < potBarSegments; i++)
-		{
-			float x = rectX + i * (rectWidth + spacing) - 82;
+	//	for (int i = 0; i < potBarSegments; i++)
+	//	{
+	//		float x = rectX + i * (rectWidth + spacing) - 82;
 
-			// Grey background
-			CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
-			CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+	//		// Grey background
+	//		CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
 
-			// Fill calculation
-			float segmentStart = i * (rectWidth + spacing);
-			float segmentFill = filledWidth - segmentStart;
-			if (segmentFill > 0.0f)
-			{
-				if (segmentFill > rectWidth) segmentFill = rectWidth;
+	//		// Fill calculation
+	//		float segmentStart = i * (rectWidth + spacing);
+	//		float segmentFill = filledWidth - segmentStart;
+	//		if (segmentFill > 0.0f)
+	//		{
+	//			if (segmentFill > rectWidth) segmentFill = rectWidth;
 
-				// Smooth transition: calculate red intensity
-				CP_Color fillColor;
-				if (filledWidth <= thresholdWidth)
-				{
-					fillColor = CP_Color_Create(0, 0, 255, 255); // blue
-				}
-				else
-				{
-					// progress past threshold (0..1)
-					float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
-					if (redAmount > 1.0f) redAmount = 1.0f;
-					int r = (int)(255.0f * redAmount);
-					int g = (int)(0.0f);
-					int b = (int)(255.0f * (1.0f - redAmount));
-					fillColor = CP_Color_Create(r, g, b, 255);
-				}
+	//			// Smooth transition: calculate red intensity
+	//			CP_Color fillColor;
+	//			if (filledWidth <= thresholdWidth)
+	//			{
+	//				fillColor = CP_Color_Create(0, 0, 255, 255); // blue
+	//			}
+	//			else
+	//			{
+	//				// progress past threshold (0..1)
+	//				float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+	//				if (redAmount > 1.0f) redAmount = 1.0f;
+	//				int r = (int)(255.0f * redAmount);
+	//				int g = (int)(0.0f);
+	//				int b = (int)(255.0f * (1.0f - redAmount));
+	//				fillColor = CP_Color_Create(r, g, b, 255);
+	//			}
 
-				CP_Settings_Fill(fillColor);
-				CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
-			}
+	//			CP_Settings_Fill(fillColor);
+	//			CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+	//		}
 
-			// Yellow bar above (sun box)
-			CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-			CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-		}
+	//		// Yellow bar above (sun box)
+	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
+	//	}
+//}
+	// --------------------- PEST -------------------------------//
+	static float pestSpawnTimer = 0.0f;
+	static float nextSpawnTime = 0.0f;
+
+	pestSpawnTimer += dt;
+
+	if (pestSpawnTimer >= nextSpawnTime) {
+		spawn_pest(level1_pots, L1_POT_SIZE);
+		pestSpawnTimer = 0.0f;
+		nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
 	}
+
+	// pass player to update_pests
+	update_pests(level1_pots, L1_POT_SIZE, &player);
+	render_pests();
+
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
@@ -706,10 +595,78 @@ void handle_tool_interaction(Tool* tool) {
 
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
-		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
+		if (level1_pots[i].selected && CP_Input_KeyDown(KEY_E)) {
 			switch (held_tool.tool_name) {
 			case WATERING_CAN:
-				if (level1_pots[i].plant.seed_type != EMPTY) { grow_plant(&level1_pots[i].plant.growth_stage); }
+				if (!level1_pots[i].watered && CP_Input_KeyDown(KEY_E)) {
+					if (level1_pots[i].plant.seed_type != EMPTY) {
+						grow_plant(&level1_pots[i].plant.growth_stage);
+						//!!!! to change into a function
+						float rectWidth = 60;
+						float rectHeight = 30;
+						int count = 5; // how many rectangles to draw
+						float spacing = 0.0f;
+
+						float totalWidth = count * rectWidth + (count - 1) * spacing;
+
+						//static float fillProgress = 0.0f; // 0 = empty, 1 = full
+						const int potBarSegments = 5; // number of segments
+						float fillSpeed = 0.4f; // fill per second
+
+						float rectX = level1_pots[i].position.x - rectWidth / 2.0f;   // center horizontally on pot
+						float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
+						CP_Settings_RectMode(CP_POSITION_CORNER);
+						level1_pots[i].fillProgress += fillSpeed * dt;
+						if (level1_pots[i].fillProgress > 1.0f) level1_pots[i].fillProgress = 1.0f;
+						float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+						float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
+
+						float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
+
+						for (int i = 0; i < potBarSegments; i++)
+						{
+							float x = rectX + i * (rectWidth + spacing) - 82;
+
+							// Grey background
+							CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+							CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+
+							// Fill calculation
+							float segmentStart = i * (rectWidth + spacing);
+							float segmentFill = filledWidth - segmentStart;
+							if (segmentFill > 0.0f)
+							{
+								if (segmentFill > rectWidth) segmentFill = rectWidth;
+
+								// Smooth transition: calculate red intensity
+								CP_Color fillColor;
+								if (filledWidth <= thresholdWidth)
+								{
+									fillColor = CP_Color_Create(0, 0, 255, 255); // blue
+								}
+								else
+								{
+									// progress past threshold (0..1)
+									float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+									if (redAmount > 1.0f) redAmount = 1.0f;
+									int r = (int)(255.0f * redAmount);
+									int g = (int)(0.0f);
+									int b = (int)(255.0f * (1.0f - redAmount));
+									fillColor = CP_Color_Create(r, g, b, 255);
+								}
+
+								CP_Settings_Fill(fillColor);
+								CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+							}
+
+							// Yellow bar above (sun box)
+							CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+							CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
+						
+						}
+					}
+				}
+
 				break;
 			case SOIL:
 				level1_pots[i].filled = true;

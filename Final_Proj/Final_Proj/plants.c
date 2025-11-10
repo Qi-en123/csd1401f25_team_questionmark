@@ -12,6 +12,8 @@ void initialize_pots(Pot *pots, int size) {
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
+		pots[i].fillProgress = 0.0f;
+		pots[i].watered = false;
 	}
 }
 

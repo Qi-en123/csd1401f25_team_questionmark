@@ -31,6 +31,8 @@ typedef struct Pot {
 	bool selected;
 	bool filled;
 	Plant plant;
+	float fillProgress;
+	bool watered;
 }Pot;
 
 void initialize_pots(Pot *pots, int size);
