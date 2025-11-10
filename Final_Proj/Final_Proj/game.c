@@ -8,7 +8,7 @@
 #include "player.h"
 #include "tools.h"
 #include "plants.h"
-
+#include "map.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -57,10 +57,8 @@ Box boxes[MAX_BOXES];
 int boxCount;
 float spawnTimer;
 
-//-----------------------------------------------------------------------------------------
-// draw background
-//image
-CP_Image spriteSheetTiles;
+
+Tile map_tiles[TILE_ROWS][TILE_COLS];
 
 
 #define TILE_COLS 30
@@ -68,100 +66,7 @@ CP_Image spriteSheetTiles;
 // each number is a tile here
 int map[TILE_ROWS][TILE_COLS] = {
 
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
 
-void draw_tile(int tile_index, float x, float y, float w, float h)
-{
-	// coordinates to draw each tile in spriteSheetTiles
-	int left, top, right, bottom;
-
-	switch (tile_index)
-	{
-	case 1: // horizontal path
-		left = 126; top = 85; right = 135; bottom = 95; break;
-
-	case 2: // vertical path
-		left = 289; top = 205; right = 299; bottom = 215; break;
-
-	case 3: // top-left corner path
-		left = 267; top = 205; right = 277; bottom = 215; break;
-
-	case 4: // top-right corner path
-		left = 311; top = 194; right = 321; bottom = 204; break;
-
-	case 5: // bottom-left corner path
-		left = 267; top = 216; right = 277; bottom = 226; break;
-
-	case 6: // bottom-right corner path
-		left = 311; top = 205; right = 321; bottom = 215; break;
-
-	default:
-		// change middle tiles
-		//left = 169; top = 249; right = 179; bottom = 259; break;
-		left = 147; top = 96; right = 157; bottom = 106; break;
-	}
-
-	// Shrink the rectangle by 1 pixel inside to avoid texture bleeding
-	left += 1;
-	top += 1;
-	right -= 1;
-	bottom -= 1;
-
-	CP_Image_DrawSubImage(spriteSheetTiles,
-		x, y, w, h,
-		left, top, right, bottom,
-		255);
-}
-
-// ------------------------------------------
-// draw entire tile map
-// ------------------------------------------
-void draw_tile_map(void)
-{
-	// Get current window size
-	float screen_w = CP_System_GetWindowWidth();
-	float screen_h = CP_System_GetWindowHeight();
-
-	// Calculate tile size so map fills the whole screen
-	float tile_w = screen_w / TILE_COLS;
-	float tile_h = screen_h / TILE_ROWS;
-
-	// Loop through map and draw each tile
-	for (int row = 0; row < TILE_ROWS; row++)
-	{
-		for (int col = 0; col < TILE_COLS; col++)
-		{
-			int tile = map[row][col];
-
-			// Use integer positions to avoid gaps
-			float x = col * tile_w;
-			float y = row * tile_h;
-
-			draw_tile(tile, (float)x, (float)y, (float)tile_w, (float)tile_h);
-		}
-	}
-}
-//------------------------------------------------------------------------------
 
 //--------------------- Pots ---------------------//
 #define L1_POT_SIZE 4
@@ -174,7 +79,7 @@ void Game_Init(void)
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
-	spriteSheetTiles = CP_Image_Load("Assets/preview.png");
+	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 
 	//ahmad
 	srand((unsigned int)time(NULL));
@@ -222,8 +127,13 @@ void Game_Update(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-	draw_tile_map();
 
+
+
+	draw_tile_map(map_tiles);
+		
+	draw_modified_map();
+	
 	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
 	CP_Color red = CP_Color_Create(220, 100, 100, 255);
 	CP_Color green = CP_Color_Create(100, 220, 100, 255);
@@ -277,6 +187,7 @@ void Game_Update(void)
 	static int inRedZone = 0;
 	//if small circle is intersecting red circle
 	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
+	
 
 
 	for (int i = 0; i < boxCount; i++) {
