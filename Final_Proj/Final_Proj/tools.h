@@ -16,8 +16,8 @@ typedef enum Tool_name {
 	SEED_1, //dun judge, dis is easier
 	SEED_2,
 	SEED_3,
-	POT,
-	HAND, //means nothing (only used to check what player is holding)
+	//POT,
+	//HAND, //means nothing (only used to check what player is holding)
 
 }Tool_name;
 
@@ -29,11 +29,13 @@ typedef struct Tool {
 	CP_Image tool_sprite;
 	bool in_range; //checks if player is within range of tool
 	bool rotatable;
+	bool selected;
+	int uses;
 }Tool;
 
-void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tool* held_tool, Tile* tile);
+void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tile* tile);
 
-void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool_name held_tool);
+void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool* held_tool);
 void render_held_tool(Tool* tool);
 
 #endif // !TOOLS_H

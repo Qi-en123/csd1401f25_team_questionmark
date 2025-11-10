@@ -24,12 +24,12 @@ CP_Image player_spritesheet;
 #define L1_TOOL_SIZE 5
 Tool level1_tools[L1_TOOL_SIZE];
 Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2, SEED_3 };
-Tool held_tool; // a copy of the tool to be held
+Tool* held_tool; // a pointer to the tool held
 
 //--------------------- Pots ---------------------//
 #define L1_POT_SIZE 40
 Pot level1_pots[L1_POT_SIZE];
-Pot* held_pot; // a pointer to the pot held (realised i could do it this way)
+Pot* held_pot; // a pointer to the pot held
 CP_Image pot_spritesheet = NULL;
 
 
@@ -61,7 +61,7 @@ Box boxes[MAX_BOXES];
 int boxCount;
 float spawnTimer;
 
-
+//--------------------- Map/Background ---------------------//
 Tile map_tiles[TILE_ROWS][TILE_COLS];
 int placeable[] = { 1,2 }; //set tiles which are placeable
 
@@ -90,7 +90,8 @@ void Game_Init(void)
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
 
 	//Tools
-	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool, &map_tiles[3][1]);
+	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &map_tiles[3][1]);
+	held_tool = NULL;
 
 	//Timer
 #pragma region Timer Initialization
@@ -113,7 +114,6 @@ void Game_Init(void)
 	held_pot = NULL;
 }
 
-
 void Game_Update(void)
 {
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -133,28 +133,27 @@ void Game_Update(void)
 	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot);
 
 	//--------------------- Tools ---------------------//
-	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool.tool_name);
+	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool);
 	//Render tool behind player if player facing Left or Up
-	if (held_tool.tool_name != HAND && (90 == player.rotation || 180 == player.rotation)) {
-		render_held_tool(&held_tool);
-		if (held_tool.tool_name == POT) { render_held_pot(held_pot, pot_spritesheet); }
+	if (90 == player.rotation || 180 == player.rotation) {
+		if (held_tool) { render_held_tool(held_tool); }
+		if (held_pot) { render_held_pot(held_pot, pot_spritesheet); }
 	}
 
 	//--------------------- Hold Tool ---------------------//
 	//If player is not holding anything
-	if (HAND == held_tool.tool_name) {
+	if (!held_tool && !held_pot) {
 		if (CP_Input_KeyReleased(KEY_Q)) {
 			//Picks up the first tool that is in range
 			for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 				if (level1_tools[i].in_range) {
-					held_tool = level1_tools[i];
+					held_tool = &level1_tools[i];
 					break;
 				}
 			}
 			//Picks up first pot that is in range
 			for (int i = 0; i < L1_POT_SIZE; ++i) {
 				if (level1_pots[i].selected) {
-					held_tool.tool_name = POT;
 					held_pot = &level1_pots[i];
 					//"unobstructs" grid, makes it placeable
 					level1_pots[i].occupied_tile->obstructed = false;
@@ -170,8 +169,8 @@ void Game_Update(void)
 			handle_pot_interaction(held_pot);
 		}
 		else {
-			move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
-			handle_tool_interaction(&held_tool);
+			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation);
+			handle_tool_interaction(held_tool);
 		}
 	}
 
@@ -179,9 +178,9 @@ void Game_Update(void)
 	//EVERYTH PLAYER RELATED IN THIS FUNCTION
 	simulate_player(&player, player_spritesheet);
 	//Render tool infront if player facing Right or Down
-	if (held_tool.tool_name != HAND && (0 == player.rotation || 270 == player.rotation)) {
-		render_held_tool(&held_tool);
-		if (held_tool.tool_name == POT) { render_held_pot(held_pot, pot_spritesheet); } 
+	if (0 == player.rotation || 270 == player.rotation) {
+		if (held_tool) { render_held_tool(held_tool); }
+		if (held_pot) { render_held_pot(held_pot, pot_spritesheet); }
 	}
 
 	/*-----------------------------------------------------------------------*/
@@ -395,7 +394,7 @@ void Game_Exit(void)
 	for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 		CP_Image_Free(level1_tools[i].tool_sprite);
 	}
-	CP_Image_Free(held_tool.tool_sprite);
+	if (held_tool) { CP_Image_Free(held_tool->tool_sprite); }
 	CP_Image_Free(pot_spritesheet);
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
 		CP_Image_Free(level1_pots[i].plant.plant_spritesheet);
@@ -490,31 +489,35 @@ void handle_tool_interaction(Tool* tool) {
 		tool->in_range = true;
 		//highlights initial grid
 		CP_Settings_RectMode(CP_POSITION_CORNER);
-		//CP_Settings_Stroke(CP_Color_Create(225, 173, 1, 255));
 		CP_Settings_NoStroke();
 		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
 		CP_Graphics_DrawRect(tool->initial_pos.x, tool->initial_pos.y,
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
-
+		//reset stroke color
+		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 		if (CP_Input_KeyReleased(KEY_Q)) {
-			tool->tool_name = HAND;
 			tool->position.x = tool->initial_pos.x;
 			tool->position.y = tool->initial_pos.y;
-		}
-		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
+			held_tool = NULL;
+			return;
+		}		
 	}
 	else tool->in_range = false;
 
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
 		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
-			switch (held_tool.tool_name) {
+			switch (held_tool->tool_name) {
 			case WATERING_CAN:
 				//if pot isnt empty and plant isnt fully grown
-				if (level1_pots[i].plant.seed_type != EMPTY && level1_pots[i].plant.growth_stage != ADULT) {
-					//grow_plant(&level1_pots[i].plant); 
+				if (level1_pots[i].plant.seed_type != EMPTY &&
+					level1_pots[i].plant.growth_stage != ADULT) {
 					//WATERING PLANT FUNCTION HERE:
+					if (held_tool->uses > 0) {
+						level1_pots[i].plant.water_amount = 1.0f;
+						held_tool->uses--;
+					}					
 				}
 				break;
 			case SOIL:
@@ -536,6 +539,16 @@ void handle_tool_interaction(Tool* tool) {
 				break;
 			}
 		}
+	}
+
+	//--------------------- Refill Water ---------------------//
+	if (held_tool->tool_name == WATERING_CAN &&
+		IsWithinRect(map_tiles[2][2].x, map_tiles[2][2].y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
+			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+			player.position.x, player.position.y)) {
+
+		held_tool->uses = 3;
+		held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 	}
 }
 
@@ -583,7 +596,6 @@ void handle_pot_interaction(Pot* pot) {
 
 				//highlights grid that pot would be placed
 				CP_Settings_RectMode(CP_POSITION_CORNER);
-				//CP_Settings_Stroke(CP_Color_Create(225, 173, 1, 255));
 				CP_Settings_NoStroke();
 				CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
 				CP_Graphics_DrawRect(tile->x, tile->y, 
@@ -592,7 +604,7 @@ void handle_pot_interaction(Pot* pot) {
 				//place down pot if tile is placeable and not obstructed by other things
 				if (CP_Input_KeyReleased(KEY_Q) && tile->placeable && !(tile->obstructed)) {
 					tile->obstructed = true;
-					held_tool.tool_name = HAND;
+					held_tool = NULL;
 					held_pot = NULL;
 					pot->position.x = tile->x;
 					pot->position.y = tile->y;

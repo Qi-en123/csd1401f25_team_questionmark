@@ -13,8 +13,8 @@ void initialize_pots(Pot *pots, int size, Tile* tile) {
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
-		tile[i].obstructed = true;
-		pots[i].occupied_tile = &tile[i];
+		tile[tile_index].obstructed = true;
+		pots[i].occupied_tile = &tile[tile_index];
 	}
 }
 
@@ -115,7 +115,7 @@ void render_plant(Plant* plant, float posx, float posy, bool selected) {
 	plant->sunlight_amount += dt / plant->sunlight_needed / 2.0f;
 	plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
 
-	if (plant->sunlight_amount >= 1.0f) {
+	if (plant->water_amount >= 1.0f && plant->sunlight_amount >= 1.0f) {
 		grow_plant(plant);
 	}
 
@@ -134,6 +134,7 @@ void grow_plant(Plant* plant) {
 	if (growth_stage != ADULT) {
 		plant->sunlight_amount = 0; //reset sunlight bar
 		plant->sunlight_needed *= 1.2f; //increase sunlight needed per growth stage
+		plant->water_amount = 0;
 	}
 }
 
@@ -158,4 +159,3 @@ void kill_plant(Pot* pot) {
 	plant->sunlight_needed = 0;
 	plant->water_amount = 0;
 }
-
