@@ -112,16 +112,18 @@ void render_plant(Plant* plant, float posx, float posy, bool selected) {
 		PLANT_WIDTH + PLANT_WIDTH * plant->growth_stage, PLANT_HEIGHT + PLANT_HEIGHT * selected, 255);
 
 	//Increase sunlight bar
-	plant->sunlight_amount += dt / plant->sunlight_needed / 2.0f;
-	plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
+	if (plant->growth_stage != ADULT) {
+		plant->sunlight_amount += dt / plant->sunlight_needed / 2.0f;
+		plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
+
+		if (selected) {
+			//SUNLIGHT AND WATER BAR HERE:
+			render_sunlight_bar(plant, posx, posy);
+		}
+	}
 
 	if (plant->water_amount >= 1.0f && plant->sunlight_amount >= 1.0f) {
 		grow_plant(plant);
-	}
-
-	if (selected) {
-		//SUNLIGHT AND WATER BAR HERE:
-		render_sunlight_bar(plant, posx, posy);
 	}
 }
 
