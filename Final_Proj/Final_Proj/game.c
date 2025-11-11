@@ -483,7 +483,7 @@ void move_tool(float* posx, float* posy, float* rotation) {
 //only called when player is holding tool
 void handle_tool_interaction(Tool* tool) {
 	//if player is back at where he picked up the tool
-	if (AreCirclesIntersecting(player.position.x, player.position.y, 9.0f,
+	if (AreCirclesIntersecting(player.position.x, player.position.y + 8.0f, 9.0f, //abit of offset on y-axis for accuracy
 		tool->initial_pos.x, tool->initial_pos.y - TOOL_RANGE_Y_OFFSET, 40.0f + TOOL_RANGE)) {
 
 		tool->in_range = true;

@@ -28,16 +28,16 @@ void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tile* t
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/shovel.png");
 			tool->rotatable = true;
 			break;
-		case SEED_1:
-			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+		case SEED_1: //berrybush
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
 			tool->rotatable = false;
 			break;
-		case SEED_2:
-			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+		case SEED_2: //cactus
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
 			tool->rotatable = false;
 			break;
-		case SEED_3:
-			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_pouch.png");
+		case SEED_3: //orange
+			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
 			tool->rotatable = false;
 			break;
 		default:

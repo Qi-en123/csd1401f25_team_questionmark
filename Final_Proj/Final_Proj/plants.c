@@ -34,8 +34,9 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 	//highlights nearby pot
 	for (int i = 0; i < size; ++i) {
 		if (&pots[i] == pot) { continue; } //skips rendering held pot
-		if (AreCirclesIntersecting(player_posx, player_posy, 9.0f, //player pos and radius
-			pots[i].position.x, pots[i].position.y, 50.0f) && //pot pos and range
+		if (IsWithinRect(pots[i].position.x, pots[i].position.y, //pot pos
+			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,  //pot height & width
+			player_posx, player_posy + 8.0f) &&  //player pos, abit of offset on y-axis for accuracy
 			pot == NULL) { //if player isnt holding a pot
 			if (!pot_selected) {
 				pots[i].selected = true;
