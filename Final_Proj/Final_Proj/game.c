@@ -65,6 +65,9 @@ float spawnTimer;
 Tile map_tiles[TILE_ROWS][TILE_COLS];
 int placeable[] = { 1,2 }; //set tiles which are placeable
 
+//Frequently used colors
+CP_Color red, green, blue, gray;
+
 void Game_Init(void)
 {
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
@@ -112,6 +115,12 @@ void Game_Init(void)
 	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
+
+	//Colors
+	blue = CP_Color_Create(0, 0, 255, 255);
+	red = CP_Color_Create(220, 100, 100, 255);
+	green = CP_Color_Create(100, 220, 100, 255);
+	gray = CP_Color_Create(210, 210, 210, 255);
 }
 
 void Game_Update(void)
@@ -123,11 +132,6 @@ void Game_Update(void)
 	set_tile_placeable(map_tiles, &placeable, sizeof(placeable)/sizeof(placeable[0]));
 		
 	draw_modified_map();
-	
-	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
-	CP_Color red = CP_Color_Create(220, 100, 100, 255);
-	CP_Color green = CP_Color_Create(100, 220, 100, 255);
-	CP_Color gray = CP_Color_Create(210, 210, 210, 255);
 
 	//--------------------- Pots ---------------------//
 	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot);
@@ -183,120 +187,8 @@ void Game_Update(void)
 		if (held_pot) { render_held_pot(held_pot, pot_spritesheet); }
 	}
 
-	/*-----------------------------------------------------------------------*/
-	CP_Settings_Fill(red);
-	//initialise the x and y coordinate of red circle
-	float red_circlex = 500.0f;
-	float red_circley = 600.0f;
-	//draw first big circle at the middle height of screen and 1/4 width from the left
-	CP_Graphics_DrawCircle(red_circlex, red_circley, 100.0f);
-	
-	static int inRedZone = 0;
-	//if small circle is intersecting red circle
-	int touchingRed = AreCirclesIntersecting(player.position.x, player.position.y, 9.0f, red_circlex, red_circley, 100.0f / 2.0f);
-	
-
-	for (int i = 0; i < boxCount; i++) {
-		if (!boxes[i].removing)
-		{
-			boxes[i].lateTimer -= dt;
-
-			if (boxes[i].lateTimer <= 0.0f)
-			{
-				boxes[i].removing = 1;
-				boxes[i].removeSpeed = 300.0f;
-			}
-		}
-	}
-
-	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
-	int numPraises = 3;
-	static char currentPraise[32] = "";
-	static float praiseTimer = 0.0f;
-
-	if (touchingRed && !inRedZone)
-	{
-
-		// Remove ONE box
-		if (boxCount > 0 && boxes[0].removing == 0)
-		{
-			boxes[0].removing = 1;
-			boxes[0].removeSpeed = 300.0f;
-		}
-		int idx = rand() % numPraises;
-		snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-		praiseTimer = 1.0f; // show for 1 second
-		inRedZone = 1;
-	}
-	else if (!touchingRed)
-	{
-		inRedZone = 0;
-	}
-
-	if (praiseTimer > 0.0f)
-	{
-		CP_Settings_TextSize(80);
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
-
-		float screenW = (float)CP_System_GetWindowWidth();
-		float screenH = (float)CP_System_GetWindowHeight();
-		CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
-
-		praiseTimer -= CP_System_GetDt();
-	}
-
-
-	//ahmad
-	spawnTimer += dt;
-
-	// Spawn every 2 seconds
-	if (spawnTimer >= 20.0f) {
-		spawn_box();
-		spawnTimer = 0.0f;
-	}
-
-	for (int i = 0; i < boxCount; i++) {
-
-		if (boxes[i].removing)
-		{
-			boxes[i].y -= boxes[i].removeSpeed * dt;
-
-			// If off-screen, delete it
-			if (boxes[i].y + boxes[i].height < 0)
-			{
-				// shift boxes down
-				for (int j = 1; j < boxCount; j++)
-					boxes[j - 1] = boxes[j];
-
-				boxCount--;
-				i--; // loop checks next box correctly
-				continue;
-			}
-		}
-
-		if (boxes[i].x > boxes[i].targetX) {
-			boxes[i].x -= boxes[i].speed;
-			if (boxes[i].x < boxes[i].targetX)
-				boxes[i].x = boxes[i].targetX;
-		}
-
-		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-		float timeLeft = boxes[i].lateTimer;
-		if (timeLeft < 0) timeLeft = 0;
-
-		CP_Settings_TextSize(50);
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-		char timerStr[8];
-		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	}
-	//ahmad
-
+	/*-----------------------------------------------------------------------*/	
+	customer_request();
 
 	CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
 	float potX = CP_System_GetWindowWidth() / 2.0f;
@@ -628,8 +520,8 @@ void spawn_box(void) {
 
 	//  Create new box on the right
 	Box newBox;
-	newBox.width = 300; // size of req box
-	newBox.height = 250;
+	newBox.width = 160; // size of req box
+	newBox.height = 160;
 	newBox.x = screenW;        // start off-screen right
 	newBox.y = 10.0f;          // top position
 	newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
@@ -637,8 +529,124 @@ void spawn_box(void) {
 
 	newBox.removing = 0;
 	newBox.removeSpeed = 0.0f;
-	newBox.lateTimer = 8.0f;
+	newBox.lateTimer = 20.0f;
 	// Add new box to array
 	boxes[boxCount++] = newBox;
 	CP_Sound_Play(customerNoti);
+}
+
+void customer_request() {
+	//--------------------- Create Requests ---------------------//
+	spawnTimer += dt;
+
+	// Spawn every 20 seconds
+	if (spawnTimer >= 5.0f) {
+		spawn_box();
+		spawnTimer = 0.0f;
+	}
+
+	for (int i = 0; i < boxCount; i++) {
+		if (!boxes[i].removing)
+		{
+			boxes[i].lateTimer -= dt;
+
+			if (boxes[i].lateTimer <= 0.0f)
+			{
+				boxes[i].removing = 1;
+				boxes[i].removeSpeed = 300.0f;
+			}
+		}
+	}
+
+	for (int i = 0; i < boxCount; i++) {
+
+		if (boxes[i].removing)
+		{
+			boxes[i].y -= boxes[i].removeSpeed * dt;
+
+			// If off-screen, delete it
+			if (boxes[i].y + boxes[i].height < 0)
+			{
+				// shift boxes down
+				for (int j = 1; j < boxCount; j++)
+					boxes[j - 1] = boxes[j];
+
+				boxCount--;
+				i--; // loop checks next box correctly
+				continue;
+			}
+		}
+
+		if (boxes[i].x > boxes[i].targetX) {
+			boxes[i].x -= boxes[i].speed;
+			if (boxes[i].x < boxes[i].targetX)
+				boxes[i].x = boxes[i].targetX;
+		}
+
+		CP_Settings_ImageMode(CP_POSITION_CORNER);
+		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 200);
+		float timeLeft = boxes[i].lateTimer;
+		if (timeLeft < 0) timeLeft = 0;
+
+		CP_Settings_TextSize(50);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+
+		char timerStr[8];
+		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+
+		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+	}
+
+	//--------------------- Fulfill Request ---------------------//
+	Tile *dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16]};
+
+	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
+	int numPraises = 3;
+	static char currentPraise[32] = "";
+	static float praiseTimer = 0.0f;
+
+	//apologies for this mess
+	for (int i = 0; i < 2; ++i) { 
+		//if drop-off point is occupied
+		if (dropoff[i]->obstructed) {
+
+			for (int j = 0; j < L1_POT_SIZE; ++j) {
+				//find pot that is occupying drop-off point
+				if (level1_pots[j].occupied_tile == dropoff[i]) {
+
+					//check if plant given fits request
+					if (level1_pots[j].plant.growth_stage == ADULT) {
+						//WORDS OF ENCOURAGEMENT
+						int idx = rand() % numPraises;
+						snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
+						praiseTimer = 1.0f; // show for 1 second
+
+						if (boxCount > 0 && boxes[0].removing == 0)
+						{
+							boxes[0].removing = 1;
+							boxes[0].removeSpeed = 300.0f;
+						}
+
+						//remove plant
+						kill_plant(&level1_pots[j]);
+						break; //exit early
+					}
+				}
+			}
+		}
+	}
+
+	if (praiseTimer > 0.0f)
+	{
+		CP_Settings_TextSize(80);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255)); // yellow text
+
+		float screenW = (float)CP_System_GetWindowWidth();
+		float screenH = (float)CP_System_GetWindowHeight();
+		CP_Font_DrawText(currentPraise, screenW / 2.0f, screenH / 4.0f);
+
+		praiseTimer -= CP_System_GetDt();
+	}
 }
