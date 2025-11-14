@@ -94,11 +94,11 @@ void Game_Init(void)
 
 	//ahmad
 	srand((unsigned int)time(NULL));
-	requestbg = CP_Image_Load("Assets/button_square_gradient.png");
+	requestbg = CP_Image_Load("Assets/button_square_gradient-1.png");
 	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
-	berrybush = CP_Image_Load("Assets/seed_berrybush.png");
-	cactus = CP_Image_Load("Assets/seed_cactus.png");
-	orangebush = CP_Image_Load("Assets/seed_orangebush.png");
+	berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
+	cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
+	orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
 	CP_System_SetFrameRate(60);
 	boxCount = 0;
 	spawnTimer = 0;
@@ -238,6 +238,9 @@ void Game_Exit(void)
 	}
 	CP_Image_Free(requestbg);
 	CP_Sound_Free(customerNoti);
+	CP_Image_Free(berrybush);
+	CP_Image_Free(cactus);
+	CP_Image_Free(orangebush);
 }
 
 void start_timer() {
@@ -545,8 +548,8 @@ void spawn_box(void) {
 
 	//  Create new box on the right
 	Box newBox;
-	newBox.width = 150; // size of req box // old numbers: 250
-	newBox.height = 150; // old numbers: 150
+	newBox.width = 120; // size of req box // old numbers: 250
+	newBox.height = 120; // old numbers: 150
 	newBox.x = screenW;        // start off-screen right
 	newBox.y = 10.0f;          // top position
 	newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
@@ -561,14 +564,14 @@ void spawn_box(void) {
 	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
 	if (newBox.numPlants > 3) newBox.numPlants = 3;
 	for (int i = 0; i < newBox.numPlants; i++) {
-		newBox.plantType = CP_Random_RangeInt(0, 3);
+		newBox.plantType = CP_Random_RangeInt(0, 2);
 		if (newBox.plantType > 2) newBox.plantType = 2; // safety clamp
 		if (newBox.plantType < 0) newBox.plantType = 0;
 	}
 
 	// Add new box to array
 	boxes[boxCount++] = newBox;
-	CP_Sound_Play(customerNoti);
+	//CP_Sound_Play(customerNoti);
 }
 
 void customer_request() {
@@ -576,7 +579,7 @@ void customer_request() {
 	spawnTimer += dt;
 
 	// Spawn every 20 seconds
-	if (spawnTimer >= 5.0f) {
+	if (spawnTimer >= 8.0f) {
 		spawn_box();
 		spawnTimer = 0.0f;
 	}
@@ -621,10 +624,10 @@ void customer_request() {
 			}
 		}
 
-		if (boxes[i].x > boxes[i].targetX + 1.0f) {
+		if (boxes[i].x > boxes[i].targetX + 1.5f) {
 			boxes[i].x -= boxes[i].speed * dt;
 		}
-		else if (boxes[i].x < boxes[i].targetX - 1.0f) {
+		else if (boxes[i].x < boxes[i].targetX - 1.5f) {
 			boxes[i].x += boxes[i].speed * dt;
 		}
 		else {
@@ -634,14 +637,14 @@ void customer_request() {
 		CP_Settings_ImageMode(CP_POSITION_CORNER);
 		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
 		CP_Image plantImage = NULL;
-		float imgSize = 65.0f; // plant icon size
+		float imgSize = 60.0f; // plant icon size
 		float spacing = 10.0f; // space between icons
 
 
 		int num = boxes[i].numPlants;
 		if (num > 0) {
-			float totalWidth = num * imgSize + (num - 1) * spacing;
-			float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
+			//float totalWidth = num * imgSize + (num - 1) * spacing;
+			float startX = boxes[i].x + (boxes[i].width - imgSize) / 2.0f;
 			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
 
 			CP_Image plantImage = NULL;
@@ -657,7 +660,7 @@ void customer_request() {
 				plantImage,
 				startX,
 				startY,
-				imgSize, imgSize, 250
+				imgSize , imgSize, 250
 			);
 		}
 
