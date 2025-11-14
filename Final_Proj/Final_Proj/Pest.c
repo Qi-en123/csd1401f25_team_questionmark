@@ -24,7 +24,7 @@ void spawn_pest(Pot* pots, int potCount) {
             pests[i].state = PEST_DESCENDING;
             pests[i].position.x = TOP_RIGHT_X + 100;
             pests[i].position.y = TOP_RIGHT_Y;
-            pests[i].speed = 100.0f + (rand() % 50);
+            pests[i].speed = 500.0f + (rand() % 50);
 
             pests[i].descendTarget.x = TOP_RIGHT_X;
             pests[i].descendTarget.y = TOP_RIGHT_Y + DESCEND_DISTANCE;

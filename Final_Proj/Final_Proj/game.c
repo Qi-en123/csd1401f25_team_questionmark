@@ -11,6 +11,7 @@
 #include "map.h"
 #include <stdlib.h>
 #include <time.h>
+#include "ui.h"
 
 #include "Pest.h"
 
@@ -39,6 +40,10 @@ CP_Color timer_font_color;
 
 
 CP_Image requestbg = NULL;
+CP_Image berrybush = NULL;
+CP_Image orangebush = NULL;
+CP_Image cactus = NULL;
+
 CP_Sound customerNoti;
 
 typedef struct {
@@ -49,6 +54,11 @@ typedef struct {
 	int removing;
 	float removeSpeed;
 	float lateTimer;
+
+	// New fields for plant requests
+	int numPlants;       // how many plants requested (1–3)
+	int plantTypes[3];   // 0 = cactus | 1 = berrybush | 2 = orangebush
+
 } Box;
 
 // Maximum number of box
@@ -59,12 +69,6 @@ float spawnTimer;
 
 
 Tile map_tiles[TILE_ROWS][TILE_COLS];
-
-
-#define TILE_COLS 30
-#define TILE_ROWS 20
-// each number is a tile here
-int map[TILE_ROWS][TILE_COLS] = {
 
 
 
@@ -85,6 +89,9 @@ void Game_Init(void)
 	srand((unsigned int)time(NULL));
 	requestbg = CP_Image_Load("Assets/button_square_gradient.png");
 	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
+	berrybush = CP_Image_Load("Assets/seed_berrybush.png");
+	cactus = CP_Image_Load("Assets/seed_cactus.png");
+	orangebush = CP_Image_Load("Assets/seed_orangebush.png");
 	CP_System_SetFrameRate(60);
 	boxCount = 0;
 	spawnTimer = 0;
@@ -97,6 +104,7 @@ void Game_Init(void)
 
 	//Tools
 	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool);
+
 
 	//Timer
 #pragma region Timer Initialization
@@ -246,7 +254,7 @@ void Game_Update(void)
 	spawnTimer += dt;
 
 	// Spawn every 2 seconds
-	if (spawnTimer >= 20.0f) {
+	if (spawnTimer >= 5.0f) {
 		spawn_box();
 		spawnTimer = 0.0f;
 	}
@@ -277,7 +285,37 @@ void Game_Update(void)
 		}
 
 		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
+		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
+		CP_Image plantImage = NULL;
+		float imgSize = 65.0f; // plant icon size
+		float spacing = 10.0f; // space between icons
+
+		
+		int num = boxes[i].numPlants;
+		if (num > 0) {
+			float totalWidth = num * imgSize + (num - 1) * spacing;
+			float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
+			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
+
+			for (int p = 0; p < num; p++) {
+				CP_Image plantImage = NULL;
+
+				switch (boxes[i].plantTypes[p]) {
+				case 0: plantImage = cactus; break;
+				case 1: plantImage = berrybush; break;
+				case 2: plantImage = orangebush; break;
+				default: plantImage = cactus; break; // fallback
+				}
+
+				CP_Image_Draw(
+					plantImage,
+					startX + p * (imgSize + spacing),
+					startY,
+					imgSize, imgSize, 250
+				);
+			}
+		}
+
 		float timeLeft = boxes[i].lateTimer;
 		if (timeLeft < 0) timeLeft = 0;
 
@@ -290,85 +328,6 @@ void Game_Update(void)
 
 		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
 	}
-	//ahmad
-
-
-	//CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
-	//float potX = CP_System_GetWindowWidth() / 2.0f;
-	//float potY = CP_System_GetWindowHeight() / 2.0f;
-	//CP_Graphics_DrawCircle(potX, potY, 120.0f);
-
-	//float rectWidth = 60;
-	//float rectHeight = 30;
-	//float potRadius = 120.0f;
-	//int count = 5; // how many rectangles to draw
-	//float spacing = 0.0f;
-
-	//float totalWidth = count * rectWidth + (count - 1) * spacing;
-
-	//static float fillProgress = 0.0f; // 0 = empty, 1 = full
-	//const int potBarSegments = 5; // number of segments
-	//float fillSpeed = 0.4f; // fill per second
-
-	//float rectX = potX - rectWidth / 2.0f;   // center horizontally on pot
-	//float rectY = potY - (120.0f / 2.0f) - rectHeight - 10.0f;
-
-	//if (AreCirclesIntersecting(player.position.x, player.position.y, 120.0f / 2.0f, potX, potY, 120.0f / 2.0f))
-	//{
-	//	// Fill while holding L
-	//	if (CP_Input_KeyDown(KEY_L))
-	//	{
-	//		CP_Settings_RectMode(CP_POSITION_CORNER);
-	//		fillProgress += fillSpeed * dt;
-	//		if (fillProgress > 1.0f) fillProgress = 1.0f;
-
-	//	}
-
-	//	float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-	//	float filledWidth = totalBarWidth * fillProgress;
-
-	//	float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
-
-	//	for (int i = 0; i < potBarSegments; i++)
-	//	{
-	//		float x = rectX + i * (rectWidth + spacing) - 82;
-
-	//		// Grey background
-	//		CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
-	//		CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-
-	//		// Fill calculation
-	//		float segmentStart = i * (rectWidth + spacing);
-	//		float segmentFill = filledWidth - segmentStart;
-	//		if (segmentFill > 0.0f)
-	//		{
-	//			if (segmentFill > rectWidth) segmentFill = rectWidth;
-
-	//			// Smooth transition: calculate red intensity
-	//			CP_Color fillColor;
-	//			if (filledWidth <= thresholdWidth)
-	//			{
-	//				fillColor = CP_Color_Create(0, 0, 255, 255); // blue
-	//			}
-	//			else
-	//			{
-	//				// progress past threshold (0..1)
-	//				float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
-	//				if (redAmount > 1.0f) redAmount = 1.0f;
-	//				int r = (int)(255.0f * redAmount);
-	//				int g = (int)(0.0f);
-	//				int b = (int)(255.0f * (1.0f - redAmount));
-	//				fillColor = CP_Color_Create(r, g, b, 255);
-	//			}
-
-	//			CP_Settings_Fill(fillColor);
-	//			CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
-	//		}
-
-	//		// Yellow bar above (sun box)
-	//		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-	//		CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-	//	}
 //}
 	// --------------------- PEST -------------------------------//
 	static float pestSpawnTimer = 0.0f;
@@ -504,87 +463,112 @@ void handle_tool_interaction(Tool* tool) {
 	}
 	else tool->in_range = false;
 
+	// Progress bar logic
+	float rectWidth = 60;
+	float rectHeight = 30;
+	int potBarSegments = 5;
+	float spacing = 0.0f;
+	float fillSpeed = 0.4f;
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
-		if (level1_pots[i].selected && CP_Input_KeyDown(KEY_E)) {
+		if (level1_pots[i].selected) {
 			switch (held_tool.tool_name) {
 			case WATERING_CAN:
-				if (!level1_pots[i].watered && CP_Input_KeyDown(KEY_E)) {
-					if (level1_pots[i].plant.seed_type != EMPTY) {
-						grow_plant(&level1_pots[i].plant.growth_stage);
-						//!!!! to change into a function
-						float rectWidth = 60;
-						float rectHeight = 30;
-						int count = 5; // how many rectangles to draw
-						float spacing = 0.0f;
+				// Only allow watering if pot hasn't been watered before
+				if (!level1_pots[i].wateredOnce && level1_pots[i].plant.seed_type != EMPTY) {
 
-						float totalWidth = count * rectWidth + (count - 1) * spacing;
+					// Progress bar logic
+					float rectWidth = 60;
+					float rectHeight = 30;
+					int potBarSegments = 5;
+					float spacing = 0.0f;
+					float fillSpeed = 0.4f;
 
-						//static float fillProgress = 0.0f; // 0 = empty, 1 = full
-						const int potBarSegments = 5; // number of segments
-						float fillSpeed = 0.4f; // fill per second
+					float rectX = level1_pots[i].position.x - rectWidth / 2.0f;
+					float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
 
-						float rectX = level1_pots[i].position.x - rectWidth / 2.0f;   // center horizontally on pot
-						float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
-						CP_Settings_RectMode(CP_POSITION_CORNER);
+					CP_Settings_RectMode(CP_POSITION_CORNER);
+
+					// Only increase fill if E is held
+					if (CP_Input_KeyDown(KEY_E)) {
 						level1_pots[i].fillProgress += fillSpeed * dt;
 						if (level1_pots[i].fillProgress > 1.0f) level1_pots[i].fillProgress = 1.0f;
+					}
+
+					// Draw progress bar
+					float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+					float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
+					float thresholdWidth = (potBarSegments - 2) * rectWidth;
+
+					for (int seg = 0; seg < potBarSegments; seg++) {
+						float x = rectX + seg * (rectWidth + spacing) - 82;
+
+						// Background color for segment
+						if (seg == potBarSegments - 2)
+							CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
+						else
+							CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+
+						CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+
+						// Fill segment
+						float segmentStart = seg * (rectWidth + spacing);
+						float segmentFill = filledWidth - segmentStart;
+						if (segmentFill > 0.0f) {
+							if (segmentFill > rectWidth) segmentFill = rectWidth;
+
+							CP_Color fillColor;
+							if (filledWidth <= thresholdWidth)
+								fillColor = CP_Color_Create(0, 0, 255, 255); // Blue
+							else {
+								float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+								if (redAmount > 1.0f) redAmount = 1.0f;
+								int r = (int)(255.0f * redAmount);
+								int g = 0;
+								int b = (int)(255.0f * (1.0f - redAmount));
+								fillColor = CP_Color_Create(r, g, b, 255);
+							}
+
+							CP_Settings_Fill(fillColor);
+							CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+						}
+					}
+
+					// Lock watering when E released
+					if (CP_Input_KeyReleased(KEY_E)) {
+						level1_pots[i].wateredOnce = true;
+						level1_pots[i].watered = true; // lock pot
+
 						float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
 						float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
 
-						float thresholdWidth = (potBarSegments - 2) * rectWidth; // start red after 2nd last segment
+						// 2nd last segment boundaries
+						int targetSegment = potBarSegments - 2; // index of 2nd last
+						float segmentStart = targetSegment * (rectWidth + spacing);
+						float segmentEnd = segmentStart + rectWidth;
 
-						for (int i = 0; i < potBarSegments; i++)
-						{
-							float x = rectX + i * (rectWidth + spacing) - 82;
-
-							// Grey background
-							CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
-							CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-
-							// Fill calculation
-							float segmentStart = i * (rectWidth + spacing);
-							float segmentFill = filledWidth - segmentStart;
-							if (segmentFill > 0.0f)
-							{
-								if (segmentFill > rectWidth) segmentFill = rectWidth;
-
-								// Smooth transition: calculate red intensity
-								CP_Color fillColor;
-								if (filledWidth <= thresholdWidth)
-								{
-									fillColor = CP_Color_Create(0, 0, 255, 255); // blue
-								}
-								else
-								{
-									// progress past threshold (0..1)
-									float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
-									if (redAmount > 1.0f) redAmount = 1.0f;
-									int r = (int)(255.0f * redAmount);
-									int g = (int)(0.0f);
-									int b = (int)(255.0f * (1.0f - redAmount));
-									fillColor = CP_Color_Create(r, g, b, 255);
-								}
-
-								CP_Settings_Fill(fillColor);
-								CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
-							}
-
-							// Yellow bar above (sun box)
-							CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
-							CP_Graphics_DrawRect(x, rectY - rectHeight - 8, rectWidth, rectHeight);
-						
+						// Grow only if blue bar is within 2nd last segment
+						if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
+							grow_plant(&level1_pots[i].plant.growth_stage);
 						}
 					}
 				}
 
 				break;
+
+
 			case SOIL:
-				level1_pots[i].filled = true;
+				if (CP_Input_KeyTriggered(KEY_E)) {
+					level1_pots[i].filled = true;
+				}
 				break;
+
 			case SEEDS:
-				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant); }
+				if (level1_pots[i].filled && CP_Input_KeyTriggered(KEY_E)) {
+					initialize_plant(&level1_pots[i].plant);
+				}
 				break;
+
 			default:
 				break;
 			}
@@ -596,6 +580,7 @@ void spawn_box(void) {
 	if (boxCount >= MAX_BOXES) return;
 
 	float screenW = (float)CP_System_GetWindowWidth();
+	float screenH = (float)CP_System_GetWindowHeight();
 
 	//  Shift all existing boxes left
 	for (int i = 0; i < boxCount; i++) {
@@ -604,8 +589,8 @@ void spawn_box(void) {
 
 	//  Create new box on the right
 	Box newBox;
-	newBox.width = 300; // size of req box
-	newBox.height = 250;
+	newBox.width = 150; // size of req box // old numbers: 250
+	newBox.height = 150; // old numbers: 150
 	newBox.x = screenW;        // start off-screen right
 	newBox.y = 10.0f;          // top position
 	newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
@@ -613,7 +598,18 @@ void spawn_box(void) {
 
 	newBox.removing = 0;
 	newBox.removeSpeed = 0.0f;
-	newBox.lateTimer = 8.0f;
+	newBox.lateTimer = 15.0f;
+
+	// --- Random plant request setup ---
+	newBox.numPlants = CP_Random_RangeInt(0, 1); // gives 1, 2, or 3
+	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
+	if (newBox.numPlants > 3) newBox.numPlants = 3;
+	for (int i = 0; i < newBox.numPlants; i++) {
+		newBox.plantTypes[i] = CP_Random_RangeInt(0, 3);
+		if (newBox.plantTypes[i] > 2) newBox.plantTypes[i] = 2; // safety clamp
+		if (newBox.plantTypes[i] < 0) newBox.plantTypes[i] = 0;
+	}
+
 	// Add new box to array
 	boxes[boxCount++] = newBox;
 	CP_Sound_Play(customerNoti);

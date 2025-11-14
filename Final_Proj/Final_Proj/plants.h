@@ -33,6 +33,7 @@ typedef struct Pot {
 	Plant plant;
 	float fillProgress;
 	bool watered;
+	bool wateredOnce;
 }Pot;
 
 void initialize_pots(Pot *pots, int size);
