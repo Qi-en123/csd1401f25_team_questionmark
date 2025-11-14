@@ -78,11 +78,6 @@ float spawnTimer;
 Tile map_tiles[TILE_ROWS][TILE_COLS];
 int placeable[] = { 1,2 }; //set tiles which are placeable
 
-
-
-//--------------------- Pots ---------------------//
-#define L1_POT_SIZE 4
-Pot level1_pots[L1_POT_SIZE];
 //Frequently used colors
 CP_Color red, green, blue, gray;
 
@@ -136,8 +131,6 @@ void Game_Init(void)
 	//Pots
 	// pest
 	initialize_pests();
-
-}
 	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
@@ -155,8 +148,8 @@ void Game_Update(void)
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
 	draw_tile_map(map_tiles);
-	set_tile_placeable(map_tiles, &placeable, sizeof(placeable)/sizeof(placeable[0]));
-		
+	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
+
 	draw_modified_map();
 
 	//--------------------- Pots ---------------------//
@@ -213,18 +206,10 @@ void Game_Update(void)
 		if (held_pot) { render_held_pot(held_pot, pot_spritesheet); }
 	}
 
-	/*-----------------------------------------------------------------------*/	
+	/*-----------------------------------------------------------------------*/
 	customer_request();
 
-	if (pestSpawnTimer >= nextSpawnTime) {
-		spawn_pest(level1_pots, L1_POT_SIZE);
-		pestSpawnTimer = 0.0f;
-		nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
-	}
 
-	// pass player to update_pests
-	update_pests(level1_pots, L1_POT_SIZE, &player);
-	render_pests();
 
 
 	//--------------------- Timer ---------------------//
@@ -352,7 +337,7 @@ void handle_tool_interaction(Tool* tool) {
 			tool->position.y = tool->initial_pos.y;
 			held_tool = NULL;
 			return;
-		}		
+		}
 	}
 	else tool->in_range = false;
 
@@ -364,7 +349,7 @@ void handle_tool_interaction(Tool* tool) {
 	float fillSpeed = 0.4f;
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
-		if (level1_pots[i].selected) {
+		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
 			switch (held_tool->tool_name) {
 			case WATERING_CAN:
 				//if pot isnt empty and plant isnt fully grown
@@ -372,97 +357,97 @@ void handle_tool_interaction(Tool* tool) {
 					level1_pots[i].plant.growth_stage != ADULT &&
 					!level1_pots[i].wateredOnce) {
 					//WATERING PLANT FUNCTION HERE:
-					if (held_tool->uses > 0) {	
+					if (held_tool->uses > 0) {
 						float rectX = level1_pots[i].position.x - rectWidth / 2.0f;
-					float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
+						float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
 
-					CP_Settings_RectMode(CP_POSITION_CORNER);
+						CP_Settings_RectMode(CP_POSITION_CORNER);
 
-					// Only increase fill if E is held
-					if (CP_Input_KeyDown(KEY_E)) {
-						level1_pots[i].fillProgress += fillSpeed * dt;
-						if (level1_pots[i].fillProgress > 1.0f) level1_pots[i].fillProgress = 1.0f;
-					}
-
-					// Draw progress bar
-					float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-					float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
-					float thresholdWidth = (potBarSegments - 2) * rectWidth;
-
-					for (int seg = 0; seg < potBarSegments; seg++) {
-						float x = rectX + seg * (rectWidth + spacing) - 82;
-
-						// Background color for segment
-						if (seg == potBarSegments - 2)
-							CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
-						else
-							CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
-
-						CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
-
-						// Fill segment
-						float segmentStart = seg * (rectWidth + spacing);
-						float segmentFill = filledWidth - segmentStart;
-						if (segmentFill > 0.0f) {
-							if (segmentFill > rectWidth) segmentFill = rectWidth;
-
-							CP_Color fillColor;
-							if (filledWidth <= thresholdWidth)
-								fillColor = CP_Color_Create(0, 0, 255, 255); // Blue
-							else {
-								float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
-								if (redAmount > 1.0f) redAmount = 1.0f;
-								int r = (int)(255.0f * redAmount);
-								int g = 0;
-								int b = (int)(255.0f * (1.0f - redAmount));
-								fillColor = CP_Color_Create(r, g, b, 255);
-							}
-
-							CP_Settings_Fill(fillColor);
-							CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+						// Only increase fill if E is held
+						if (CP_Input_KeyDown(KEY_E)) {
+							level1_pots[i].fillProgress += fillSpeed * dt;
+							if (level1_pots[i].fillProgress > 1.0f) level1_pots[i].fillProgress = 1.0f;
 						}
-					}
 
-					// Lock watering when E released
-					if (CP_Input_KeyReleased(KEY_E)) {
-						level1_pots[i].wateredOnce = true;
-						level1_pots[i].watered = true; // lock pot
-
+						// Draw progress bar
 						float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
 						float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
+						float thresholdWidth = (potBarSegments - 2) * rectWidth;
 
-						// 2nd last segment boundaries
-						int targetSegment = potBarSegments - 2; // index of 2nd last
-						float segmentStart = targetSegment * (rectWidth + spacing);
-						float segmentEnd = segmentStart + rectWidth;
+						for (int seg = 0; seg < potBarSegments; seg++) {
+							float x = rectX + seg * (rectWidth + spacing) - 82;
 
-						// Grow only if blue bar is within 2nd last segment
-						if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
-							level1_pots[i].plant.water_amount = 1.0f;
+							// Background color for segment
+							if (seg == potBarSegments - 2)
+								CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
+							else
+								CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+
+							CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
+
+							// Fill segment
+							float segmentStart = seg * (rectWidth + spacing);
+							float segmentFill = filledWidth - segmentStart;
+							if (segmentFill > 0.0f) {
+								if (segmentFill > rectWidth) segmentFill = rectWidth;
+
+								CP_Color fillColor;
+								if (filledWidth <= thresholdWidth)
+									fillColor = CP_Color_Create(0, 0, 255, 255); // Blue
+								else {
+									float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
+									if (redAmount > 1.0f) redAmount = 1.0f;
+									int r = (int)(255.0f * redAmount);
+									int g = 0;
+									int b = (int)(255.0f * (1.0f - redAmount));
+									fillColor = CP_Color_Create(r, g, b, 255);
+								}
+
+								CP_Settings_Fill(fillColor);
+								CP_Graphics_DrawRect(x, rectY, segmentFill, rectHeight);
+							}
 						}
-					}					
+
+						// Lock watering when E released
+						if (CP_Input_KeyReleased(KEY_E)) {
+							level1_pots[i].wateredOnce = true;
+							level1_pots[i].watered = true; // lock pot
+
+							float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
+							float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
+
+							// 2nd last segment boundaries
+							int targetSegment = potBarSegments - 2; // index of 2nd last
+							float segmentStart = targetSegment * (rectWidth + spacing);
+							float segmentEnd = segmentStart + rectWidth;
+
+							// Grow only if blue bar is within 2nd last segment
+							if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
+								level1_pots[i].plant.water_amount = 1.0f;
+							}
+						}
 						held_tool->uses--;
 
 
-					}					
+					}
 				}
 				break;
 
 
 			case SOIL:
 				level1_pots[i].filled = true;
-				if (level1_pots[i].plant.seed_type != EMPTY && CP_Input_KeyTriggered(KEY_E)) {
+				if (level1_pots[i].plant.seed_type != EMPTY) {
 					kill_plant(&level1_pots[i]);
 				}
 				break;
 			case SEED_1: //this is easier, :p
-				if (level1_pots[i].filled && CP_Input_KeyTriggered(KEY_E)) { initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
 				break;
 			case SEED_2:
-				if (level1_pots[i].filled && CP_Input_KeyTriggered(KEY_E)) { initialize_plant(&level1_pots[i].plant, CACTUS); }
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, CACTUS); }
 				break;
 			case SEED_3:
-				if (level1_pots[i].filled && CP_Input_KeyTriggered(KEY_E)) { initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
+				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
 				break;
 
 			default:
@@ -528,7 +513,7 @@ void handle_pot_interaction(Pot* pot) {
 				CP_Settings_RectMode(CP_POSITION_CORNER);
 				CP_Settings_NoStroke();
 				CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
-				CP_Graphics_DrawRect(tile->x, tile->y, 
+				CP_Graphics_DrawRect(tile->x, tile->y,
 					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
 				//place down pot if tile is placeable and not obstructed by other things
@@ -635,91 +620,101 @@ void customer_request() {
 
 		spawnTimer += dt;
 
-	// Spawn every 2 seconds
-	if (spawnTimer >= 5.0f) {
-		spawn_box();
-		spawnTimer = 0.0f;
-	}
+		// Spawn every 2 seconds
+		if (spawnTimer >= 5.0f) {
+			spawn_box();
+			spawnTimer = 0.0f;
+		}
 
-	for (int i = 0; i < boxCount; i++) {
+		for (int i = 0; i < boxCount; i++) {
 
-		if (boxes[i].removing)
-		{
-			boxes[i].y -= boxes[i].removeSpeed * dt;
-
-			// If off-screen, delete it
-			if (boxes[i].y + boxes[i].height < 0)
+			if (boxes[i].removing)
 			{
-				// shift boxes down
-				for (int j = 1; j < boxCount; j++)
-					boxes[j - 1] = boxes[j];
+				boxes[i].y -= boxes[i].removeSpeed * dt;
 
-				boxCount--;
-				i--; // loop checks next box correctly
-				continue;
-			}
-		}
+				// If off-screen, delete it
+				if (boxes[i].y + boxes[i].height < 0)
+				{
+					// shift boxes down
+					for (int j = 1; j < boxCount; j++)
+						boxes[j - 1] = boxes[j];
 
-		if (boxes[i].x > boxes[i].targetX) {
-			boxes[i].x -= boxes[i].speed;
-			if (boxes[i].x < boxes[i].targetX)
-				boxes[i].x = boxes[i].targetX;
-		}
-
-		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
-		CP_Image plantImage = NULL;
-		float imgSize = 65.0f; // plant icon size
-		float spacing = 10.0f; // space between icons
-
-		
-		int num = boxes[i].numPlants;
-		if (num > 0) {
-			float totalWidth = num * imgSize + (num - 1) * spacing;
-			float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
-			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
-
-			for (int p = 0; p < num; p++) {
-				CP_Image plantImage = NULL;
-
-				switch (boxes[i].plantTypes[p]) {
-				case 0: plantImage = cactus; break;
-				case 1: plantImage = berrybush; break;
-				case 2: plantImage = orangebush; break;
-				default: plantImage = cactus; break; // fallback
+					boxCount--;
+					i--; // loop checks next box correctly
+					continue;
 				}
-
-				CP_Image_Draw(
-					plantImage,
-					startX + p * (imgSize + spacing),
-					startY,
-					imgSize, imgSize, 250
-				);
 			}
+
+			if (boxes[i].x > boxes[i].targetX) {
+				boxes[i].x -= boxes[i].speed;
+				if (boxes[i].x < boxes[i].targetX)
+					boxes[i].x = boxes[i].targetX;
+			}
+
+			CP_Settings_ImageMode(CP_POSITION_CORNER);
+			CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
+			CP_Image plantImage = NULL;
+			float imgSize = 65.0f; // plant icon size
+			float spacing = 10.0f; // space between icons
+
+
+			int num = boxes[i].numPlants;
+			if (num > 0) {
+				float totalWidth = num * imgSize + (num - 1) * spacing;
+				float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
+				float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
+
+				for (int p = 0; p < num; p++) {
+					CP_Image plantImage = NULL;
+
+					switch (boxes[i].plantTypes[p]) {
+					case 0: plantImage = cactus; break;
+					case 1: plantImage = berrybush; break;
+					case 2: plantImage = orangebush; break;
+					default: plantImage = cactus; break; // fallback
+					}
+
+					CP_Image_Draw(
+						plantImage,
+						startX + p * (imgSize + spacing),
+						startY,
+						imgSize, imgSize, 250
+					);
+				}
+			}
+
+			float timeLeft = boxes[i].lateTimer;
+			if (timeLeft < 0) timeLeft = 0;
+
+			CP_Settings_TextSize(50);
+			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+			CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+
+			char timerStr[8];
+			snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+
+			CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+		}
+		//}
+			// --------------------- PEST -------------------------------//
+		static float pestSpawnTimer = 0.0f;
+		static float nextSpawnTime = 0.0f;
+
+		if (pestSpawnTimer >= nextSpawnTime) {
+			spawn_pest(level1_pots, L1_POT_SIZE);
+			pestSpawnTimer = 0.0f;
+			nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
 		}
 
-		float timeLeft = boxes[i].lateTimer;
-		if (timeLeft < 0) timeLeft = 0;
+		// pass player to update_pests
+		update_pests(level1_pots, L1_POT_SIZE, &player);
+		render_pests();
 
-		CP_Settings_TextSize(50);
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-		char timerStr[8];
-		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	}
-//}
-	// --------------------- PEST -------------------------------//
-	static float pestSpawnTimer = 0.0f;
-	static float nextSpawnTime = 0.0f;
-
-	pestSpawnTimer += dt;
+		pestSpawnTimer += dt;
 	}
 
 	//--------------------- Fulfill Request ---------------------//
-	Tile *dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16]};
+	Tile* dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16] };
 
 	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
 	int numPraises = 3;
@@ -727,7 +722,7 @@ void customer_request() {
 	static float praiseTimer = 0.0f;
 
 	//apologies for this mess
-	for (int i = 0; i < 2; ++i) { 
+	for (int i = 0; i < 2; ++i) {
 		//if drop-off point is occupied
 		if (dropoff[i]->obstructed) {
 
