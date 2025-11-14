@@ -50,11 +50,7 @@ void move_player(float* pos, float speed) {
 	*pos += speed * dt;
 }
 
-//All of the player functions in here
-void simulate_player(Player* player, CP_Image spritesheet) {
-	handle_player_input(player);
-	render_player(player, spritesheet);
-}
+
 
 //These are for player animation
 float time_between_frame = 0.0f; //to check time between each frame

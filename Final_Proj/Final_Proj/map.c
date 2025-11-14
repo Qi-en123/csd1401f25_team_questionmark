@@ -21,10 +21,10 @@ int map[TILE_ROWS][TILE_COLS] = {
 int modified_map[TILE_ROWS][TILE_COLS] = {
 
 {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 5, 0, 0},
+	{9, 9, 9, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 4, 7, 7, 5, 9, 9},
 	{1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2},
 	{2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
-	{1, 2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2},
+	{1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2},
 	{2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1},
 	{1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2},
 	{2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 1},
@@ -65,7 +65,8 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 
 	case 7: // bottom dirt path
 		left = 17; top = 48; right = 33, bottom = 64; break;
-
+	case 8:
+		left = 128; top = 120; right = 144, bottom = 145; break;
 
 	default:
 		// horizontal fence
@@ -125,7 +126,20 @@ void draw_modified_map(void)
 			int tile = modified_map[row][col];
 			float x = col * tile_w;
 			float y = row * tile_h;
-			draw_tile(tile, x, y, tile_w, tile_h);
+
+			// If tile is 8, stretch it vertically to cover 2 tiles
+			if (tile == 8)
+			{
+				draw_tile(tile, x, y, tile_w, tile_h * 2);
+
+				// Optional: set the next row to 0 to avoid drawing over the stretched tile
+				if (row + 1 < TILE_ROWS)
+					modified_map[row + 1][col] = 0; // clear the tile below
+			}
+			else if (tile != 0) // skip cleared tiles
+			{
+				draw_tile(tile, x, y, tile_w, tile_h);
+			}
 		}
 	}
 }

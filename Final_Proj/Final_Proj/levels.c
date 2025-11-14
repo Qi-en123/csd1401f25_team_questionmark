@@ -158,7 +158,9 @@ void Level_Update(void)
     }
 
     // if exit button is clicked
-    if(IsButtonClicked(50, 50, 100, 100)){ CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
+    if(IsButtonClicked(50, 50, 100, 100)){ 
+        CP_Sound_Play(BtnSound);
+        CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
 
     
 
@@ -179,6 +181,6 @@ void Level_Exit(void)
     CP_Image_Free(spriteSheet_level);
     CP_Image_Free(mainmenu_bg_level);
     CP_Font_Free(font_level);
-    CP_Sound_Free(BtnSound);
+
 
 }

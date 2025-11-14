@@ -28,7 +28,6 @@ void initialize_player(Player* player, float speed, float posx, float posy);
 void handle_player_input(Player* player);
 
 void move_player(float* pos, float speed);
-void simulate_player(Player* player, CP_Image spritesheet);
 void render_player(Player* player, CP_Image spritesheet);
 
 #endif // !PLAYER_H

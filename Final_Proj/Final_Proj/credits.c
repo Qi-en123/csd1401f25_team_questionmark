@@ -174,5 +174,5 @@ void Credits_Exit(void)
     CP_Image_Free(spriteSheet_credits);
     CP_Image_Free(mainmenu_bg_credits);
     CP_Font_Free(font_credits);
-    CP_Sound_Free(BtnSound);
+
 }

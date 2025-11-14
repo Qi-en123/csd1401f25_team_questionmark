@@ -13,7 +13,15 @@
 #include <time.h>
 
 CP_Font myFont;
-
+CP_Font Font;
+CP_Image button_white;
+CP_Image button_green;
+CP_Image button_circle_white;
+CP_Image button_circle_green;
+CP_Image repeat;
+CP_Image next;
+CP_Image home;
+CP_Sound BtnSound;
 //--------------------- Player ---------------------//
 Player player;
 float player_speed;
@@ -59,7 +67,13 @@ Tile map_tiles[TILE_ROWS][TILE_COLS];
 
 
 
-
+int paused = 0; // 0 = running, 1 = paused
+int showControls = 0; // 0 = hidden, 1 = showing
+int gameOver = 0;   // 0 = running, 1 = ended
+int starCount = 0;  // 0–3 stars
+int score = 0;
+CP_Image star_default;
+CP_Image star_achieved;
 
 //--------------------- Pots ---------------------//
 #define L1_POT_SIZE 4
@@ -67,8 +81,14 @@ Pot level1_pots[L1_POT_SIZE];
 
 void Game_Init(void)
 {
+	gameOver = 0;
+	score = 0;
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	myFont = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
+	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
+	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
+	star_default = CP_Image_Load("Assets/star_outline.png"); 
+	star_achieved = CP_Image_Load("Assets/star.png");
+
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
@@ -87,7 +107,15 @@ void Game_Init(void)
 	player_startpos_x = player_startpos_y = 100.0f;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
-
+	// buttons 
+	button_white = CP_Image_Load("Assets/button_rectangle_line.png");
+	button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
+	button_circle_white = CP_Image_Load("Assets/button_round_line.png");
+	button_circle_green = CP_Image_Load("Assets/button_round_gloss.png");
+	next = CP_Image_Load("Assets/next.png");
+	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
+	home = CP_Image_Load("Assets/menuList.png");
+	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
 	//Tools
 	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &held_tool);
 
@@ -113,6 +141,23 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
+
+	// Don't allow pause if game is over
+	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
+		paused = !paused;
+
+		if (paused) {
+			showControls = 0; // Reset controls overlay when opening pause menu
+		}
+	}
+	if (CP_Input_KeyReleased(KEY_2)) {
+		gameOver = 1;
+		starCount = 3;
+		
+	}
+
+
+
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
@@ -122,6 +167,7 @@ void Game_Update(void)
 	draw_tile_map(map_tiles);
 		
 	draw_modified_map();
+
 	
 	CP_Color blue = CP_Color_Create(0, 0, 255, 255);
 	CP_Color red = CP_Color_Create(220, 100, 100, 255);
@@ -156,10 +202,114 @@ void Game_Update(void)
 		move_tool(&held_tool.position.x, &held_tool.position.y, &held_tool.rotation);
 		handle_tool_interaction(&held_tool);
 	}
+	//draw player
+	render_player( &player, player_spritesheet);
+	//------------------------------Paused -----------------------------------------------
+// If paused, draw pause overlay and skip game logic
+	if (paused) {
+		// Semi-transparent black overlay
+		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
+		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
+			CP_System_GetWindowHeight() / 2,
+			CP_System_GetWindowWidth(),
+			CP_System_GetWindowHeight());
+
+		if (showControls) {
+			// Draw the controls panel only
+			CP_Settings_ImageMode(CP_POSITION_CENTER);
+			float panelWidth = 800;
+			float panelHeight = 500;
+			float panelX = (float)CP_System_GetWindowWidth() / 2;
+			float panelY = (float)CP_System_GetWindowHeight() / 2;
+
+			CP_Image_Draw(button_white, panelX, panelY, panelWidth, panelHeight, 255);
+
+			// Draw text line by line
+			CP_Font_Set(myFont);
+			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255)); // black text
+			CP_Settings_TextSize(40);
+			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
+			float lineHeight = 55.0f; // vertical spacing between lines
+			float startY = panelY - 150; // start higher up so text is centered
+
+			CP_Font_DrawText("Controls:", panelX, startY);
+			CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineHeight);
+			CP_Font_DrawText("Interact: [E]", panelX, startY + 2 * lineHeight);
+			CP_Font_DrawText("Pick up/Drop Tool: [P]", panelX, startY + 3 * lineHeight);
+			CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineHeight);
+			CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineHeight);
+
+			// Close overlay when Key 1 is pressed
+			if (CP_Input_KeyReleased(KEY_1)) {
+				showControls = 0;
+			}
+		}
+		else {
+			// Draw the normal pause menu buttons
+			int x_coord = 650; // shared x coordinate for all buttons
+			float btnWidth = 500.0f;
+			float btnHeight = 90.0f;
+			float btnX = x_coord - 100;
+			float btnY[3] = { 225.0f, 425.0f, 625.0f };
+			const char* btnText[3] = { "Resume","Controls", "Quit" };
+
+			CP_Settings_ImageMode(CP_POSITION_CORNER);
+
+			for (int i = 0; i < 3; i++) {
+				if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight)) {
+					CP_Image_Draw(button_green, btnX, btnY[i], btnWidth, btnHeight, 255);
+				}
+				else {
+					CP_Image_Draw(button_white, btnX, btnY[i], btnWidth, btnHeight, 255);
+				}
+			}
+
+			// Play sound on click
+			for (int i = 0; i < 3; i++) {
+				if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
+					CP_Sound_Play(BtnSound);
+					break;
+				}
+			}
+
+			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) {
+				paused = 0; // Resume
+			}
+			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) {
+				showControls = 1; // Show controls overlay
+			}
+			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight)) {
+				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); // Quit
+			}
+
+			// Draw button texts
+			CP_Font_Set(Font);
+			CP_Settings_TextSize(80.0f);
+			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
+			for (int i = 0; i < 3; i++) {
+				float textX = btnX + btnWidth / 2;
+				float textY = btnY[i] + btnHeight / 2;
+				CP_Font_DrawText(btnText[i], textX, textY);
+			}
+		}
+
+		return; // skip the rest of the game logic
+	}
+
+	//---------------- GAME OVER -----------------------------
+	if (gameOver)
+	{
+		draw_gameover_panel(starCount, score);
+		return;   // Stop all other game updates
+	}
+
+
 
 	//--------------------- Player ---------------------//
-	//EVERYTH PLAYER RELATED IN THIS FUNCTION
-	simulate_player(&player, player_spritesheet);
+	handle_player_input(&player);
 	//Render tool infront if player facing Right or Down
 	if (held_tool.tool_name != HAND && (0 == player.rotation || 270 == player.rotation)) {
 		render_held_tool(&held_tool);
@@ -231,55 +381,8 @@ void Game_Update(void)
 	}
 
 
-	//ahmad
-	spawnTimer += dt;
 
-	// Spawn every 2 seconds
-	if (spawnTimer >= 20.0f) {
-		spawn_box();
-		spawnTimer = 0.0f;
-	}
 
-	for (int i = 0; i < boxCount; i++) {
-
-		if (boxes[i].removing)
-		{
-			boxes[i].y -= boxes[i].removeSpeed * dt;
-
-			// If off-screen, delete it
-			if (boxes[i].y + boxes[i].height < 0)
-			{
-				// shift boxes down
-				for (int j = 1; j < boxCount; j++)
-					boxes[j - 1] = boxes[j];
-
-				boxCount--;
-				i--; // loop checks next box correctly
-				continue;
-			}
-		}
-
-		if (boxes[i].x > boxes[i].targetX) {
-			boxes[i].x -= boxes[i].speed;
-			if (boxes[i].x < boxes[i].targetX)
-				boxes[i].x = boxes[i].targetX;
-		}
-
-		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-		float timeLeft = boxes[i].lateTimer;
-		if (timeLeft < 0) timeLeft = 0;
-
-		CP_Settings_TextSize(50);
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-		char timerStr[8];
-		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	}
-	//ahmad
 
 
 	CP_Settings_Fill(CP_Color_Create(164, 147, 147, 255));
@@ -360,12 +463,69 @@ void Game_Update(void)
 		}
 	}
 
+	//----------------------------------------------------------------------------------------
+	//ahmad
+	spawnTimer += dt;
+
+	// Spawn every 2 seconds
+	if (spawnTimer >= 20.0f) {
+		spawn_box();
+		spawnTimer = 0.0f;
+	}
+
+	for (int i = 0; i < boxCount; i++) {
+
+		if (boxes[i].removing)
+		{
+			boxes[i].y -= boxes[i].removeSpeed * dt;
+
+			// If off-screen, delete it
+			if (boxes[i].y + boxes[i].height < 0)
+			{
+				// shift boxes down
+				for (int j = 1; j < boxCount; j++)
+					boxes[j - 1] = boxes[j];
+
+				boxCount--;
+				i--; // loop checks next box correctly
+				continue;
+			}
+		}
+
+		if (boxes[i].x > boxes[i].targetX) {
+			boxes[i].x -= boxes[i].speed;
+			if (boxes[i].x < boxes[i].targetX)
+				boxes[i].x = boxes[i].targetX;
+		}
+
+		CP_Settings_ImageMode(CP_POSITION_CORNER);
+		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
+		float timeLeft = boxes[i].lateTimer;
+		if (timeLeft < 0) timeLeft = 0;
+
+		CP_Settings_TextSize(50);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+
+		char timerStr[8];
+		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+
+		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+	}
 	//--------------------- Timer ---------------------//
 	//render timer on top
 	start_timer();
 
-	// if ESC is pressed, go back main menu page
-	if (CP_Input_KeyDown(KEY_ESCAPE)) { CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
+	if (stage_timer <= 0 && !gameOver)
+	{
+		gameOver = 1;
+		starCount = 0;      // Fail
+
+	}
+
+
+	
+
 }
 
 void Game_Exit(void)
@@ -373,6 +533,7 @@ void Game_Exit(void)
 	CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
 	CP_Font_Free(myFont);
+	CP_Font_Free(Font);
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
 	for (int i = 0; i < L1_TOOL_SIZE; i++) {
@@ -522,4 +683,112 @@ void spawn_box(void) {
 	// Add new box to array
 	boxes[boxCount++] = newBox;
 	CP_Sound_Play(customerNoti);
+}
+
+
+
+void draw_gameover_panel(int stars, int score )
+{
+	float w = CP_System_GetWindowWidth();
+	float h = CP_System_GetWindowHeight();
+
+	// Dim background
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
+	CP_Graphics_DrawRect(w / 2, h / 2, w, h);
+
+	// Panel
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
+	float panelW = 800, panelH = 500;
+	CP_Image_Draw(button_white,w / 2, h / 2, panelW, panelH,255);
+
+	// Title
+	CP_Font_Set(myFont);
+	CP_Settings_TextSize(70);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
+	CP_Font_DrawText("Score", w / 2, h / 2 - 30);
+	//converts stage_timer into a string/char*
+	
+	char buffer[50];
+	sprintf_s(buffer, 50, "%d", score); 
+	CP_Settings_TextSize(100);
+	CP_Font_DrawText(buffer, w / 2, h / 2 + 70);
+	// Draw stars
+
+	float starW = 150, starH = 150;
+	float spacingX = 100;
+	float spacingY = 30; // middle star higher
+	float centerX = w / 2;
+	float baseY = 200.0f;
+
+	for (int i = 1; i <= 3; i++) // start from 1, go to 3
+	{
+		float x = centerX + (i - 2) * spacingX; // -1,0,1 for left, center, right
+		float y = baseY;
+		if (i == 2) y -= spacingY; // middle star higher
+		// Set size: middle star bigger, side stars smaller
+		float starW = (i == 2) ? 150.0f : 100.0f;
+		float starH = (i == 2) ? 150.0f : 100.0f;
+		// Set rotation for inverted U effect
+		float rotation = 0.0f;
+		if (i == 1) rotation = -15.0f; // tilt left star slightly counter-clockwise
+		if (i == 3) rotation = 15.0f;  // tilt right star slightly clockwise
+
+		CP_Image img = (i <= stars) ? star_achieved : star_default;
+		CP_Image_DrawAdvanced(img, x, y, starW, starH, 255, rotation);
+	}
+
+	float btnWidth = 150.0f;
+	float btnHeight = 150.0f;
+	float btnX[3] = { w / 2 - 250,w / 2, w / 2 + 250 }; // spaced around center
+	float btnY = h / 2 + 225; // 
+
+
+	// Draw buttons
+	for (int i = 0; i < 3; i++) {
+		
+
+		if (IsCircleHovered(btnX[i], btnY, btnWidth))
+			CP_Image_Draw(button_circle_green, btnX[i], btnY, btnWidth, btnHeight, 255);
+		else
+			CP_Image_Draw(button_circle_white, btnX[i], btnY, btnWidth, btnHeight, 255);
+
+		if (i == 0) {
+			CP_Image_Draw(home, btnX[i], btnY, btnWidth - 75.0f, btnHeight - 75.0f, 255);
+		}
+		if (i == 1) {
+			CP_Image_Draw(repeat, btnX[i], btnY, btnWidth - 75.0f, btnHeight - 75.0f, 255);
+		}
+		if (i == 2) {
+			CP_Image_Draw(next, btnX[i], btnY, btnWidth - 75.0f, btnHeight - 75.0f, 255);
+		}
+
+	}
+
+	// Play click sound for any button
+	for (int i = 0; i < 2; i++) {
+		if (IsButtonClicked(btnX[i], btnY, btnWidth - 75.0f, btnHeight - 75.0f)) {
+			CP_Sound_Play(BtnSound);
+			break;
+		}
+	}
+
+	// Button actions
+	if (IsCircleClicked(btnX[0], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+	}
+
+	if (IsCircleClicked(btnX[1], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+		CP_Engine_SetNextGameStateForced(Game_Init, Game_Update, Game_Exit);
+	}
+
+	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) 
+	{ }
+	
+
+
+	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
+		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+	}
 }
