@@ -121,7 +121,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 			break;
 		}
 
-		time_between_frame += CP_System_GetDt();
+		time_between_frame += dt;
 		if (time_between_frame > 0.3f) {
 			time_between_frame = 0.0f;
 			current_frame = (1 + current_frame) % 2;

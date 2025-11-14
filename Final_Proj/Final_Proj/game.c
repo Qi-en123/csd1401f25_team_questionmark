@@ -64,7 +64,8 @@ typedef struct {
 
 	// New fields for plant requests
 	int numPlants;       // how many plants requested (1�3)
-	int plantTypes[3];   // 0 = cactus | 1 = berrybush | 2 = orangebush
+	//int plantTypes[3];   // 0 = cactus | 1 = berrybush | 2 = orangebush
+	int plantType;
 
 } Box;
 
@@ -103,7 +104,7 @@ void Game_Init(void)
 	spawnTimer = 0;
 
 	//Initialize player with default values
-	player_speed = 300.0f;
+	player_speed = 600.0f;
 	player_startpos_x = player_startpos_y = 100.0f;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
@@ -549,20 +550,20 @@ void spawn_box(void) {
 	newBox.x = screenW;        // start off-screen right
 	newBox.y = 10.0f;          // top position
 	newBox.targetX = screenW - (newBox.width + 10);  // rightmost visible spot
-	newBox.speed = 5.0f;
+	newBox.speed = 150.0f;
 
 	newBox.removing = 0;
 	newBox.removeSpeed = 0.0f;
-	newBox.lateTimer = 15.0f;
+	newBox.lateTimer = 25.0f;
 
 	// --- Random plant request setup ---
 	newBox.numPlants = CP_Random_RangeInt(0, 1); // gives 1, 2, or 3
 	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
 	if (newBox.numPlants > 3) newBox.numPlants = 3;
 	for (int i = 0; i < newBox.numPlants; i++) {
-		newBox.plantTypes[i] = CP_Random_RangeInt(0, 3);
-		if (newBox.plantTypes[i] > 2) newBox.plantTypes[i] = 2; // safety clamp
-		if (newBox.plantTypes[i] < 0) newBox.plantTypes[i] = 0;
+		newBox.plantType = CP_Random_RangeInt(0, 3);
+		if (newBox.plantType > 2) newBox.plantType = 2; // safety clamp
+		if (newBox.plantType < 0) newBox.plantType = 0;
 	}
 
 	// Add new box to array
@@ -603,8 +604,16 @@ void customer_request() {
 			if (boxes[i].y + boxes[i].height < 0)
 			{
 				// shift boxes down
-				for (int j = 1; j < boxCount; j++)
-					boxes[j - 1] = boxes[j];
+				//for (int j = 1; j < boxCount; j++)
+				//	boxes[j - 1] = boxes[j];
+				for (int j = 0; j < boxCount; ++j) {
+					boxes[i+j] = boxes[i+j+1];
+				}
+				if (i != 0) {
+					for (int j = 0; j < boxCount - (boxCount - i); ++j) {
+						boxes[j].targetX += boxes[j].width + 10;
+					}
+				}
 
 				boxCount--;
 				i--; // loop checks next box correctly
@@ -612,10 +621,14 @@ void customer_request() {
 			}
 		}
 
-		if (boxes[i].x > boxes[i].targetX) {
-			boxes[i].x -= boxes[i].speed;
-			if (boxes[i].x < boxes[i].targetX)
-				boxes[i].x = boxes[i].targetX;
+		if (boxes[i].x > boxes[i].targetX + 1.0f) {
+			boxes[i].x -= boxes[i].speed * dt;
+		}
+		else if (boxes[i].x < boxes[i].targetX - 1.0f) {
+			boxes[i].x += boxes[i].speed * dt;
+		}
+		else {
+			boxes[i].x = boxes[i].targetX;
 		}
 
 		CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -631,23 +644,21 @@ void customer_request() {
 			float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
 			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
 
-			for (int p = 0; p < num; p++) {
-				CP_Image plantImage = NULL;
+			CP_Image plantImage = NULL;
 
-				switch (boxes[i].plantTypes[p]) {
-				case 0: plantImage = cactus; break;
-				case 1: plantImage = berrybush; break;
-				case 2: plantImage = orangebush; break;
-				default: plantImage = cactus; break; // fallback
-				}
-
-				CP_Image_Draw(
-					plantImage,
-					startX + p * (imgSize + spacing),
-					startY,
-					imgSize, imgSize, 250
-				);
+			switch (boxes[i].plantType) {
+			case 0: plantImage = berrybush; break;
+			case 1: plantImage = cactus; break;
+			case 2: plantImage = orangebush; break;
+			default: plantImage = berrybush; break; // fallback
 			}
+
+			CP_Image_Draw(
+				plantImage,
+				startX,
+				startY,
+				imgSize, imgSize, 250
+			);
 		}
 
 		float timeLeft = boxes[i].lateTimer;
@@ -663,7 +674,7 @@ void customer_request() {
 		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
 	}
 
-	// --------------------- PEST -------------------------------//
+	//--------------------- Pests ---------------------//
 	static float pestSpawnTimer = 0.0f;
 	static float nextSpawnTime = 0.0f;
 
@@ -695,24 +706,26 @@ void customer_request() {
 
 			for (int j = 0; j < L1_POT_SIZE; ++j) {
 				//find pot that is occupying drop-off point
-				if (level1_pots[j].occupied_tile == dropoff[i]) {
+				if (level1_pots[j].occupied_tile == dropoff[i] /*&&
+					level1_pots[j].plant.growth_stage == ADULT*/ &&
+					boxCount > 0) {
 
-					//check if plant given fits request
-					if (level1_pots[j].plant.growth_stage == ADULT) {
-						//WORDS OF ENCOURAGEMENT
-						int idx = rand() % numPraises;
-						snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
-						praiseTimer = 1.0f; // show for 1 second
+					for (int k = 0; k < boxCount; ++k) {
+						if (level1_pots[j].plant.seed_type == boxes[k].plantType) {
+							if (0 == boxes[k].removing) {
 
-						if (boxCount > 0 && boxes[0].removing == 0)
-						{
-							boxes[0].removing = 1;
-							boxes[0].removeSpeed = 300.0f;
+								int idx = rand() % numPraises;
+								snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
+								praiseTimer = 1.0f;
+
+								boxes[k].removing = 1;
+								boxes[k].removeSpeed = 300.0f;
+
+								//remove plant
+								kill_plant(&level1_pots[j]);
+								break; //exit early
+							}
 						}
-
-						//remove plant
-						kill_plant(&level1_pots[j]);
-						break; //exit early
 					}
 				}
 			}

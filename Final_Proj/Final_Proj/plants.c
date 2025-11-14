@@ -97,7 +97,7 @@ void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
 		break;
 	}
 	plant->growth_stage = SEED;
-	plant->seed_type = seed_type; //give it a random seed type first
+	plant->seed_type = seed_type;
 	plant->sunlight_amount = 0;
 }
 
