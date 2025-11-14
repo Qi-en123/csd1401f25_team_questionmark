@@ -427,12 +427,9 @@ void handle_tool_interaction(Tool* tool) {
 							}
 						}
 						held_tool->uses--;
-
-
 					}
 				}
 				break;
-
 
 			case SOIL:
 				level1_pots[i].filled = true;
@@ -441,13 +438,16 @@ void handle_tool_interaction(Tool* tool) {
 				}
 				break;
 			case SEED_1: //this is easier, :p
-				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+					initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
 				break;
 			case SEED_2:
-				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, CACTUS); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+					initialize_plant(&level1_pots[i].plant, CACTUS); }
 				break;
 			case SEED_3:
-				if (level1_pots[i].filled) { initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+					initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
 				break;
 
 			default:
@@ -618,100 +618,67 @@ void customer_request() {
 				boxes[i].x = boxes[i].targetX;
 		}
 
-		spawnTimer += dt;
+		CP_Settings_ImageMode(CP_POSITION_CORNER);
+		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
+		CP_Image plantImage = NULL;
+		float imgSize = 65.0f; // plant icon size
+		float spacing = 10.0f; // space between icons
 
-		// Spawn every 2 seconds
-		if (spawnTimer >= 5.0f) {
-			spawn_box();
-			spawnTimer = 0.0f;
-		}
 
-		for (int i = 0; i < boxCount; i++) {
+		int num = boxes[i].numPlants;
+		if (num > 0) {
+			float totalWidth = num * imgSize + (num - 1) * spacing;
+			float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
+			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
 
-			if (boxes[i].removing)
-			{
-				boxes[i].y -= boxes[i].removeSpeed * dt;
+			for (int p = 0; p < num; p++) {
+				CP_Image plantImage = NULL;
 
-				// If off-screen, delete it
-				if (boxes[i].y + boxes[i].height < 0)
-				{
-					// shift boxes down
-					for (int j = 1; j < boxCount; j++)
-						boxes[j - 1] = boxes[j];
-
-					boxCount--;
-					i--; // loop checks next box correctly
-					continue;
+				switch (boxes[i].plantTypes[p]) {
+				case 0: plantImage = cactus; break;
+				case 1: plantImage = berrybush; break;
+				case 2: plantImage = orangebush; break;
+				default: plantImage = cactus; break; // fallback
 				}
+
+				CP_Image_Draw(
+					plantImage,
+					startX + p * (imgSize + spacing),
+					startY,
+					imgSize, imgSize, 250
+				);
 			}
-
-			if (boxes[i].x > boxes[i].targetX) {
-				boxes[i].x -= boxes[i].speed;
-				if (boxes[i].x < boxes[i].targetX)
-					boxes[i].x = boxes[i].targetX;
-			}
-
-			CP_Settings_ImageMode(CP_POSITION_CORNER);
-			CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
-			CP_Image plantImage = NULL;
-			float imgSize = 65.0f; // plant icon size
-			float spacing = 10.0f; // space between icons
-
-
-			int num = boxes[i].numPlants;
-			if (num > 0) {
-				float totalWidth = num * imgSize + (num - 1) * spacing;
-				float startX = boxes[i].x + (boxes[i].width - totalWidth) / 2.0f;
-				float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
-
-				for (int p = 0; p < num; p++) {
-					CP_Image plantImage = NULL;
-
-					switch (boxes[i].plantTypes[p]) {
-					case 0: plantImage = cactus; break;
-					case 1: plantImage = berrybush; break;
-					case 2: plantImage = orangebush; break;
-					default: plantImage = cactus; break; // fallback
-					}
-
-					CP_Image_Draw(
-						plantImage,
-						startX + p * (imgSize + spacing),
-						startY,
-						imgSize, imgSize, 250
-					);
-				}
-			}
-
-			float timeLeft = boxes[i].lateTimer;
-			if (timeLeft < 0) timeLeft = 0;
-
-			CP_Settings_TextSize(50);
-			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-			CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-			char timerStr[8];
-			snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-			CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-		}
-		//}
-			// --------------------- PEST -------------------------------//
-		static float pestSpawnTimer = 0.0f;
-		static float nextSpawnTime = 0.0f;
-
-		if (pestSpawnTimer >= nextSpawnTime) {
-			spawn_pest(level1_pots, L1_POT_SIZE);
-			pestSpawnTimer = 0.0f;
-			nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
 		}
 
-		// pass player to update_pests
-		update_pests(level1_pots, L1_POT_SIZE, &player);
-		render_pests();
+		float timeLeft = boxes[i].lateTimer;
+		if (timeLeft < 0) timeLeft = 0;
 
-		pestSpawnTimer += dt;
+		CP_Settings_TextSize(50);
+		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+
+		char timerStr[8];
+		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
+
+		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
 	}
+
+	// --------------------- PEST -------------------------------//
+	static float pestSpawnTimer = 0.0f;
+	static float nextSpawnTime = 0.0f;
+
+	if (pestSpawnTimer >= nextSpawnTime) {
+		spawn_pest(level1_pots, L1_POT_SIZE);
+		pestSpawnTimer = 0.0f;
+		nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
+	}
+
+	// pass player to update_pests
+	update_pests(level1_pots, L1_POT_SIZE, &player);
+	render_pests();
+
+	pestSpawnTimer += dt;
+
 
 	//--------------------- Fulfill Request ---------------------//
 	Tile* dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16] };
