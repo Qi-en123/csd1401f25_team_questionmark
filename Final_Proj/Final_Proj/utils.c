@@ -60,6 +60,14 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 	//if distance between circle 1 centre and circle 2 centre is less than the sum of 2 radius means intersecting
 	return distance <= r1 + r2 ? 1 : 0;
 }
+int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float posx, float posy) {
+	float left = rect_x - rect_w / 2.0f;
+	float right = rect_x + rect_w / 2.0f;
+	float top = rect_y - rect_h / 2.0f;
+	float down = rect_y + rect_h / 2.0f;
+
+	return (posx >= left && posx <= right && posy >= top && posy <= down);
+}
 
 //Returns the tinted version of color.
 //Note: tint_val must be float
