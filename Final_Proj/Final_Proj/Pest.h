@@ -19,6 +19,7 @@ typedef struct Pest {
     float speed;
     Pest_State state;
     int targetPotIndex;
+    int rotation;
 
     // ---- Animation variables ----
     int current_frame;         // current frame of sprite

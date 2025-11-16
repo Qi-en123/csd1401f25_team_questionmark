@@ -15,3 +15,4 @@ void spawn_box(void);
 void move_pot(float* posx, float* posy);
 void handle_pot_interaction(Pot* pot);
 void customer_request();
+void simulate_pests();

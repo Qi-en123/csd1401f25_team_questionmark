@@ -46,7 +46,8 @@ void spawn_pest(Pot* pots, int potCount) {
             pests[i].state = PEST_DESCENDING;
             pests[i].position.x = TOP_RIGHT_X + 100;
             pests[i].position.y = TOP_RIGHT_Y;
-            pests[i].speed = 500.0f + (rand() % 50);
+            pests[i].speed = 200.0f + (rand() % 50);
+            pests[i].rotation = 1;
 
             pests[i].descendTarget.x = TOP_RIGHT_X;
             pests[i].descendTarget.y = TOP_RIGHT_Y + DESCEND_DISTANCE;
@@ -143,12 +144,16 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             }
 
             dir = normalize(dir);
+
             p->position.x += dir.x * p->speed * dt;
             p->position.y += dir.y * p->speed * dt;
 
             if (distance(p->position, (Vector2) { TOP_RIGHT_X, TOP_RIGHT_Y }) < 5.0f)
                 p->state = PEST_INACTIVE;
         }
+
+        //flips pest sprite based on x-axis direction
+        p->rotation = (dir.x < 0) ? -1 : 1;
 
         // Animation
         p->time_between_frame += dt;
@@ -164,20 +169,25 @@ void render_pests(void) {
     CP_Settings_ImageMode(CP_POSITION_CORNER);
     for (int i = 0; i < MAX_PESTS; i++) {
         Pest* p = &pests[i];
-        if (p->state != PEST_INACTIVE) {
-            float srcX = p->current_frame * PEST_WIDTH;
-            CP_Image_DrawSubImage(
-                pest_spritesheet,
-                p->position.x,
-                p->position.y,
-                PEST_WIDTH * SCALE,
-                PEST_HEIGHT * SCALE,
-                srcX,
-                0.0f,
-                PEST_WIDTH +srcX,
-                PEST_HEIGHT,
-                255
-            );
-        }
+		if (p->state != PEST_INACTIVE) {
+			float srcX = p->current_frame * PEST_WIDTH;
+
+            //makes it so when sprite width is inverted, sprite appears on same location
+            float imgX;
+            imgX = (p->rotation<0) ? p->position.x + PEST_WIDTH * SCALE : p->position.x;
+
+			CP_Image_DrawSubImage(
+				pest_spritesheet,
+				imgX,
+				p->position.y,
+				PEST_WIDTH * SCALE * p->rotation,
+				PEST_HEIGHT * SCALE,
+				srcX,
+				0.0f,
+				PEST_WIDTH + srcX,
+				PEST_HEIGHT,
+				255
+			);
+		}
     }
 }

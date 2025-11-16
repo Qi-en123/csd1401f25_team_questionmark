@@ -24,9 +24,12 @@ typedef enum GROWTH_STAGE {
 typedef struct Plant {
 	SEED_TYPE seed_type;
 	float water_amount;
+	int water_needed; //0-4 (0 is the first bar)
 	float sunlight_amount, sunlight_needed;
 	CP_Image plant_spritesheet; //plant growth stages
 	GROWTH_STAGE growth_stage;
+	bool wateredOnce;
+	float fillProgress;
 }Plant;
 
 typedef struct Pot {
@@ -34,9 +37,6 @@ typedef struct Pot {
 	bool selected;
 	bool filled;
 	Plant plant;
-	float fillProgress;
-	bool watered;
-	bool wateredOnce;
 	Tile* occupied_tile; //pointer to tile that its occupying, used to de-occupy when picked up
 }Pot;
 

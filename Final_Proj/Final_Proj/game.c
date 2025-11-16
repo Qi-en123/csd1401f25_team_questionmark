@@ -25,19 +25,23 @@ float player_startpos_x, player_startpos_y;
 CP_Image player_spritesheet;
 
 //--------------------- Tools ---------------------//
-#define L1_TOOL_SIZE 5
+#define L1_TOOL_SIZE 4
 Tool level1_tools[L1_TOOL_SIZE];
-Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2, SEED_3 };
+/*!!!!Due to time constraint thrs a bug, DO NOT skip seed numbers : !!!!
+  !!!!		e.g. do SEED_1,2,3, DO NOT DO SEED_2,3 or SEED_1,3		!!!!
+  !!!!Tools must always have WATERING_CAN, SOIL & SEED_1 (Minimum)  !!!!*/
+Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2};
 Tool* held_tool; // a pointer to the tool held
 
 //--------------------- Pots ---------------------//
-#define L1_POT_SIZE 40
+#define L1_POT_SIZE 5
 Pot level1_pots[L1_POT_SIZE];
 Pot* held_pot; // a pointer to the pot held
 CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
+#define STAGE_TIMER 480.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
@@ -45,13 +49,25 @@ float timer_width, timer_height;
 float timer_font_size;
 CP_Color timer_font_color;
 
-
+//--------------------- Requests ---------------------//
 CP_Image requestbg = NULL;
 CP_Image berrybush = NULL;
 CP_Image orangebush = NULL;
 CP_Image cactus = NULL;
 CP_Image pest_spritesheet = NULL;
 CP_Sound customerNoti;
+static float startDelay;
+#define REQUEST_TIMER 13.0f
+#define REQUEST_INTERVAL 2.0f
+
+//--------------------- Score ---------------------//
+//int three_star_val = 1200;
+//int two_star_val = 800;
+//int three_star_val = 500;
+//
+
+//--------------------- Pests ---------------------//
+#define PEST_SPAWN_INTERVAL 40.0f
 
 typedef struct {
 	float x, y;
@@ -92,7 +108,7 @@ void Game_Init(void)
 	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 	draw_tile_map(map_tiles);
 
-	//ahmad
+	//Request
 	srand((unsigned int)time(NULL));
 	requestbg = CP_Image_Load("Assets/button_square_gradient-1.png");
 	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
@@ -102,9 +118,10 @@ void Game_Init(void)
 	CP_System_SetFrameRate(60);
 	boxCount = 0;
 	spawnTimer = 0;
+	startDelay = 10.0f;
 
 	//Initialize player with default values
-	player_speed = 600.0f;
+	player_speed = 400.0f;
 	player_startpos_x = player_startpos_y = 100.0f;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
@@ -117,7 +134,7 @@ void Game_Init(void)
 	//Timer
 #pragma region Timer Initialization
 
-	stage_timer = 35.0f;
+	stage_timer = STAGE_TIMER;
 	timer_bg_blue = CP_Image_Load("Assets/timer_bg_blue.png");
 	timer_bg_red = CP_Image_Load("Assets/timer_bg_red.png");
 	timer_width = CP_System_GetWindowWidth() / 8.0f;
@@ -130,13 +147,12 @@ void Game_Init(void)
 #pragma endregion
 
 	//Pots
-	// pest
-	initialize_pests();
 	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
 
 	//pest
+	initialize_pests();
 	pest_spritesheet = CP_Image_Load("Assets/rat_spritesheet.png");
 
 	//Colors
@@ -212,9 +228,7 @@ void Game_Update(void)
 
 	/*-----------------------------------------------------------------------*/
 	customer_request();
-
-
-
+	simulate_pests();
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
@@ -363,7 +377,7 @@ void handle_tool_interaction(Tool* tool) {
 				// If pot isn't empty and plant isn't fully grown
 				if (level1_pots[i].plant.seed_type != EMPTY &&
 					level1_pots[i].plant.growth_stage != ADULT &&
-					!level1_pots[i].wateredOnce) {
+					!level1_pots[i].plant.wateredOnce) {
 
 					// Only proceed if tool has uses
 					if (held_tool->uses > 0) {
@@ -375,27 +389,27 @@ void handle_tool_interaction(Tool* tool) {
 						// HANDLE WATERING LOGIC
 						if (CP_Input_KeyDown(KEY_E)) {
 							// Increase fill while holding E
-							level1_pots[i].fillProgress += fillSpeed * dt;
-							if (level1_pots[i].fillProgress > 1.0f)
-								level1_pots[i].fillProgress = 1.0f;
+							level1_pots[i].plant.fillProgress += fillSpeed * dt;
+							if (level1_pots[i].plant.fillProgress > 1.0f)
+								level1_pots[i].plant.fillProgress = 1.0f;
 
 							// Gradually decrease uses while holding E
-							float useDrainRate = 1.0f; // adjust to change how fast uses drain
-							held_tool->uses -= dt * useDrainRate;
-							if (held_tool->uses < 0)
-								held_tool->uses = 0;
+							//float useDrainRate = 1.0f; // adjust to change how fast uses drain
+							//held_tool->uses -= dt * useDrainRate;
+							//if (held_tool->uses < 0)
+							//	held_tool->uses = 0;
 						}
 
 						// DRAW PROGRESS BAR (always draw, even if E is not held)
 						float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-						float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
-						float thresholdWidth = (potBarSegments - 2) * rectWidth;
+						float filledWidth = totalBarWidth * level1_pots[i].plant.fillProgress;
+						float thresholdWidth = level1_pots[i].plant.water_needed * rectWidth;
 
 						for (int seg = 0; seg < potBarSegments; seg++) {
 							float x = rectX + seg * (rectWidth + spacing) - 82;
 
 							// Background color
-							if (seg == potBarSegments - 2)
+							if (seg == level1_pots[i].plant.water_needed)
 								CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
 							else
 								CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
@@ -428,22 +442,25 @@ void handle_tool_interaction(Tool* tool) {
 
 						// LOCK POT WHEN E IS RELEASED OR USES RUN OUT
 						if (CP_Input_KeyReleased(KEY_E) || held_tool->uses <= 0) {
-							level1_pots[i].wateredOnce = true;
-							level1_pots[i].watered = true; // lock pot
+							level1_pots[i].plant.wateredOnce = true;
 
 							// Grow plant only if fill is within the target segment
-							int targetSegment = potBarSegments - 2; // 2nd last segment
+							int targetSegment = level1_pots[i].plant.water_needed; // 2nd last segment
 							float segmentStart = targetSegment * (rectWidth + spacing);
 							float segmentEnd = segmentStart + rectWidth;
 
+							held_tool->uses--;
+
 							if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
 								level1_pots[i].plant.water_amount = 1.0f;
+							}
+							else {
+								kill_plant(&level1_pots[i]);
 							}
 						}
 					}
 				}
 				break;
-
 
 			case SOIL:
 				if (level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
@@ -473,12 +490,12 @@ void handle_tool_interaction(Tool* tool) {
 	}
 
 	//--------------------- Refill Water ---------------------//
-	if (held_tool->tool_name == WATERING_CAN &&
+	if (CP_Input_KeyTriggered(KEY_E) && held_tool->tool_name == WATERING_CAN &&
 		IsWithinRect(map_tiles[2][2].x, map_tiles[2][2].y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
-		held_tool->uses = 100;
+		held_tool->uses = 3;
 		held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 	}
 }
@@ -569,14 +586,14 @@ void spawn_box(void) {
 
 	newBox.removing = 0;
 	newBox.removeSpeed = 0.0f;
-	newBox.lateTimer = 25.0f;
+	newBox.lateTimer = REQUEST_TIMER;
 
 	// --- Random plant request setup ---
 	newBox.numPlants = CP_Random_RangeInt(0, 1); // gives 1, 2, or 3
 	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
 	if (newBox.numPlants > 3) newBox.numPlants = 3;
 	for (int i = 0; i < newBox.numPlants; i++) {
-		newBox.plantType = CP_Random_RangeInt(0, 2);
+		newBox.plantType = CP_Random_RangeInt(0, L1_TOOL_SIZE-3);
 		if (newBox.plantType > 2) newBox.plantType = 2; // safety clamp
 		if (newBox.plantType < 0) newBox.plantType = 0;
 	}
@@ -590,10 +607,19 @@ void customer_request() {
 	//--------------------- Create Requests ---------------------//
 	spawnTimer += dt;
 
-	// Spawn every 20 seconds
-	if (spawnTimer >= 8.0f) {
-		spawn_box();
-		spawnTimer = 0.0f;
+	// Spawn every few seconds
+	if (startDelay > 0.0f) {
+		startDelay -= dt;
+		if (startDelay <= 0.0f) {
+			spawn_box();
+			spawnTimer = 0.0f;
+		}
+	}
+	else {
+		if (spawnTimer >= REQUEST_INTERVAL) {
+			spawn_box();
+			spawnTimer = 0.0f;
+		}
 	}
 
 	for (int i = 0; i < boxCount; i++) {
@@ -689,23 +715,6 @@ void customer_request() {
 		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
 	}
 
-	//--------------------- Pests ---------------------//
-	static float pestSpawnTimer = 0.0f;
-	static float nextSpawnTime = 0.0f;
-
-	if (pestSpawnTimer >= nextSpawnTime) {
-		spawn_pest(level1_pots, L1_POT_SIZE);
-		pestSpawnTimer = 0.0f;
-		nextSpawnTime = 3.0f + ((float)rand() / RAND_MAX) * 5.0f;
-	}
-
-	// pass player to update_pests
-	update_pests(level1_pots, L1_POT_SIZE, &player);
-	render_pests();
-
-	pestSpawnTimer += dt;
-
-
 	//--------------------- Fulfill Request ---------------------//
 	Tile* dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16] };
 
@@ -721,8 +730,8 @@ void customer_request() {
 
 			for (int j = 0; j < L1_POT_SIZE; ++j) {
 				//find pot that is occupying drop-off point
-				if (level1_pots[j].occupied_tile == dropoff[i] /*&&
-					level1_pots[j].plant.growth_stage == ADULT*/ &&
+				if (level1_pots[j].occupied_tile == dropoff[i] &&
+					level1_pots[j].plant.growth_stage == ADULT &&
 					boxCount > 0) {
 
 					for (int k = 0; k < boxCount; ++k) {
@@ -759,4 +768,37 @@ void customer_request() {
 
 		praiseTimer -= CP_System_GetDt();
 	}
+}
+
+void simulate_pests() {
+	//--------------------- Pests ---------------------//
+	static float pestSpawnTimer = 0.0f;
+	static float nextSpawnTime = 0.0f;
+
+	if (pestSpawnTimer >= nextSpawnTime) {
+		spawn_pest(level1_pots, L1_POT_SIZE);
+		pestSpawnTimer = 0.0f;
+		nextSpawnTime = PEST_SPAWN_INTERVAL + ((float)rand() / RAND_MAX) * 5.0f;
+	}
+
+	// pass player to update_pests
+	update_pests(level1_pots, L1_POT_SIZE, &player);
+	render_pests();
+
+	pestSpawnTimer += dt;
+}
+
+int add_score(Box* box) {
+	int score = 100;
+
+	//60secs -- 30secs Fulfil - 2x score
+	//		 -- 0secs Fulfil - 1x score
+	//
+	//stars 0: 
+
+	//when fulfil request - get score based on time left
+	//x2 score if u fufill within half the time limit??
+	//score += (int)box->lateTimer ;
+
+	return score;
 }

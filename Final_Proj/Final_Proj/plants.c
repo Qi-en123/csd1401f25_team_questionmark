@@ -13,9 +13,8 @@ void initialize_pots(Pot *pots, int size, Tile* tile) {
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
-		pots[i].fillProgress = 0.0f;
-		pots[i].watered = false;
-		pots[i].wateredOnce = false;
+		pots[i].plant.fillProgress = 0.0f;
+		pots[i].plant.wateredOnce = false;
 		tile[tile_index].obstructed = true;
 		pots[i].occupied_tile = &tile[tile_index];
 	}
@@ -79,26 +78,28 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
 //Initialize the plant for the pot
 void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
 	switch (seed_type) {
+	default:
 	case BERRY_BUSH:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
 		plant->sunlight_needed = 1.0f; //default
+		plant->water_needed = 4;
 		break;
 	case ORANGE_BUSH:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/orangebush_spritesheet.png");
 		plant->sunlight_needed = 1.5f;
+		plant->water_needed = 2;
 		break;
 	case CACTUS:
 		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/cactus_spritesheet.png");
 		plant->sunlight_needed = 3.0f;
-		break;
-	default:
-		plant->plant_spritesheet = CP_Image_Load("Assets/plant_sprites/berrybush_spritesheet.png");
-		plant->sunlight_needed = 1.0f; //default
+		plant->water_needed = 1;
 		break;
 	}
 	plant->growth_stage = SEED;
 	plant->seed_type = seed_type;
 	plant->sunlight_amount = 0;
+	plant->wateredOnce = false;
+	plant->fillProgress = 0.0f;
 }
 
 //Draws the plant on top of the pot
@@ -117,7 +118,7 @@ void render_plant(Plant* plant, float posx, float posy, bool selected) {
 
 	//Increase sunlight bar
 	if (plant->growth_stage != ADULT) {
-		plant->sunlight_amount += dt / plant->sunlight_needed / 2.0f;
+		plant->sunlight_amount += dt / plant->sunlight_needed / 3.0f;
 		plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
 
 		if (selected) {
@@ -141,6 +142,8 @@ void grow_plant(Plant* plant) {
 		plant->sunlight_amount = 0; //reset sunlight bar
 		plant->sunlight_needed *= 1.2f; //increase sunlight needed per growth stage
 		plant->water_amount = 0;
+		plant->fillProgress = 0;
+		plant->wateredOnce = false;
 	}
 }
 
