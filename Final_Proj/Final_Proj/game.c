@@ -50,7 +50,7 @@ CP_Image requestbg = NULL;
 CP_Image berrybush = NULL;
 CP_Image orangebush = NULL;
 CP_Image cactus = NULL;
-
+CP_Image pest_spritesheet = NULL;
 CP_Sound customerNoti;
 
 typedef struct {
@@ -134,6 +134,9 @@ void Game_Init(void)
 	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
+
+	//pest
+	pest_spritesheet = CP_Image_Load("Assets/rat_spritesheet.png");
 
 	//Colors
 	blue = CP_Color_Create(0, 0, 255, 255);
@@ -224,6 +227,7 @@ void Game_Exit(void)
 {
 	CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
+	CP_Image_Free(pest_spritesheet);
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
