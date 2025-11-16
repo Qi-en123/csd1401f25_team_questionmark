@@ -1,24 +1,46 @@
 #include "Pest.h"
 #include <stdlib.h>
 #include <math.h>
+#include "cprocessing.h"
 
 Pest pests[MAX_PESTS];
+CP_Image pest_spritesheet; // set in Game_Init or elsewhere
 
-#define PLAYER_DETECT_RADIUS 100.0f // shorter detection
-#define TOP_RIGHT_X 1080.0f
+#define PLAYER_DETECT_RADIUS 100.0f
+#define TOP_RIGHT_X 1200.0f
 #define TOP_RIGHT_Y 20.0f
-#define DESCEND_DISTANCE 100.0f    // how far down pests move initially
+#define DESCEND_DISTANCE 270.0f
 #define POT_AVOID_RADIUS 50.0f
+
+// Sprite animation
+#define PEST_WIDTH 19       // width of 1 frame
+#define PEST_HEIGHT 19      // height of 1 frame
+#define PEST_FRAMES 3       // total frames
+#define FRAME_DURATION 0.3f // seconds per frame
+#define SCALE 3             // scale factor on screen
 
 // Initialize all pests as inactive
 void initialize_pests(void) {
     for (int i = 0; i < MAX_PESTS; i++) {
         pests[i].state = PEST_INACTIVE;
+        pests[i].current_frame = 0;
+        pests[i].time_between_frame = 0.0f;
     }
 }
 
 // Spawn pest at top-right, set descend target
 void spawn_pest(Pot* pots, int potCount) {
+    // Build a list of valid pots with plants
+    int validIndices[MAX_PESTS];
+    int validCount = 0;
+    for (int i = 0; i < potCount; i++) {
+        if (pots[i].filled && pots[i].plant.seed_type != EMPTY) {
+            validIndices[validCount++] = i;
+        }
+    }
+
+    if (validCount == 0) return; // No pots with plants, don't spawn
+
     for (int i = 0; i < MAX_PESTS; i++) {
         if (pests[i].state == PEST_INACTIVE) {
             pests[i].state = PEST_DESCENDING;
@@ -29,12 +51,18 @@ void spawn_pest(Pot* pots, int potCount) {
             pests[i].descendTarget.x = TOP_RIGHT_X;
             pests[i].descendTarget.y = TOP_RIGHT_Y + DESCEND_DISTANCE;
 
-            pests[i].targetPotIndex = rand() % potCount;
+            // Pick a random valid pot
+            int randomIndex = rand() % validCount;
+            pests[i].targetPotIndex = validIndices[randomIndex];
             pests[i].target = pots[pests[i].targetPotIndex].position;
+
+            pests[i].current_frame = 0;
+            pests[i].time_between_frame = 0.0f;
             break;
         }
     }
 }
+
 
 // Helper: normalize vector
 static Vector2 normalize(Vector2 v) {
@@ -53,6 +81,7 @@ static float distance(Vector2 a, Vector2 b) {
     return sqrtf(dx * dx + dy * dy);
 }
 
+// Update pests
 void update_pests(Pot* pots, int potCount, Player* player) {
     for (int i = 0; i < MAX_PESTS; i++) {
         Pest* p = &pests[i];
@@ -65,28 +94,33 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             p->state = PEST_FLEEING;
         }
 
+        // Movement
         if (p->state == PEST_DESCENDING) {
-            // Move downward first
             dir.x = p->descendTarget.x - p->position.x;
             dir.y = p->descendTarget.y - p->position.y;
             dir = normalize(dir);
 
-            p->position.x += dir.x * p->speed * CP_System_GetDt();
-            p->position.y += dir.y * p->speed * CP_System_GetDt();
+            p->position.x += dir.x * p->speed * dt;
+            p->position.y += dir.y * p->speed * dt;
 
-            if (distance(p->position, p->descendTarget) < 5.0f) {
+            if (distance(p->position, p->descendTarget) < 5.0f)
                 p->state = PEST_CHASING;
-            }
         }
         else if (p->state == PEST_CHASING) {
             dir.x = p->target.x - p->position.x;
             dir.y = p->target.y - p->position.y;
             dir = normalize(dir);
 
-            p->position.x += dir.x * p->speed * CP_System_GetDt();
-            p->position.y += dir.y * p->speed * CP_System_GetDt();
+            p->position.x += dir.x * p->speed * dt;
+            p->position.y += dir.y * p->speed * dt;
 
+            // Check if reached target
             if (distance(p->position, p->target) < 5.0f) {
+                // Only affect pots with plants
+                Pot* targetPot = &pots[p->targetPotIndex];
+                if (targetPot->filled && targetPot->plant.seed_type != EMPTY) {
+                    kill_plant(targetPot); // reset the pot
+                }
                 p->state = PEST_INACTIVE;
             }
         }
@@ -109,22 +143,41 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             }
 
             dir = normalize(dir);
-            p->position.x += dir.x * p->speed * CP_System_GetDt();
-            p->position.y += dir.y * p->speed * CP_System_GetDt();
+            p->position.x += dir.x * p->speed * dt;
+            p->position.y += dir.y * p->speed * dt;
 
-            if (distance(p->position, (Vector2) { TOP_RIGHT_X, TOP_RIGHT_Y }) < 5.0f) {
+            if (distance(p->position, (Vector2) { TOP_RIGHT_X, TOP_RIGHT_Y }) < 5.0f)
                 p->state = PEST_INACTIVE;
-            }
+        }
+
+        // Animation
+        p->time_between_frame += dt;
+        if (p->time_between_frame > FRAME_DURATION) {
+            p->time_between_frame = 0.0f;
+            p->current_frame = (p->current_frame + 1) % PEST_FRAMES;
         }
     }
 }
 
-// Draw pests
+// Render pests
 void render_pests(void) {
-    CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
+    CP_Settings_ImageMode(CP_POSITION_CORNER);
     for (int i = 0; i < MAX_PESTS; i++) {
-        if (pests[i].state != PEST_INACTIVE) {
-            CP_Graphics_DrawCircle(pests[i].position.x, pests[i].position.y, 50.0f);
+        Pest* p = &pests[i];
+        if (p->state != PEST_INACTIVE) {
+            float srcX = p->current_frame * PEST_WIDTH;
+            CP_Image_DrawSubImage(
+                pest_spritesheet,
+                p->position.x,
+                p->position.y,
+                PEST_WIDTH * SCALE,
+                PEST_HEIGHT * SCALE,
+                srcX,
+                0.0f,
+                PEST_WIDTH +srcX,
+                PEST_HEIGHT,
+                255
+            );
         }
     }
 }

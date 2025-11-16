@@ -50,7 +50,7 @@ CP_Image requestbg = NULL;
 CP_Image berrybush = NULL;
 CP_Image orangebush = NULL;
 CP_Image cactus = NULL;
-
+CP_Image pest_spritesheet = NULL;
 CP_Sound customerNoti;
 
 typedef struct {
@@ -135,6 +135,9 @@ void Game_Init(void)
 	initialize_pots(level1_pots, L1_POT_SIZE, &map_tiles[5][5]);
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
 	held_pot = NULL;
+
+	//pest
+	pest_spritesheet = CP_Image_Load("Assets/rat_spritesheet.png");
 
 	//Colors
 	blue = CP_Color_Create(0, 0, 255, 255);
@@ -225,6 +228,7 @@ void Game_Exit(void)
 {
 	CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
+	CP_Image_Free(pest_spritesheet);
 	CP_Font_Free(myFont);
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
@@ -353,27 +357,36 @@ void handle_tool_interaction(Tool* tool) {
 	float fillSpeed = 0.4f;
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
-		if (level1_pots[i].selected && CP_Input_KeyReleased(KEY_E)) {
+		if (level1_pots[i].selected) {
 			switch (held_tool->tool_name) {
 			case WATERING_CAN:
-				//if pot isnt empty and plant isnt fully grown
+				// If pot isn't empty and plant isn't fully grown
 				if (level1_pots[i].plant.seed_type != EMPTY &&
 					level1_pots[i].plant.growth_stage != ADULT &&
 					!level1_pots[i].wateredOnce) {
-					//WATERING PLANT FUNCTION HERE:
+
+					// Only proceed if tool has uses
 					if (held_tool->uses > 0) {
 						float rectX = level1_pots[i].position.x - rectWidth / 2.0f;
 						float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
 
 						CP_Settings_RectMode(CP_POSITION_CORNER);
 
-						// Only increase fill if E is held
+						// HANDLE WATERING LOGIC
 						if (CP_Input_KeyDown(KEY_E)) {
+							// Increase fill while holding E
 							level1_pots[i].fillProgress += fillSpeed * dt;
-							if (level1_pots[i].fillProgress > 1.0f) level1_pots[i].fillProgress = 1.0f;
+							if (level1_pots[i].fillProgress > 1.0f)
+								level1_pots[i].fillProgress = 1.0f;
+
+							// Gradually decrease uses while holding E
+							float useDrainRate = 1.0f; // adjust to change how fast uses drain
+							held_tool->uses -= dt * useDrainRate;
+							if (held_tool->uses < 0)
+								held_tool->uses = 0;
 						}
 
-						// Draw progress bar
+						// DRAW PROGRESS BAR (always draw, even if E is not held)
 						float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
 						float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
 						float thresholdWidth = (potBarSegments - 2) * rectWidth;
@@ -381,7 +394,7 @@ void handle_tool_interaction(Tool* tool) {
 						for (int seg = 0; seg < potBarSegments; seg++) {
 							float x = rectX + seg * (rectWidth + spacing) - 82;
 
-							// Background color for segment
+							// Background color
 							if (seg == potBarSegments - 2)
 								CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
 							else
@@ -393,7 +406,8 @@ void handle_tool_interaction(Tool* tool) {
 							float segmentStart = seg * (rectWidth + spacing);
 							float segmentFill = filledWidth - segmentStart;
 							if (segmentFill > 0.0f) {
-								if (segmentFill > rectWidth) segmentFill = rectWidth;
+								if (segmentFill > rectWidth)
+									segmentFill = rectWidth;
 
 								CP_Color fillColor;
 								if (filledWidth <= thresholdWidth)
@@ -412,45 +426,43 @@ void handle_tool_interaction(Tool* tool) {
 							}
 						}
 
-						// Lock watering when E released
-						if (CP_Input_KeyReleased(KEY_E)) {
+						// LOCK POT WHEN E IS RELEASED OR USES RUN OUT
+						if (CP_Input_KeyReleased(KEY_E) || held_tool->uses <= 0) {
 							level1_pots[i].wateredOnce = true;
 							level1_pots[i].watered = true; // lock pot
 
-							float totalBarWidth = potBarSegments * rectWidth + (potBarSegments - 1) * spacing;
-							float filledWidth = totalBarWidth * level1_pots[i].fillProgress;
-
-							// 2nd last segment boundaries
-							int targetSegment = potBarSegments - 2; // index of 2nd last
+							// Grow plant only if fill is within the target segment
+							int targetSegment = potBarSegments - 2; // 2nd last segment
 							float segmentStart = targetSegment * (rectWidth + spacing);
 							float segmentEnd = segmentStart + rectWidth;
 
-							// Grow only if blue bar is within 2nd last segment
 							if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
 								level1_pots[i].plant.water_amount = 1.0f;
 							}
 						}
-						held_tool->uses--;
 					}
 				}
 				break;
 
+
 			case SOIL:
-				level1_pots[i].filled = true;
-				if (level1_pots[i].plant.seed_type != EMPTY) {
+				if (level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
+					level1_pots[i].filled = true;
+				}
+				if (level1_pots[i].plant.seed_type != EMPTY && CP_Input_KeyReleased(KEY_E)) {
 					kill_plant(&level1_pots[i]);
 				}
 				break;
-			case SEED_1: //this is easier, :p
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+			case SEED_1:
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
 					initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
 				break;
 			case SEED_2:
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
 					initialize_plant(&level1_pots[i].plant, CACTUS); }
 				break;
 			case SEED_3:
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
 					initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
 				break;
 
@@ -466,7 +478,7 @@ void handle_tool_interaction(Tool* tool) {
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
-		held_tool->uses = 3;
+		held_tool->uses = 100;
 		held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 	}
 }
