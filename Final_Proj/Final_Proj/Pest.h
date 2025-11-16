@@ -25,7 +25,7 @@ typedef struct Pest {
     float time_between_frame;  // time since last frame switch
 } Pest;
 
-#define MAX_PESTS 5
+#define MAX_PESTS 100
 extern Pest pests[MAX_PESTS];
 extern CP_Image pest_spritesheet; // global reference to the sprite sheet
 
