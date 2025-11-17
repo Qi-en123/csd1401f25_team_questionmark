@@ -21,7 +21,7 @@ int map[TILE_ROWS][TILE_COLS] = {
 int modified_map[TILE_ROWS][TILE_COLS] = {
 
 {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
-	{9, 9, 9, 8, 4, 7, 7, 5, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+{10, 10, 10, 8, 4, 7, 7, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
 	{1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2},
 	{2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
 	{1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2},
@@ -68,6 +68,7 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 	case 8:
 		left = 128; top = 120; right = 144, bottom = 145; break;
 
+	
 	default:
 		// horizontal fence
 		left = 145; top = 50; right = 158; bottom = 63; break;
