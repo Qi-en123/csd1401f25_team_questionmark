@@ -387,54 +387,8 @@ void Game_Update(void)
 	simulate_pests();
 
 	//----------------------------------------------------------------------------------------
-	//ahmad
-	spawnTimer += dt;
-
-	// Spawn every 2 seconds
-	if (spawnTimer >= 20.0f) {
-		spawn_box();
-		spawnTimer = 0.0f;
-	}
-
-	for (int i = 0; i < boxCount; i++) {
-
-		if (boxes[i].removing)
-		{
-			boxes[i].y -= boxes[i].removeSpeed * dt;
-
-			// If off-screen, delete it
-			if (boxes[i].y + boxes[i].height < 0)
-			{
-				// shift boxes down
-				for (int j = 1; j < boxCount; j++)
-					boxes[j - 1] = boxes[j];
-
-				boxCount--;
-				i--; // loop checks next box correctly
-				continue;
-			}
-		}
-
-		if (boxes[i].x > boxes[i].targetX) {
-			boxes[i].x -= boxes[i].speed;
-			if (boxes[i].x < boxes[i].targetX)
-				boxes[i].x = boxes[i].targetX;
-		}
-
-		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 255);
-		float timeLeft = boxes[i].lateTimer;
-		if (timeLeft < 0) timeLeft = 0;
-
-		CP_Settings_TextSize(50);
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-
-		char timerStr[8];
-		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
-
-		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
-	}
+	//
+	
 	//--------------------- Timer ---------------------//
 	//render timer on top
 	start_timer();
