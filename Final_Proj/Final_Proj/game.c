@@ -274,7 +274,9 @@ void Game_Update(void)
 // If paused, draw pause overlay and skip game logic
 	if (paused) {
 		// Semi-transparent black overlay
+
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
+		CP_Settings_RectMode(CP_POSITION_CENTER);
 		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
 			CP_System_GetWindowHeight() / 2,
 			CP_System_GetWindowWidth(),
@@ -980,6 +982,7 @@ void draw_gameover_panel(int stars, int score )
 
 	// Dim background
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
+	CP_Settings_RectMode(CP_POSITION_CENTER);
 	CP_Graphics_DrawRect(w / 2, h / 2, w, h);
 
 	// Panel
