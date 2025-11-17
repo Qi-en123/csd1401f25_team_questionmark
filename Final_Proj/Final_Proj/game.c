@@ -988,22 +988,20 @@ void draw_gameover_panel( int score )
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	float panelW = 800, panelH = 500;
 	CP_Image_Draw(button_white,w / 2, h / 2, panelW, panelH,255);
+	CP_Font_Set(myFont);
+	CP_Settings_TextSize(70);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 
 	if (stars == 0) {
 		// Title
-		CP_Font_Set(myFont);
-		CP_Settings_TextSize(70);
-		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		
 		CP_Font_DrawText("Level Failed", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
 	else {
 		// Title
-		CP_Font_Set(myFont);
-		CP_Settings_TextSize(70);
-		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
 		CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
