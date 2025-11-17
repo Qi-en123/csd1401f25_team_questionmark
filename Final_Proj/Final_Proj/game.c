@@ -105,8 +105,8 @@ int placeable[] = { 1,2 }; //set tiles which are placeable
 
 
 
-int paused = 0; // 0 = running, 1 = paused
-int showControls = 0; // 0 = hidden, 1 = showing
+int paused = 1; // 0 = running, 1 = paused
+int showControls = 1; // 0 = hidden, 1 = showing
 int gameOver = 0;   // 0 = running, 1 = ended
 int starCount = 0;  // 0�3 stars
 int score = 0;
@@ -119,6 +119,8 @@ CP_Color red, green, blue, gray;
 
 void Game_Init(void)
 {
+	paused = 1;
+	showControls = 1;
 	gameOver = 0;
 	score = 0;
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
