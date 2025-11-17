@@ -49,7 +49,7 @@ CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
-#define STAGE_TIMER 480.0f
+#define STAGE_TIMER 30.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
@@ -65,14 +65,8 @@ CP_Image cactus = NULL;
 CP_Image pest_spritesheet = NULL;
 CP_Sound customerNoti;
 static float startDelay;
-#define REQUEST_TIMER 13.0f
+#define REQUEST_TIMER 60.0f
 #define REQUEST_INTERVAL 2.0f
-
-//--------------------- Score ---------------------//
-//int three_star_val = 1200;
-//int two_star_val = 800;
-//int three_star_val = 500;
-//
 
 //--------------------- Pests ---------------------//
 #define PEST_SPAWN_INTERVAL 40.0f
@@ -441,6 +435,10 @@ void start_timer() {
 	//converts stage_timer into a string/char*
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
+	if (stage_timer <= 0.0f) {
+		draw_gameover_panel(3, score);
+	}
+
 	//blinking effect
 	if (stage_timer < 30.0f) {
 		if ((int)stage_timer % 2) {
@@ -655,7 +653,7 @@ void handle_tool_interaction(Tool* tool) {
 
 	//--------------------- Refill Water ---------------------//
 	if (CP_Input_KeyTriggered(KEY_E) && held_tool->tool_name == WATERING_CAN &&
-		IsWithinRect(map_tiles[2][2].x, map_tiles[2][2].y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
+		IsWithinRect(map_tiles[2][3].x, map_tiles[2][3].y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
@@ -809,7 +807,7 @@ void customer_request() {
 			if (boxes[i].y + boxes[i].height < 0)
 			{
 				// shift boxes down
-				for (int j = 0; j < boxCount-1; ++j) {
+				for (int j = 0; j < boxCount-i; ++j) {
 					boxes[i+j] = boxes[i+j+1];
 				}
 				if (i != 0) {
@@ -878,7 +876,7 @@ void customer_request() {
 	}
 
 	//--------------------- Fulfill Request ---------------------//
-	Tile* dropoff[2] = { &map_tiles[2][15], &map_tiles[2][16] };
+	Tile* dropoff[2] = { &map_tiles[2][5], &map_tiles[2][6] };
 
 	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
 	int numPraises = 3;
@@ -899,6 +897,7 @@ void customer_request() {
 					for (int k = 0; k < boxCount; ++k) {
 						if (level1_pots[j].plant.seed_type == boxes[k].plantType) {
 							if (0 == boxes[k].removing) {
+								score += 1000.0f * (1.0f + (boxes[k].lateTimer / 60.0f));
 
 								int idx = rand() % numPraises;
 								snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
@@ -907,7 +906,7 @@ void customer_request() {
 								boxes[k].removing = 1;
 								boxes[k].removeSpeed = 300.0f;
 
-								//remove plant
+								//remove plant								
 								kill_plant(&level1_pots[j]);
 								break; //exit early
 							}
@@ -950,20 +949,6 @@ void simulate_pests() {
 	pestSpawnTimer += dt;
 }
 
-int add_score(Box* box) {
-	int score = 100;
-
-	//60secs -- 30secs Fulfil - 2x score
-	//		 -- 0secs Fulfil - 1x score
-	//
-	//stars 0: 
-
-	//when fulfil request - get score based on time left
-	//x2 score if u fufill within half the time limit??
-	//score += (int)box->lateTimer ;
-
-	return score;
-}
 
 void draw_gameover_panel(int stars, int score )
 {
@@ -1064,8 +1049,6 @@ void draw_gameover_panel(int stars, int score )
 
 	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) 
 	{ }
-	
-
 
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
