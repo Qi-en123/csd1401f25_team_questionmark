@@ -180,6 +180,10 @@ void Level_Exit(void)
     //free image and font_level and sound
     CP_Image_Free(spriteSheet_level);
     CP_Image_Free(mainmenu_bg_level);
+    CP_Image_Free(button_white_square);
+    CP_Image_Free(button_green_square);
+    CP_Image_Free(button_exitW_level);
+    CP_Image_Free(button_exitG_level);
     CP_Font_Free(font_level);
 
 

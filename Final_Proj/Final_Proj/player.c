@@ -56,12 +56,11 @@ void move_player(float* pos, float speed) {
 float time_between_frame = 0.0f; //to check time between each frame
 int current_frame = 0; //to check current frame
 
+#define PLAYER_WIDTH 18
+#define PLAYER_HEIGHT 18
+#define FRAMES 12
 //To draw the player
 void render_player(Player* player, CP_Image spritesheet) {
-#define SPRITE_WIDTH 18
-#define SPRITE_HEIGHT 18
-#define FRAMES 12
-
 	//--------------------- MOVEMENT ---------------------//
 	float pos_x = player->position.x;
 	float pos_y = player->position.y;
@@ -73,7 +72,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 		switch (player->rotation)
 		{
 		case 0: //down
-			img_x = SPRITE_WIDTH;
+			img_x = PLAYER_WIDTH;
 			break;
 
 		case 90: //left
@@ -81,15 +80,15 @@ void render_player(Player* player, CP_Image spritesheet) {
 			break;
 
 		case 180: //up
-			img_x = SPRITE_WIDTH * 2;
+			img_x = PLAYER_WIDTH * 2;
 			break;
 
 		case 270: //right
-			img_x = SPRITE_WIDTH * 3;
+			img_x = PLAYER_WIDTH * 3;
 			break;
 
 		default:
-			img_x = SPRITE_WIDTH;
+			img_x = PLAYER_WIDTH;
 			break;
 		}
 	}
@@ -99,26 +98,26 @@ void render_player(Player* player, CP_Image spritesheet) {
 		switch (player->rotation)
 		{
 		case 0: //down
-			img_x = SPRITE_WIDTH * 5; //90,162 => frames (2) => currframe 0&1 => currframe *4*18 + offset;
+			img_x = PLAYER_WIDTH * 5; //90,162 => frames (2) => currframe 0&1 => currframe *4*18 + offset;
 			break;
 
 		case 90: //left
-			img_x = SPRITE_WIDTH * 4;
+			img_x = PLAYER_WIDTH * 4;
 			break;
 
 		case 180: //up
-			img_x = SPRITE_WIDTH * 6;
+			img_x = PLAYER_WIDTH * 6;
 			break;
 
 		case 270: //right
-			img_x = SPRITE_WIDTH * 7;
+			img_x = PLAYER_WIDTH * 7;
 			break;
 
 		default:
 			break;
 		}
 
-		time_between_frame += CP_System_GetDt();
+		time_between_frame += dt;
 		if (time_between_frame > 0.3f) {
 			time_between_frame = 0.0f;
 			current_frame = (1 + current_frame) % 2;
@@ -127,7 +126,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	//render player
-	CP_Image_DrawSubImage(spritesheet, pos_x, pos_y, SPRITE_WIDTH*4.0f, SPRITE_HEIGHT*4.0f, //sprite settings
-		img_x + (current_frame * SPRITE_WIDTH * 4), 0.0f,  //start of sub img
-		img_x + (current_frame * SPRITE_WIDTH * 4) + SPRITE_WIDTH, SPRITE_HEIGHT, 255); //end of sub img
+	CP_Image_DrawSubImage(spritesheet, pos_x, pos_y, PLAYER_WIDTH * 5.0f, PLAYER_HEIGHT * 5.0f, //sprite settings
+		img_x + (current_frame * PLAYER_WIDTH * 4), 0.0f,  //start of sub img
+		img_x + (current_frame * PLAYER_WIDTH * 4) + PLAYER_WIDTH, PLAYER_HEIGHT, 255); //end of sub img
 }

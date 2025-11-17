@@ -104,8 +104,6 @@ void draw_tile_map(Tile* map_tile)
 			tile->tile_index = map[row][col];
 
 			// Use integer positions to avoid gaps
-			//float x = col * tile_w;
-			//float y = row * tile_h;
 			tile->x = col * tile_w;
 			tile->y = row * tile_h;
 
@@ -140,6 +138,21 @@ void draw_modified_map(void)
 			else if (tile != 0) // skip cleared tiles
 			{
 				draw_tile(tile, x, y, tile_w, tile_h);
+			}
+		}
+	}
+}
+void set_tile_placeable(Tile* map_tile, int* placeable, int size) {
+	for (int row = 0; row < TILE_ROWS; row++)
+	{
+		for (int col = 0; col < TILE_COLS; col++)
+		{
+			Tile* tile = &map_tile[row * TILE_COLS + col];
+			for (int i = 0; i < size; ++i) {
+				if (placeable[i] == tile->tile_index) {
+					tile->placeable = true;
+					continue;
+				}
 			}
 		}
 	}

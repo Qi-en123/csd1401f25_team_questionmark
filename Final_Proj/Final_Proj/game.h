@@ -1,6 +1,7 @@
 #pragma once
 #include "tools.h"
 #include "cprocessing.h"
+#include "plants.h"
 
 void Game_Init(void);
 
@@ -15,3 +16,7 @@ void spawn_box(void);
 
 
 void draw_gameover_panel(int stars, int score);
+void move_pot(float* posx, float* posy);
+void handle_pot_interaction(Pot* pot);
+void customer_request();
+void simulate_pests();
