@@ -20,6 +20,7 @@ CP_Font myFont;
 CP_Font Font;
 CP_Image button_white;
 CP_Image button_green;
+CP_Image button_score;
 CP_Image button_circle_white;
 CP_Image button_circle_green;
 CP_Image repeat;
@@ -149,6 +150,7 @@ void Game_Init(void)
 	// buttons 
 	button_white = CP_Image_Load("Assets/button_rectangle_line.png");
 	button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
+	button_score = CP_Image_Load("Assets/timer_bg_yellow.png");
 	button_circle_white = CP_Image_Load("Assets/button_round_line.png");
 	button_circle_green = CP_Image_Load("Assets/button_round_gloss.png");
 	next = CP_Image_Load("Assets/next.png");
@@ -393,6 +395,17 @@ void Game_Update(void)
 		gameOver = 1;
 		starCount = 0;      // Fail
 	}
+
+	char buffer_score[50];
+	sprintf_s(buffer_score, 50, "%d", score);
+	CP_Image_Draw(button_score, 125, 135, 210, 60, 255);
+	CP_Font_Set(myFont);
+	CP_Settings_TextSize(40);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	CP_Font_DrawText(buffer_score, 125, 135);
+
+
 }
 
 void Game_Exit(void)
