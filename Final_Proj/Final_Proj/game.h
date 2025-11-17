@@ -15,7 +15,7 @@ void handle_tool_interaction(Tool* tool);
 void spawn_box(void);
 
 
-void draw_gameover_panel(int stars, int score);
+void draw_gameover_panel( int score);
 void move_pot(float* posx, float* posy);
 void handle_pot_interaction(Pot* pot);
 void customer_request();

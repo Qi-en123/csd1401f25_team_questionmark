@@ -366,7 +366,7 @@ void Game_Update(void)
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(starCount, score);
+		draw_gameover_panel( score);
 		return;   // Stop all other game updates
 	}
 
@@ -436,7 +436,7 @@ void start_timer() {
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
 	if (stage_timer <= 0.0f) {
-		draw_gameover_panel(3, score);
+		draw_gameover_panel( score);
 	}
 
 	//blinking effect
@@ -950,10 +950,21 @@ void simulate_pests() {
 }
 
 
-void draw_gameover_panel(int stars, int score )
+void draw_gameover_panel( int score )
 {
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
+	int stars = 0;
+	if (score > 1000) {
+		stars = 1;
+	}
+	if (score > 2000) {
+		stars = 2;
+	}
+	if (score > 3000) {
+		stars = 3;
+	}
+
 
 	// Dim background
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
