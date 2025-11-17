@@ -387,9 +387,6 @@ void Game_Update(void)
 	/*-----------------------------------------------------------------------*/
 	customer_request();
 	simulate_pests();
-
-	//----------------------------------------------------------------------------------------
-	//
 	
 	//--------------------- Timer ---------------------//
 	//render timer on top
@@ -399,12 +396,7 @@ void Game_Update(void)
 	{
 		gameOver = 1;
 		starCount = 0;      // Fail
-
 	}
-
-
-	
-
 }
 
 void Game_Exit(void)
@@ -815,13 +807,11 @@ void customer_request() {
 			if (boxes[i].y + boxes[i].height < 0)
 			{
 				// shift boxes down
-				//for (int j = 1; j < boxCount; j++)
-				//	boxes[j - 1] = boxes[j];
-				for (int j = 0; j < boxCount; ++j) {
+				for (int j = 0; j < boxCount-1; ++j) {
 					boxes[i+j] = boxes[i+j+1];
 				}
 				if (i != 0) {
-					for (int j = 0; j < boxCount - (boxCount - i); ++j) {
+					for (int j = 0; j < i; ++j) {
 						boxes[j].targetX += boxes[j].width + 10;
 					}
 				}
@@ -972,8 +962,6 @@ int add_score(Box* box) {
 
 	return score;
 }
-
-
 
 void draw_gameover_panel(int stars, int score )
 {

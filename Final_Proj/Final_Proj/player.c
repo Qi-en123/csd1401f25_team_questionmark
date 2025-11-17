@@ -58,7 +58,7 @@ int current_frame = 0; //to check current frame
 
 #define PLAYER_WIDTH 18
 #define PLAYER_HEIGHT 18
-#define FRAMES 12
+//#define FRAMES 12
 //To draw the player
 void render_player(Player* player, CP_Image spritesheet) {
 	//--------------------- MOVEMENT ---------------------//
