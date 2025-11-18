@@ -20,10 +20,9 @@ void initialize_pots(Pot *pots, int size, Tile* tile) {
 	}
 }
 
-#define POT_WIDTH 19
-#define POT_HEIGHT 19
 //Draws all the pots, checks if player is close-by
-void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_posx, float player_posy, Pot* pot) {
+void render_pots(Pot* pots, CP_Image pot_spritesheet, int size,
+	float player_posx, float player_posy, Pot* pot, void* held_tool) {
 
 	//ensures only 1 pot can be selected at all times
 	bool pot_selected = false;
@@ -44,6 +43,7 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 				pots[i].selected = true;
 				pot_selected = true;
 			}
+			if (!held_tool) { show_tooltip("Press 'Q' to Pick Up"); }
 		}
 		else {
 			pots[i].selected = false;
@@ -52,6 +52,16 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_pos
 		float start_x = POT_WIDTH * pots[i].selected; //changes sprite subimg to highlighted version
 		float start_y = POT_HEIGHT - POT_HEIGHT * pots[i].filled; //changes to filled version (in this version its dug hole)
 
+		//Pot shadow
+		CP_Settings_EllipseMode(CP_POSITION_CENTER);
+		CP_Settings_NoStroke();
+		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
+
+		float shadow_x = pots[i].position.x + (POT_WIDTH * POT_SCALE / 2) - 1.0f;
+		float shadow_y = pots[i].position.y + POT_HEIGHT * POT_SCALE - 5.0f;
+		CP_Graphics_DrawEllipse(shadow_x, shadow_y, POT_WIDTH * POT_SCALE * 0.65f, 15.0f);
+
+		//Pot
 		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 			start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
@@ -67,6 +77,16 @@ void render_held_pot(Pot* pot, CP_Image pot_spritesheet) {
 	float start_x = POT_WIDTH * pot->selected; //changes sprite subimg to highlighted version
 	float start_y = POT_HEIGHT - POT_HEIGHT * pot->filled; //changes to filled version (in this version its dug hole)
 
+	//Pot shadow
+	CP_Settings_EllipseMode(CP_POSITION_CENTER);
+	CP_Settings_NoStroke();
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
+
+	CP_Graphics_DrawEllipse(pot->position.x, pot->position.y + POT_HEIGHT * POT_SCALE / 2 + 2.0f,
+		POT_WIDTH * POT_SCALE * 0.65f, 15.0f);
+
+	//Pot
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	CP_Image_DrawSubImage(pot_spritesheet, pot->position.x, pot->position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 		start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
@@ -104,11 +124,6 @@ void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
 
 //Draws the plant on top of the pot
 void render_plant(Plant* plant, float posx, float posy, bool selected) {
-#define PLANT_OFFSETY -26 //makes plant appear on top of pot
-#define PLANT_OFFSETX 0
-#define PLANT_WIDTH 19
-#define PLANT_HEIGHT 19
-
 	//sprites are in order (seed, seedling, youth, adult): growth_stage 0 == seed; x=0 etc.
 	//y=0, non-highlighted, y=1, highlighted
 	CP_Image_DrawSubImage(plant->plant_spritesheet, posx + PLANT_OFFSETX, posy + PLANT_OFFSETY,
@@ -118,11 +133,11 @@ void render_plant(Plant* plant, float posx, float posy, bool selected) {
 
 	//Increase sunlight bar
 	if (plant->growth_stage != ADULT) {
-		plant->sunlight_amount += dt / plant->sunlight_needed / 3.0f;
+		plant->sunlight_amount += dt / plant->sunlight_needed / 4.0f;
 		plant->sunlight_amount = CP_Math_ClampFloat(plant->sunlight_amount, 0.0f, 1.0f);
 
 		if (selected) {
-			//SUNLIGHT AND WATER BAR HERE:
+			//SUNLIGHT BAR HERE:
 			render_sunlight_bar(plant, posx, posy);
 		}
 	}
@@ -140,7 +155,7 @@ void grow_plant(Plant* plant) {
 	
 	if (growth_stage != ADULT) {
 		plant->sunlight_amount = 0; //reset sunlight bar
-		plant->sunlight_needed *= 1.2f; //increase sunlight needed per growth stage
+		plant->sunlight_needed *= 1.25f; //increase sunlight needed per growth stage
 		plant->water_amount = 0;
 		plant->fillProgress = 0;
 		plant->wateredOnce = false;
@@ -150,13 +165,19 @@ void grow_plant(Plant* plant) {
 
 //Renders sunlight bar on top of selected/nearest plant
 void render_sunlight_bar(Plant* plant, float posx, float posy) {
+	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
+	CP_Settings_StrokeWeight(3.0f);
 	//Bar background
-	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 120));
-	CP_Graphics_DrawRect(posx, posy - 30.0f, 80.0f, 20.0f);
+	float bar_width = 200.0f;
+	float bar_height = 24.0f;
+	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 100));
+	CP_Graphics_DrawRect(posx - (bar_width / 2) + (POT_WIDTH * POT_SCALE / 2),
+		posy - 30.0f, bar_width, bar_height);
 
 	//Sunlight bar
 	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 180));
-	CP_Graphics_DrawRect(posx, posy - 30.0f, 80.0f * plant->sunlight_amount, 20.0f);
+	CP_Graphics_DrawRect(posx - (bar_width / 2) + (POT_WIDTH * POT_SCALE / 2),
+		posy - 30.0f, bar_width * plant->sunlight_amount, bar_height);
 }
 
 void kill_plant(Pot* pot) {

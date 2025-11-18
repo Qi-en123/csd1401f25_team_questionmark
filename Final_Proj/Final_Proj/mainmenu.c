@@ -7,6 +7,7 @@
     CP_Image spriteSheet;
     CP_Image mainmenu_bg;
     CP_Image button_white;
+    CP_Image white_background;
     CP_Image button_green;
     //font 
     CP_Font font;
@@ -46,6 +47,7 @@
         mainmenu_bg = CP_Image_Load("Assets/backgroundColorGrass.png");
         spriteSheet = CP_Image_Load("Assets/spritesheet_default.png");
         button_white = CP_Image_Load("Assets/button_rectangle_line.png");
+        white_background = CP_Image_Load("Assets/button_rectangle_line-1.png");
         button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
         //load font 
         font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
@@ -105,7 +107,7 @@
             float panelX = screenW / 2;
             float panelY = screenH / 2;
 
-            CP_Image_Draw(button_white, panelX, panelY, panelW, panelH, 255);
+            CP_Image_Draw(white_background, panelX, panelY, panelW, panelH, 255);
 
             // text
             CP_Font_Set(myFont);
@@ -208,6 +210,7 @@
         CP_Font_Free(myFont);
         CP_Sound_Free(themeSound);
         CP_Image_Free(button_white);
+        CP_Image_Free(white_background);
         CP_Image_Free(button_green);
         CP_Sound_Free(BtnSound);
     }

@@ -62,6 +62,17 @@ void render_tools(Tool* tools, int size, float player_posx, float player_posy, T
 		else {
 			tools[i].in_range = false;
 		}
+
+		//Tool shadow
+		CP_Settings_EllipseMode(CP_POSITION_CENTER);
+		CP_Settings_NoStroke();
+		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
+
+		float shadow_x = tools[i].position.x + (TOOL_WIDTH * TOOL_SCALE / 2);
+		float shadow_y = tools[i].position.y + TOOL_HEIGHT * TOOL_SCALE - 4.0f;
+		CP_Graphics_DrawEllipse(shadow_x, shadow_y, TOOL_WIDTH * TOOL_SCALE, 20.0f);
+
+		//Tool
 		CP_Image_Draw(tools[i].tool_sprite, tools[i].position.x, tools[i].position.y,
 			TOOL_WIDTH * TOOL_SCALE, TOOL_HEIGHT * TOOL_SCALE, 255);
 
@@ -78,6 +89,7 @@ void render_held_tool(Tool* tool) {
 	if (tool->tool_name == WATERING_CAN && tool->uses <= 0) {
 		tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_empty.png");
 	}
+
 	CP_Image_DrawAdvanced(tool->tool_sprite, tool->position.x, tool->position.y,
 		TOOL_WIDTH * TOOL_SCALE, TOOL_HEIGHT * TOOL_SCALE, 255, tool->rotation * tool->rotatable);
 }

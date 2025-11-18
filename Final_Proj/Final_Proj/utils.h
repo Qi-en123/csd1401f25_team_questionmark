@@ -15,8 +15,6 @@ typedef struct Vector2 {
 	float x, y;
 }Vector2;
 
-//Returns the tinted version of color.
-//Note: tint_val must be float (e.g 1.0f/4.0f)
-CP_Color tintColor(CP_Color color, float tint_val);
+void show_tooltip(const char* text);
 
 typedef enum { false, true } bool;
