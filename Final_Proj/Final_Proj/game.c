@@ -15,7 +15,7 @@
 
 #include "Pest.h"
 
-
+CP_Image guide;
 CP_Font myFont;
 CP_Font Font;
 CP_Image button_white;
@@ -114,6 +114,7 @@ CP_Color red, green, blue, gray;
 
 void Game_Init(void)
 {
+
 	paused = 1;
 	showControls = 1;
 	gameOver = 0;
@@ -123,7 +124,7 @@ void Game_Init(void)
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	star_default = CP_Image_Load("Assets/star_outline.png"); 
 	star_achieved = CP_Image_Load("Assets/star.png");
-
+	guide = CP_Image_Load("Assets/guide.png");
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
@@ -283,28 +284,14 @@ void Game_Update(void)
 		if (showControls) {
 			// Draw the controls panel only
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
-			float panelWidth = 800;
-			float panelHeight = 500;
-			float panelX = (float)CP_System_GetWindowWidth() / 2;
+			float panelWidth = 1650;
+			float panelHeight = 900;
+			float panelX = (float)CP_System_GetWindowWidth() / 2 - 25;
 			float panelY = (float)CP_System_GetWindowHeight() / 2;
 
-			CP_Image_Draw(button_white, panelX, panelY, panelWidth, panelHeight, 255);
+			CP_Image_Draw(guide, panelX, panelY, panelWidth, panelHeight, 255);
 
-			// Draw text line by line
-			CP_Font_Set(myFont);
-			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255)); // black text
-			CP_Settings_TextSize(40);
-			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-
-			float lineHeight = 55.0f; // vertical spacing between lines
-			float startY = panelY - 150; // start higher up so text is centered
-
-			CP_Font_DrawText("Controls:", panelX, startY);
-			CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineHeight);
-			CP_Font_DrawText("Interact: [E]", panelX, startY + 2 * lineHeight);
-			CP_Font_DrawText("Pick up/Drop Tool: [P]", panelX, startY + 3 * lineHeight);
-			CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineHeight);
-			CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineHeight);
+			
 
 			// Close overlay when Key 1 is pressed
 			if (CP_Input_KeyReleased(KEY_1)) {
