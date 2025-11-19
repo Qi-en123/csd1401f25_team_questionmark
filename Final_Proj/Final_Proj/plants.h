@@ -7,7 +7,7 @@
 
 #define POT_WIDTH 19
 #define POT_HEIGHT 19
-#define POT_SCALE 3.4
+#define POT_SCALE 4.5
 #define PLANT_OFFSETY -26 //makes plant appear on top of pot
 #define PLANT_OFFSETX 0
 #define PLANT_WIDTH 19

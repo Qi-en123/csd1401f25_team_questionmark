@@ -53,7 +53,7 @@ CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
-#define STAGE_TIMER 300.0f
+#define STAGE_TIMER 480.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
@@ -238,7 +238,7 @@ void Game_Update(void)
 	//--------------------- Hold Tool ---------------------//
 	//If player is not holding anything
 	if (!held_tool && !held_pot) {
-		if (CP_Input_KeyReleased(KEY_Q)) {
+		if (CP_Input_KeyReleased(KEY_J)) {
 			//Picks up the first tool that is in range
 			for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 				if (level1_tools[i].in_range) {
@@ -286,9 +286,9 @@ void Game_Update(void)
 		if (showControls) {
 			// Draw the controls panel only
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
-			float panelWidth = 1650;
+			float panelWidth = 1600;
 			float panelHeight = 900;
-			float panelX = (float)CP_System_GetWindowWidth() / 2 - 25;
+			float panelX = (float)CP_System_GetWindowWidth() / 2 ;
 			float panelY = (float)CP_System_GetWindowHeight() / 2;
 
 			CP_Image_Draw(guide, panelX, panelY, panelWidth, panelHeight, 255);
@@ -549,13 +549,13 @@ void handle_tool_interaction(Tool* tool) {
 
 		//reset stroke color
 		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
-		if (CP_Input_KeyReleased(KEY_Q)) {
+		if (CP_Input_KeyReleased(KEY_J)) {
 			tool->position.x = tool->initial_pos.x;
 			tool->position.y = tool->initial_pos.y;
 			held_tool = NULL;
 			return;
 		}
-		show_tooltip("Press 'Q' to Place Down");
+		show_tooltip("Press 'J' to Place Down");
 	}
 	else tool->in_range = false;
 
@@ -586,7 +586,7 @@ void handle_tool_interaction(Tool* tool) {
 						CP_Settings_StrokeWeight(3.0f);
 
 						// HANDLE WATERING LOGIC
-						if (CP_Input_KeyDown(KEY_E)) {
+						if (CP_Input_KeyDown(KEY_K)) {
 							// Increase fill while holding E
 							level1_pots[i].plant.fillProgress += fillSpeed * dt;
 							if (level1_pots[i].plant.fillProgress > 1.0f)
@@ -640,7 +640,7 @@ void handle_tool_interaction(Tool* tool) {
 						}
 
 						// LOCK POT WHEN E IS RELEASED OR USES RUN OUT
-						if (CP_Input_KeyReleased(KEY_E) || held_tool->uses <= 0) {
+						if (CP_Input_KeyReleased(KEY_K) || held_tool->uses <= 0) {
 							level1_pots[i].plant.wateredOnce = true;
 
 							// Grow plant only if fill is within the target segment
@@ -660,48 +660,50 @@ void handle_tool_interaction(Tool* tool) {
 					}
 				}
 				//Controls tool tip at btm right
-				show_tooltip("Press & Hold 'E' to Water");
+				CP_Font_Set(myFont);
+				show_tooltip("Press & Hold 'K' to Water");
 
 				break;
-
+				
+				
 			case SOIL:
 				if (level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						level1_pots[i].filled = true;
 					}
-					show_tooltip("Press 'E' to Dig Soil");
+					show_tooltip("Press 'K' to Dig Soil");
 				}
 				if (level1_pots[i].plant.seed_type != EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						kill_plant(&level1_pots[i]);
 					}
-					show_tooltip("Press 'E' to Remove Plant");
+					show_tooltip("Press 'K' to Remove Plant");
 				}
 				break;
 			case SEED_1:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, BERRY_BUSH);
 					}
-					show_tooltip("Press 'E' to Plant Berry Bush");
+					show_tooltip("Press 'K' to Plant Berry Bush");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_2:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, CACTUS);
 					}
-					show_tooltip("Press 'E' to Plant Cactus");
+					show_tooltip("Press 'K' to Plant Cactus");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_3:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY){
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, ORANGE_BUSH);
 					}
-					show_tooltip("Press 'E' to Plant Orange Bush");
+					show_tooltip("Press 'K' to Plant Orange Bush");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
@@ -718,11 +720,11 @@ void handle_tool_interaction(Tool* tool) {
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
-		if (CP_Input_KeyTriggered(KEY_E)) {
+		if (CP_Input_KeyTriggered(KEY_K)) {
 			held_tool->uses = 3;
 			held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 		}
-		show_tooltip("Press 'E' to Refill Bucket");
+		show_tooltip("Press 'K' to Refill Bucket");
 	}
 }
 
@@ -777,7 +779,7 @@ void handle_pot_interaction(Pot* pot) {
 					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
 				//place down pot if tile is placeable and not obstructed by other things
-				if (CP_Input_KeyReleased(KEY_Q)) {
+				if (CP_Input_KeyReleased(KEY_J)) {
 					tile->obstructed = true;
 					held_tool = NULL;
 					held_pot = NULL;
@@ -785,7 +787,7 @@ void handle_pot_interaction(Pot* pot) {
 					pot->position.y = tile->y;
 					pot->occupied_tile = tile;
 				}
-				show_tooltip("Press 'Q' to Place Down");
+				show_tooltip("Press 'J' to Place Down");
 			}
 		}
 	}

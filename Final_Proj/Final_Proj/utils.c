@@ -84,8 +84,11 @@ int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float p
 }
 
 void show_tooltip(const char* text) {
-	CP_Settings_TextSize(28.0f);
+	CP_Font font;
+	font = CP_Font_Load("Assets/Exo2-Regular.ttf");
+	CP_Font_Set(font);
+	CP_Settings_TextSize(50.0f);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_RIGHT, CP_TEXT_ALIGN_V_TOP);
-	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Font_DrawText(text, 1550.0f, 830.0f);
 }

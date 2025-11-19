@@ -120,8 +120,8 @@
 
             CP_Font_DrawText("Controls:", panelX, startY);
             CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineH);
-            CP_Font_DrawText("Interact: [E]", panelX, startY + 2 * lineH);
-            CP_Font_DrawText("Pick up/Drop Tool: [P]", panelX, startY + 3 * lineH);
+            CP_Font_DrawText("Interact: [K]", panelX, startY + 2 * lineH);
+            CP_Font_DrawText("Pick up/Drop Tool: [J]", panelX, startY + 3 * lineH);
             CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineH);
             CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineH);
 
