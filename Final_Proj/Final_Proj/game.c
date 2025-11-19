@@ -837,25 +837,26 @@ void customer_request() {
 	//--------------------- Create Requests ---------------------//
 	spawnTimer += dt;
 
-	// Spawn every few seconds
+	// --- START DELAY HANDLING ---
 	if (startDelay > 0.0f) {
 		startDelay -= dt;
+
 		if (startDelay <= 0.0f) {
+			// First request appears after the 10s delay
 			spawn_box();
-			spawnTimer = -10.0f;
+
+			// Reset timers cleanly
+			spawnTimer = 0.0f;
+			startDelay = 0.0f;
 		}
+
+		return; // Do not spawn normally yet
 	}
-	else {
-		if (0 == boxCount) {
-			if (spawnTimer >= REQUEST_INTERVAL / 2.0f) {
-				spawn_box();
-				spawnTimer = 0.0f;
-			}
-			else if (spawnTimer >= REQUEST_INTERVAL) {
-				spawn_box();
-				spawnTimer = 0.0f;
-			}
-		}
+
+	// --- NORMAL SPAWNING (after delay finishes) ---
+	if (spawnTimer >= REQUEST_INTERVAL && boxCount < MAX_BOXES) {
+		spawn_box();
+		spawnTimer = 0.0f;
 	}
 
 	for (int i = 0; i < boxCount; i++) {
