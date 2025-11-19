@@ -5,7 +5,13 @@
 #include "cprocessing.h"
 #include "map.h"
 
+#define POT_WIDTH 19
+#define POT_HEIGHT 19
 #define POT_SCALE 3.4
+#define PLANT_OFFSETY -26 //makes plant appear on top of pot
+#define PLANT_OFFSETX 0
+#define PLANT_WIDTH 19
+#define PLANT_HEIGHT 19
 
 typedef enum SEED_TYPE {
 	BERRY_BUSH,
@@ -41,7 +47,8 @@ typedef struct Pot {
 }Pot;
 
 void initialize_pots(Pot* pots, int size, Tile* tile);
-void render_pots(Pot* pots, CP_Image pot_spritesheet, int size, float player_posx, float player_posy, Pot* held_pot);
+void render_pots(Pot* pots, CP_Image pot_spritesheet, int size,
+	float player_posx, float player_posy, Pot* held_pot, void* held_tool);
 void render_held_pot(Pot* pot, CP_Image pot_spritesheet);
 
 

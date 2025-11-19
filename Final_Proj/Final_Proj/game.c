@@ -23,9 +23,12 @@ CP_Image button_green;
 CP_Image button_score;
 CP_Image button_circle_white;
 CP_Image button_circle_green;
+CP_Image white_background;
 CP_Image repeat;
 CP_Image next;
 CP_Image home;
+
+
 CP_Sound BtnSound;
 //--------------------- Player ---------------------//
 Player player;
@@ -39,7 +42,7 @@ Tool level1_tools[L1_TOOL_SIZE];
 /*!!!!Due to time constraint thrs a bug, DO NOT skip seed numbers : !!!!
   !!!!		e.g. do SEED_1,2,3, DO NOT DO SEED_2,3 or SEED_1,3		!!!!
   !!!!Tools must always have WATERING_CAN, SOIL & SEED_1 (Minimum)  !!!!*/
-Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2};
+Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2 };
 Tool* held_tool; // a pointer to the tool held
 
 //--------------------- Pots ---------------------//
@@ -50,7 +53,7 @@ CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
-#define STAGE_TIMER 30.0f
+#define STAGE_TIMER 300.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
@@ -66,8 +69,8 @@ CP_Image cactus = NULL;
 CP_Image pest_spritesheet = NULL;
 CP_Sound customerNoti;
 static float startDelay;
-#define REQUEST_TIMER 60.0f
-#define REQUEST_INTERVAL 2.0f
+#define REQUEST_TIMER 80.0f
+#define REQUEST_INTERVAL 20.0f
 
 //--------------------- Pests ---------------------//
 #define PEST_SPAWN_INTERVAL 40.0f
@@ -99,7 +102,6 @@ Tile map_tiles[TILE_ROWS][TILE_COLS];
 int placeable[] = { 1,2 }; //set tiles which are placeable
 
 
-
 int paused = 1; // 0 = running, 1 = paused
 int showControls = 1; // 0 = hidden, 1 = showing
 int gameOver = 0;   // 0 = running, 1 = ended
@@ -122,7 +124,7 @@ void Game_Init(void)
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
-	star_default = CP_Image_Load("Assets/star_outline.png"); 
+	star_default = CP_Image_Load("Assets/star_outline.png");
 	star_achieved = CP_Image_Load("Assets/star.png");
 	guide = CP_Image_Load("Assets/guide.png");
 
@@ -130,6 +132,7 @@ void Game_Init(void)
 
 	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 	draw_tile_map(map_tiles);
+	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	//Request
 	srand((unsigned int)time(NULL));
@@ -145,11 +148,14 @@ void Game_Init(void)
 
 	//Initialize player with default values
 	player_speed = 400.0f;
-	player_startpos_x = player_startpos_y = 100.0f;
+	player_startpos_x = CP_System_GetWindowWidth() / 2;
+	player_startpos_y = CP_System_GetWindowHeight() / 2;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
+
 	// buttons 
 	button_white = CP_Image_Load("Assets/button_rectangle_line.png");
+	white_background = CP_Image_Load("Assets/button_rectangle_line-1.png");
 	button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
 	button_score = CP_Image_Load("Assets/timer_bg_yellow.png");
 	button_circle_white = CP_Image_Load("Assets/button_round_line.png");
@@ -159,7 +165,7 @@ void Game_Init(void)
 	home = CP_Image_Load("Assets/menuList.png");
 	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
 	//Tools
-	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &map_tiles[3][1]);
+	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &map_tiles[4][1]);
 	held_tool = NULL;
 
 
@@ -196,7 +202,6 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
-
 	// Don't allow pause if game is over
 	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
 		paused = !paused;
@@ -208,23 +213,19 @@ void Game_Update(void)
 	if (CP_Input_KeyReleased(KEY_2)) {
 		gameOver = 1;
 		starCount = 3;
-		
+
 	}
-
-
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
 	draw_tile_map(map_tiles);
-	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
+	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	draw_modified_map();
 
-
-
 	//--------------------- Pots ---------------------//
-	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot);
+	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot, held_tool);
 
 	//--------------------- Tools ---------------------//
 	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool);
@@ -247,8 +248,9 @@ void Game_Update(void)
 			}
 			//Picks up first pot that is in range
 			for (int i = 0; i < L1_POT_SIZE; ++i) {
-				if (level1_pots[i].selected) {
+				if (level1_pots[i].selected) {					
 					held_pot = &level1_pots[i];
+					move_pot(&held_pot->position.x, &held_pot->position.y); //intialize held pot pos
 					//"unobstructs" grid, makes it placeable
 					level1_pots[i].occupied_tile->obstructed = false;
 					break;
@@ -268,7 +270,7 @@ void Game_Update(void)
 		}
 	}
 	//draw player
-	render_player( &player, player_spritesheet);
+	render_player(&player, player_spritesheet);
 	//------------------------------Paused -----------------------------------------------
 // If paused, draw pause overlay and skip game logic
 	if (paused) {
@@ -338,7 +340,7 @@ void Game_Update(void)
 
 			// Draw button texts
 			CP_Font_Set(Font);
-			CP_Settings_TextSize(80.0f);
+			CP_Settings_TextSize(64.0f);
 			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 
@@ -355,7 +357,7 @@ void Game_Update(void)
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel( score);
+		draw_gameover_panel(score);
 		return;   // Stop all other game updates
 	}
 
@@ -372,7 +374,7 @@ void Game_Update(void)
 	/*-----------------------------------------------------------------------*/
 	customer_request();
 	simulate_pests();
-	
+
 	//--------------------- Timer ---------------------//
 	//render timer on top
 	start_timer();
@@ -383,40 +385,70 @@ void Game_Update(void)
 		starCount = 0;      // Fail
 	}
 
+	//--------------------- Score ---------------------//
 	char buffer_score[50];
 	sprintf_s(buffer_score, 50, "%d", score);
-	CP_Image_Draw(button_score, 125, 135, 210, 60, 255);
+	CP_Image_Draw(button_score, timer_pos_x, 135, 200, 60, 255);
 	CP_Font_Set(myFont);
 	CP_Settings_TextSize(40);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	CP_Font_DrawText(buffer_score, 125, 135);
-
-
+	CP_Font_DrawText(buffer_score, timer_pos_x, 130);
 }
 
 void Game_Exit(void)
 {
+	//--------------------- Free Fonts ---------------------//
+	CP_Font_Free(myFont);
+	CP_Font_Free(Font);
+
+	//--------------------- Free Sprites ---------------------//
+	//Spritesheets
 	CP_Image_Free(spriteSheetTiles);
 	CP_Image_Free(player_spritesheet);
 	CP_Image_Free(pest_spritesheet);
-	CP_Font_Free(myFont);
-	CP_Font_Free(Font);
+
+	//Button Sprites
+	CP_Image_Free(button_white);
+	CP_Image_Free(button_white);
+	CP_Image_Free(button_score);
+	CP_Image_Free(button_circle_white);
+	CP_Image_Free(button_circle_green);
+	CP_Image_Free(white_background);
+	CP_Image_Free(repeat);
+	CP_Image_Free(next);
+	CP_Image_Free(home);
+
+	//Timer sprite
 	CP_Image_Free(timer_bg_blue);
 	CP_Image_Free(timer_bg_red);
+
+	//Tool sprites
 	for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 		CP_Image_Free(level1_tools[i].tool_sprite);
 	}
 	if (held_tool) { CP_Image_Free(held_tool->tool_sprite); }
+
+	//Pot spritesheet
 	CP_Image_Free(pot_spritesheet);
+
+	//Plant sprites
 	for (int i = 0; i < L1_POT_SIZE; ++i) {
 		CP_Image_Free(level1_pots[i].plant.plant_spritesheet);
 	}
+
+	//Request sprites
 	CP_Image_Free(requestbg);
-	CP_Sound_Free(customerNoti);
 	CP_Image_Free(berrybush);
 	CP_Image_Free(cactus);
 	CP_Image_Free(orangebush);
+
+	CP_Image_Free(star_default);
+	CP_Image_Free(star_achieved);
+
+	//--------------------- Free Audio ---------------------//
+	CP_Sound_Free(customerNoti);
+	CP_Sound_Free(BtnSound);
 }
 
 void start_timer() {
@@ -436,7 +468,7 @@ void start_timer() {
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
 	if (stage_timer <= 0.0f) {
-		draw_gameover_panel( score);
+		draw_gameover_panel(score);
 	}
 
 	//blinking effect
@@ -464,6 +496,7 @@ void start_timer() {
 	CP_Image_Draw(timer_bg_blue, timer_pos_x, timer_pos_y, timer_width, timer_height, 255);
 	CP_Image_Draw(timer_bg_red, timer_pos_x, timer_pos_y, timer_width, timer_height, timer_red_alpha);
 	//Timer 
+	CP_Font_Set(Font);
 	CP_Settings_TextSize(timer_font_size);
 	CP_Settings_Fill(timer_font_color);
 	CP_Font_DrawText(countdown, timer_pos_x, timer_pos_y);
@@ -510,7 +543,7 @@ void handle_tool_interaction(Tool* tool) {
 		//highlights initial grid
 		CP_Settings_RectMode(CP_POSITION_CORNER);
 		CP_Settings_NoStroke();
-		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
+		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 80));
 		CP_Graphics_DrawRect(tool->initial_pos.x, tool->initial_pos.y,
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
@@ -522,12 +555,13 @@ void handle_tool_interaction(Tool* tool) {
 			held_tool = NULL;
 			return;
 		}
+		show_tooltip("Press 'Q' to Place Down");
 	}
 	else tool->in_range = false;
 
 	// Progress bar logic
-	float rectWidth = 60;
-	float rectHeight = 30;
+	float rectWidth = 40.0f;
+	float rectHeight = 24.0f;
 	int potBarSegments = 5;
 	float spacing = 0.0f;
 	float fillSpeed = 0.4f;
@@ -543,10 +577,13 @@ void handle_tool_interaction(Tool* tool) {
 
 					// Only proceed if tool has uses
 					if (held_tool->uses > 0) {
-						float rectX = level1_pots[i].position.x - rectWidth / 2.0f;
-						float rectY = level1_pots[i].position.y - (120.0f / 2.0f) - rectHeight - 10.0f;
+						float rectX = level1_pots[i].position.x - (rectWidth * potBarSegments / 2)
+							+ (POT_HEIGHT * POT_SCALE / 2);
+						float rectY = level1_pots[i].position.y - rectHeight - 30.0f;
 
 						CP_Settings_RectMode(CP_POSITION_CORNER);
+						CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
+						CP_Settings_StrokeWeight(3.0f);
 
 						// HANDLE WATERING LOGIC
 						if (CP_Input_KeyDown(KEY_E)) {
@@ -568,13 +605,13 @@ void handle_tool_interaction(Tool* tool) {
 						float thresholdWidth = level1_pots[i].plant.water_needed * rectWidth;
 
 						for (int seg = 0; seg < potBarSegments; seg++) {
-							float x = rectX + seg * (rectWidth + spacing) - 82;
+							float x = rectX + seg * (rectWidth + spacing);
 
 							// Background color
 							if (seg == level1_pots[i].plant.water_needed)
-								CP_Settings_Fill(CP_Color_Create(255, 150, 150, 255)); // Red bar
+								CP_Settings_Fill(CP_Color_Create(255, 0, 0, 180)); // Red bar
 							else
-								CP_Settings_Fill(CP_Color_Create(120, 120, 120, 255));
+								CP_Settings_Fill(CP_Color_Create(255, 255, 255, 100));
 
 							CP_Graphics_DrawRect(x, rectY, rectWidth, rectHeight);
 
@@ -587,7 +624,7 @@ void handle_tool_interaction(Tool* tool) {
 
 								CP_Color fillColor;
 								if (filledWidth <= thresholdWidth)
-									fillColor = CP_Color_Create(0, 0, 255, 255); // Blue
+									fillColor = CP_Color_Create(0, 0, 255, 180); // Blue
 								else {
 									float redAmount = (filledWidth - thresholdWidth) / (totalBarWidth - thresholdWidth);
 									if (redAmount > 1.0f) redAmount = 1.0f;
@@ -622,27 +659,51 @@ void handle_tool_interaction(Tool* tool) {
 						}
 					}
 				}
+				//Controls tool tip at btm right
+				show_tooltip("Press & Hold 'E' to Water");
+
 				break;
 
 			case SOIL:
-				if (level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
-					level1_pots[i].filled = true;
+				if (level1_pots[i].plant.seed_type == EMPTY) {
+					if (CP_Input_KeyReleased(KEY_E)) {
+						level1_pots[i].filled = true;
+					}
+					show_tooltip("Press 'E' to Dig Soil");
 				}
-				if (level1_pots[i].plant.seed_type != EMPTY && CP_Input_KeyReleased(KEY_E)) {
-					kill_plant(&level1_pots[i]);
+				if (level1_pots[i].plant.seed_type != EMPTY) {
+					if (CP_Input_KeyReleased(KEY_E)) {
+						kill_plant(&level1_pots[i]);
+					}
+					show_tooltip("Press 'E' to Remove Plant");
 				}
 				break;
 			case SEED_1:
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
-					initialize_plant(&level1_pots[i].plant, BERRY_BUSH); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+					if (CP_Input_KeyReleased(KEY_E)) {
+						initialize_plant(&level1_pots[i].plant, BERRY_BUSH);
+					}
+					show_tooltip("Press 'E' to Plant Berry Bush");
+				}
+				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_2:
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
-					initialize_plant(&level1_pots[i].plant, CACTUS); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
+					if (CP_Input_KeyReleased(KEY_E)) {
+						initialize_plant(&level1_pots[i].plant, CACTUS);
+					}
+					show_tooltip("Press 'E' to Plant Cactus");
+				}
+				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_3:
-				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY && CP_Input_KeyReleased(KEY_E)) {
-					initialize_plant(&level1_pots[i].plant, ORANGE_BUSH); }
+				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY){
+					if (CP_Input_KeyReleased(KEY_E)) {
+						initialize_plant(&level1_pots[i].plant, ORANGE_BUSH);
+					}
+					show_tooltip("Press 'E' to Plant Orange Bush");
+				}
+				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 
 			default:
@@ -652,13 +713,16 @@ void handle_tool_interaction(Tool* tool) {
 	}
 
 	//--------------------- Refill Water ---------------------//
-	if (CP_Input_KeyTriggered(KEY_E) && held_tool->tool_name == WATERING_CAN &&
+	if (held_tool->tool_name == WATERING_CAN &&
 		IsWithinRect(map_tiles[2][3].x, map_tiles[2][3].y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
-		held_tool->uses = 3;
-		held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
+		if (CP_Input_KeyTriggered(KEY_E)) {
+			held_tool->uses = 3;
+			held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
+		}
+		show_tooltip("Press 'E' to Refill Bucket");
 	}
 }
 
@@ -670,28 +734,27 @@ void move_pot(float* posx, float* posy) {
 	//Rough offset for now
 	switch (player.rotation) {
 	case 0: //DOWN
-		offset_x += 5.0f;
-		offset_y += 10.0f;
+		offset_x += 0.0f;
+		offset_y += 15.0f;
 		break;
 	case 180: //UP
-		offset_x += 5.0f;
+		offset_x += 0.0f;
 		offset_y -= 12.0f;
 		break;
 	case 90: //LEFT
 		offset_x -= 40.0f;
-		offset_y += 6.0f;
+		offset_y += 10.0f;
 		break;
 	case 270: //RIGHT
-		offset_x += 40.0f;
-		offset_y += 6.0f;
+		offset_x += 32.0f;
+		offset_y += 10.0f;
 		break;
 	default:
 		break;
 	}
 
-
-	*posx = player.position.x + offset_x;
-	*posy = player.position.y + offset_y;
+	*posx = player.position.x + (PLAYER_WIDTH * PLAYER_SCALE / 2) + offset_x;
+	*posy = player.position.y + (PLAYER_HEIGHT * PLAYER_SCALE / 2) + offset_y;
 }
 
 //only called when player is holding pot
@@ -702,17 +765,19 @@ void handle_pot_interaction(Pot* pot) {
 
 			if (IsWithinRect(tile->x, tile->y,
 				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
-				player.position.x, player.position.y)) {
+				player.position.x, player.position.y) &&
+				!(tile->obstructed) && //if no pots on tile
+				tile->placeable) { //if tile is placeable (set manually)
 
 				//highlights grid that pot would be placed
 				CP_Settings_RectMode(CP_POSITION_CORNER);
 				CP_Settings_NoStroke();
-				CP_Settings_Fill(CP_Color_Create(255, 255, 255, 80));
+				CP_Settings_Fill(CP_Color_Create(255, 255, 0, 80));
 				CP_Graphics_DrawRect(tile->x, tile->y,
 					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
 				//place down pot if tile is placeable and not obstructed by other things
-				if (CP_Input_KeyReleased(KEY_Q) && tile->placeable && !(tile->obstructed)) {
+				if (CP_Input_KeyReleased(KEY_Q)) {
 					tile->obstructed = true;
 					held_tool = NULL;
 					held_pot = NULL;
@@ -720,6 +785,7 @@ void handle_pot_interaction(Pot* pot) {
 					pot->position.y = tile->y;
 					pot->occupied_tile = tile;
 				}
+				show_tooltip("Press 'Q' to Place Down");
 			}
 		}
 	}
@@ -755,7 +821,7 @@ void spawn_box(void) {
 	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
 	if (newBox.numPlants > 3) newBox.numPlants = 3;
 	for (int i = 0; i < newBox.numPlants; i++) {
-		newBox.plantType = CP_Random_RangeInt(0, L1_TOOL_SIZE-3);
+		newBox.plantType = CP_Random_RangeInt(0, L1_TOOL_SIZE - 3);
 		if (newBox.plantType > 2) newBox.plantType = 2; // safety clamp
 		if (newBox.plantType < 0) newBox.plantType = 0;
 	}
@@ -774,13 +840,19 @@ void customer_request() {
 		startDelay -= dt;
 		if (startDelay <= 0.0f) {
 			spawn_box();
-			spawnTimer = 0.0f;
+			spawnTimer = -10.0f;
 		}
 	}
 	else {
-		if (spawnTimer >= REQUEST_INTERVAL) {
-			spawn_box();
-			spawnTimer = 0.0f;
+		if (0 == boxCount) {
+			if (spawnTimer >= REQUEST_INTERVAL / 2.0f) {
+				spawn_box();
+				spawnTimer = 0.0f;
+			}
+			else if (spawnTimer >= REQUEST_INTERVAL) {
+				spawn_box();
+				spawnTimer = 0.0f;
+			}
 		}
 	}
 
@@ -807,8 +879,8 @@ void customer_request() {
 			if (boxes[i].y + boxes[i].height < 0)
 			{
 				// shift boxes down
-				for (int j = 0; j < boxCount-i; ++j) {
-					boxes[i+j] = boxes[i+j+1];
+				for (int j = 0; j < boxCount - i; ++j) {
+					boxes[i + j] = boxes[i + j + 1];
 				}
 				if (i != 0) {
 					for (int j = 0; j < i; ++j) {
@@ -858,13 +930,14 @@ void customer_request() {
 				plantImage,
 				startX,
 				startY,
-				imgSize , imgSize, 250
+				imgSize, imgSize, 250
 			);
 		}
 
 		float timeLeft = boxes[i].lateTimer;
 		if (timeLeft < 0) timeLeft = 0;
 
+		CP_Font_Set(Font);
 		CP_Settings_TextSize(50);
 		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 		CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
@@ -949,8 +1022,7 @@ void simulate_pests() {
 	pestSpawnTimer += dt;
 }
 
-
-void draw_gameover_panel( int score )
+void draw_gameover_panel(int score)
 {
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
@@ -974,7 +1046,7 @@ void draw_gameover_panel( int score )
 	// Panel
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	float panelW = 800, panelH = 500;
-	CP_Image_Draw(button_white,w / 2, h / 2, panelW, panelH,255);
+	CP_Image_Draw(white_background,w / 2, h / 2, panelW, panelH,255);
 	CP_Font_Set(myFont);
 	CP_Settings_TextSize(70);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
@@ -992,9 +1064,9 @@ void draw_gameover_panel( int score )
 		CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
-	
+
 	char buffer[50];
-	sprintf_s(buffer, 50, "%d", score); 
+	sprintf_s(buffer, 50, "%d", score);
 	CP_Settings_TextSize(100);
 	CP_Font_DrawText(buffer, w / 2, h / 2 + 70);
 	// Draw stars
@@ -1030,7 +1102,7 @@ void draw_gameover_panel( int score )
 
 	// Draw buttons
 	for (int i = 0; i < 3; i++) {
-		
+
 
 		if (IsCircleHovered(btnX[i], btnY, btnWidth))
 			CP_Image_Draw(button_circle_green, btnX[i], btnY, btnWidth, btnHeight, 255);
@@ -1066,8 +1138,9 @@ void draw_gameover_panel( int score )
 		CP_Engine_SetNextGameStateForced(Game_Init, Game_Update, Game_Exit);
 	}
 
-	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) 
-	{ }
+	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+	{
+	}
 
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);

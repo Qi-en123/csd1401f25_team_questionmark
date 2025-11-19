@@ -83,13 +83,9 @@ int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float p
 	return (posx >= left && posx <= right && posy >= top && posy <= down);
 }
 
-//Returns the tinted version of color.
-//Note: tint_val must be float
-CP_Color tintColor(CP_Color color, float tint_val) {
-	float r, g, b;
-	r = color.r + (255 - color.r) * tint_val;
-	g = color.g + (255 - color.g) * tint_val;
-	b = color.b + (255 - color.b) * tint_val;
-
-	return CP_Color_Create(r,g,b,255);
+void show_tooltip(const char* text) {
+	CP_Settings_TextSize(28.0f);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_RIGHT, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+	CP_Font_DrawText(text, 1550.0f, 830.0f);
 }

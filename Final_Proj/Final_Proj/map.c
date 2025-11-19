@@ -156,6 +156,7 @@ void set_tile_placeable(Tile* map_tile, int* placeable, int size) {
 					tile->placeable = true;
 					continue;
 				}
+				tile->obstructed = false;
 			}
 		}
 	}

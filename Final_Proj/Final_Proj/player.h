@@ -9,6 +9,10 @@ You can use this for player Movement & Interactions
 #include "cprocessing.h"
 #include "utils.h"
 
+#define PLAYER_WIDTH 18
+#define PLAYER_HEIGHT 18
+#define PLAYER_SCALE 5.0f
+
 typedef enum Player_State {
 	IDLE,		//0
 	WALKING,	//1
