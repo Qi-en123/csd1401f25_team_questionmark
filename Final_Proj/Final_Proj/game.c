@@ -50,7 +50,7 @@ CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
-#define STAGE_TIMER 30.0f
+#define STAGE_TIMER 300.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;

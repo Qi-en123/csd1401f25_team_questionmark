@@ -38,6 +38,7 @@ typedef struct Pot {
 	bool filled;
 	Plant plant;
 	Tile* occupied_tile; //pointer to tile that its occupying, used to de-occupy when picked up
+	bool beingCarried;
 }Pot;
 
 void initialize_pots(Pot* pots, int size, Tile* tile);
