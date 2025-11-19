@@ -787,7 +787,7 @@ void handle_pot_interaction(Pot* pot) {
 					pot->position.y = tile->y;
 					pot->occupied_tile = tile;
 				}
-				show_tooltip("Press 'J' to Place Down");
+				show_tooltip("Press 'K' to Place Down");
 			}
 		}
 	}

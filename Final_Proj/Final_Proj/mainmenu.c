@@ -9,6 +9,7 @@
     CP_Image button_white;
     CP_Image white_background;
     CP_Image button_green;
+    CP_Image guide;
     //font 
     CP_Font font;
     CP_Font myFont;
@@ -49,6 +50,7 @@
         button_white = CP_Image_Load("Assets/button_rectangle_line.png");
         white_background = CP_Image_Load("Assets/button_rectangle_line-1.png");
         button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
+        guide = CP_Image_Load("Assets/guide.png");
         //load font 
         font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
         myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
@@ -103,27 +105,13 @@
 
             // panel
             CP_Settings_ImageMode(CP_POSITION_CENTER);
-            float panelW = 800, panelH = 500;
-            float panelX = screenW / 2;
-            float panelY = screenH / 2;
+            CP_Settings_ImageMode(CP_POSITION_CENTER);
+            float panelWidth = 1600;
+            float panelHeight = 900;
+            float panelX = (float)CP_System_GetWindowWidth() / 2;
+            float panelY = (float)CP_System_GetWindowHeight() / 2;
 
-            CP_Image_Draw(white_background, panelX, panelY, panelW, panelH, 255);
-
-            // text
-            CP_Font_Set(myFont);
-            CP_Settings_TextSize(40);
-            CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-            CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-
-            float lineH = 55;
-            float startY = panelY - 150;
-
-            CP_Font_DrawText("Controls:", panelX, startY);
-            CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineH);
-            CP_Font_DrawText("Interact: [K]", panelX, startY + 2 * lineH);
-            CP_Font_DrawText("Pick up/Drop Tool: [J]", panelX, startY + 3 * lineH);
-            CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineH);
-            CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineH);
+            CP_Image_Draw(guide, panelX, panelY, panelWidth, panelHeight, 255);
 
             // return to menu
             if (CP_Input_KeyReleased(KEY_1))
