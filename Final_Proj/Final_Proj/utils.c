@@ -58,11 +58,8 @@ int IsCircleClicked(float circle_center_x, float circle_center_y, float diameter
 		if (distance <= radius) {
 			return 1;
 		}
-		//esle return 0 (not inside circle)
-		else {
-			return 0;
-		}
 	}
+	return 0;
 }
 int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c2_y, float r2)
 {

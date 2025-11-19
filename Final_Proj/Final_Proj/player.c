@@ -4,6 +4,7 @@ Movements, Interactions, Animation, Stats
 
 #include "player.h"
 #include "cprocessing.h"
+#include "map.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -43,16 +44,40 @@ void handle_player_input(Player* player) {
 		player->rotation = 180;
 		player->player_state = WALKING;
 	}
-
-	player->position.x = CP_Math_ClampFloat(player->position.x, 0, CP_System_GetWindowWidth() - 
-		(PLAYER_WIDTH * PLAYER_SCALE));
-	player->position.y = CP_Math_ClampFloat(player->position.y, 0, CP_System_GetWindowHeight() - 
-		(PLAYER_HEIGHT * PLAYER_SCALE));
 }
 
 //Move player on 1 axis
 void move_player(float* pos, float speed) {
 	*pos += speed * dt;
+}
+
+void detect_collision_player(float *posx, float *posy, Tile* tiles, float speed) {
+	float tile_width = (float)CP_System_GetWindowWidth() / TILE_COLS;
+	float tile_height = (float)CP_System_GetWindowHeight() / TILE_ROWS;
+
+	*posx = CP_Math_ClampFloat(*posx, 0, CP_System_GetWindowWidth() -
+		(PLAYER_WIDTH * PLAYER_SCALE));
+	*posy = CP_Math_ClampFloat(*posy, 0, CP_System_GetWindowHeight() -
+		(PLAYER_HEIGHT * PLAYER_SCALE));
+
+	//grid that player is in
+	int row = (int)((*posy + (PLAYER_HEIGHT * PLAYER_SCALE) / 2) / tile_height);
+	int col = (int)((*posx + (PLAYER_WIDTH * PLAYER_SCALE) / 2) / tile_width);
+	Tile* tile = (tiles + row * TILE_COLS + col);
+
+	//if player collided with unwalkable grid
+	if (!tile->walkable) {
+		float player_x = *posx + (PLAYER_WIDTH * PLAYER_SCALE) / 2;
+		float player_y = *posy + (PLAYER_HEIGHT * PLAYER_SCALE) / 2;
+
+		//just stops moving
+		if (player_y > tile->y && player_y < tile->y + tile_height) {
+			*posy += player_y > tile->y + tile_height / 2 ? speed * dt : -speed * dt;
+		}
+		//else if (player_x > tile->x && player_x < tile->x + tile_width) {
+		//	*posx += player_x > tile->x + tile_width / 2 ? speed * dt : -speed * dt;
+		//}
+	}
 }
 
 //These are for player animation

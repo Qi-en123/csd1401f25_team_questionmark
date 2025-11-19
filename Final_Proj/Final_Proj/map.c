@@ -114,7 +114,7 @@ void draw_tile_map(Tile* map_tile)
 		}
 	}
 }
-void draw_modified_map(void)
+void draw_modified_map(Tile* map_tile)
 {
 	float screen_w = CP_System_GetWindowWidth();
 	float screen_h = CP_System_GetWindowHeight();
@@ -128,6 +128,9 @@ void draw_modified_map(void)
 			int tile = modified_map[row][col];
 			float x = col * tile_w;
 			float y = row * tile_h;
+
+			//no time kinda bs paiseh
+			map_tile[row * TILE_COLS + col].walkable = (tile == 11 || tile == 5 || tile == 4) ? false : true;
 
 			// If tile is 8, stretch it vertically to cover 2 tiles
 			if (tile == 8 )

@@ -221,7 +221,7 @@ void Game_Update(void)
 	draw_tile_map(map_tiles);
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
-	draw_modified_map();
+	draw_modified_map(map_tiles);
 
 	//--------------------- Pots ---------------------//
 	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot, held_tool);
@@ -378,6 +378,8 @@ void Game_Update(void)
 
 	//--------------------- Player ---------------------//
 	handle_player_input(&player);
+	detect_collision_player(&player.position.x, &player.position.y, map_tiles, player.speed);
+
 	//Render tool infront if player facing Right or Down
 	if (0 == player.rotation || 270 == player.rotation) {
 		if (held_tool) { render_held_tool(held_tool); }
@@ -395,7 +397,6 @@ void Game_Update(void)
 	if (stage_timer <= 0 && !gameOver)
 	{
 		gameOver = 1;
-		starCount = 0;      // Fail
 	}
 
 	//--------------------- Score ---------------------//
@@ -1049,7 +1050,6 @@ void draw_gameover_panel(int score)
 	if (score > 3000) {
 		stars = 3;
 	}
-
 
 	// Dim background
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
