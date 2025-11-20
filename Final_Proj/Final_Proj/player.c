@@ -1,7 +1,3 @@
-/* Everything related to player
-Movements, Interactions, Animation, Stats
-*/
-
 #include "player.h"
 #include "cprocessing.h"
 #include "map.h"
@@ -55,28 +51,20 @@ void detect_collision_player(float *posx, float *posy, Tile* tiles, float speed)
 	float tile_width = (float)CP_System_GetWindowWidth() / TILE_COLS;
 	float tile_height = (float)CP_System_GetWindowHeight() / TILE_ROWS;
 
-	*posx = CP_Math_ClampFloat(*posx, 0, CP_System_GetWindowWidth() -
-		(PLAYER_WIDTH * PLAYER_SCALE));
-	*posy = CP_Math_ClampFloat(*posy, 0, CP_System_GetWindowHeight() -
-		(PLAYER_HEIGHT * PLAYER_SCALE));
+	//prevents player moving out of screen
+	*posx = CP_Math_ClampFloat(*posx, (PLAYER_WIDTH * PLAYER_SCALE / 2.0f),
+		CP_System_GetWindowWidth() - (PLAYER_WIDTH * PLAYER_SCALE / 2.0f));
+	*posy = CP_Math_ClampFloat(*posy, (PLAYER_HEIGHT * PLAYER_SCALE / 2.0f),
+		CP_System_GetWindowHeight() - (PLAYER_HEIGHT * PLAYER_SCALE / 2.0f));
 
 	//grid that player is in
-	int row = (int)((*posy + (PLAYER_HEIGHT * PLAYER_SCALE) / 2) / tile_height);
-	int col = (int)((*posx + (PLAYER_WIDTH * PLAYER_SCALE) / 2) / tile_width);
+	int row = (int)(*posy / tile_height);
+	int col = (int)(*posx / tile_width);
 	Tile* tile = (tiles + row * TILE_COLS + col);
 
-	//if player collided with unwalkable grid
+	//fake collision (prevents player passing through obstacles on y axis)
 	if (!tile->walkable) {
-		float player_x = *posx + (PLAYER_WIDTH * PLAYER_SCALE) / 2;
-		float player_y = *posy + (PLAYER_HEIGHT * PLAYER_SCALE) / 2;
-
-		//just stops moving
-		if (player_y > tile->y && player_y < tile->y + tile_height) {
-			*posy += player_y > tile->y + tile_height / 2 ? speed * dt : -speed * dt;
-		}
-		//else if (player_x > tile->x && player_x < tile->x + tile_width) {
-		//	*posx += player_x > tile->x + tile_width / 2 ? speed * dt : -speed * dt;
-		//}
+		*posy += (*posy < tile->y) ? -speed * dt : speed * dt;
 	}
 }
 
@@ -150,17 +138,7 @@ void render_player(Player* player, CP_Image spritesheet) {
 		}
 	}
 
-	//Player shadow
-	CP_Settings_EllipseMode(CP_POSITION_CENTER);
-	CP_Settings_NoStroke();
-	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
-
-	float shadow_x = pos_x + (PLAYER_WIDTH * PLAYER_SCALE / 2);
-	float shadow_y = pos_y + PLAYER_HEIGHT * PLAYER_SCALE - 4.0f;
-	CP_Graphics_DrawEllipse(shadow_x, shadow_y, PLAYER_WIDTH * PLAYER_SCALE * 0.65f, 20.0f);
-
-
-	CP_Settings_ImageMode(CP_POSITION_CORNER);
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	//render player
 	CP_Image_DrawSubImage(spritesheet, pos_x, pos_y, PLAYER_WIDTH * PLAYER_SCALE, PLAYER_HEIGHT * PLAYER_SCALE, //sprite settings
 		img_x + (current_frame * PLAYER_WIDTH * 4), 0.0f,  //start of sub img

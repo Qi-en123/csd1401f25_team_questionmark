@@ -110,6 +110,22 @@ int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float p
 	return (posx >= left && posx <= right && posy >= top && posy <= down);
 }
 
+int AreRectsIntersecting(float rect1_x, float rect1_y, float width1, float height1,
+	float rect2_x, float rect2_y, float width2, float height2) {
+
+	float w1 = width1 / 2.0f;
+	float w2 = width2 / 2.0f;
+	float h1 = height1 / 2.0f;
+	float h2 = height2 / 2.0f;
+
+	int right_check = (rect1_x + w1 < rect2_x + w2) && (rect1_x + w1 > rect2_x - w2);
+	int left_check = (rect1_x - w1 > rect2_x - w2) && (rect1_x - w1 < rect2_x + w2);
+	int top_check = (rect1_y - h1 > rect2_y - h2) && (rect1_y - h1 < rect2_y + h2);
+	int btm_check = (rect1_y + h1 < rect2_y + h2) && (rect1_y + h1 > rect2_y - h2);
+
+	return ((right_check || left_check) && (top_check || btm_check));
+}
+
 void show_tooltip(const char* text) {
 	CP_Font font;
 	font = CP_Font_Load("Assets/Exo2-Regular.ttf");

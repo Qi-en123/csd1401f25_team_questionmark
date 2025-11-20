@@ -5,11 +5,9 @@
 #include "cprocessing.h"
 #include "map.h"
 
-#define POT_WIDTH 19
-#define POT_HEIGHT 19
-#define POT_SCALE 4.5
-#define PLANT_OFFSETY -26 //makes plant appear on top of pot
-#define PLANT_OFFSETX 0
+#define POT_WIDTH 17
+#define POT_HEIGHT 17
+#define POT_SCALE 4
 #define PLANT_WIDTH 19
 #define PLANT_HEIGHT 19
 
