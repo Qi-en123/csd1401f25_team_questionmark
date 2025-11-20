@@ -7,7 +7,7 @@
 
 #define POT_WIDTH 19
 #define POT_HEIGHT 19
-#define POT_SCALE 3.4
+#define POT_SCALE 4.5
 #define PLANT_OFFSETY -26 //makes plant appear on top of pot
 #define PLANT_OFFSETX 0
 #define PLANT_WIDTH 19
@@ -44,6 +44,7 @@ typedef struct Pot {
 	bool filled;
 	Plant plant;
 	Tile* occupied_tile; //pointer to tile that its occupying, used to de-occupy when picked up
+	bool beingCarried;
 }Pot;
 
 void initialize_pots(Pot* pots, int size, Tile* tile);

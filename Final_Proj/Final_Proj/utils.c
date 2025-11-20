@@ -19,6 +19,36 @@ int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 
     return 0;
 }
+int IsButtonHovered_Center(float centerX, float centerY, float width, float height)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - width / 2;
+	float right = centerX + width / 2;
+	float top = centerY - height / 2;
+	float bottom = centerY + height / 2;
+
+	return (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom);
+}
+int IsButtonClicked_Center(float centerX, float centerY, float rectW, float rectH)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - rectW / 2;
+	float right = centerX + rectW / 2;
+	float top = centerY - rectH / 2;
+	float bottom = centerY + rectH / 2;
+
+	if (mouseX >= left && mouseX <= right &&
+		mouseY >= top && mouseY <= bottom)
+	{
+		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
+			return 1;
+	}
+	return 0;
+}
 int IsCircleHovered(float center_x, float center_y, float diameter)
 {
 	float mx = CP_Input_GetMouseX();
@@ -81,8 +111,11 @@ int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float p
 }
 
 void show_tooltip(const char* text) {
-	CP_Settings_TextSize(28.0f);
+	CP_Font font;
+	font = CP_Font_Load("Assets/Exo2-Regular.ttf");
+	CP_Font_Set(font);
+	CP_Settings_TextSize(50.0f);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_RIGHT, CP_TEXT_ALIGN_V_TOP);
-	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 255));
+	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Font_DrawText(text, 1550.0f, 830.0f);
 }

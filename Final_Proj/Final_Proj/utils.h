@@ -8,8 +8,8 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 int IsButtonHovered(float rectX, float rectY, float rectW, float rectH);
 int IsCircleHovered(float center_x, float center_y, float diameter);
 int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float posx, float posy);
-
-
+int IsButtonClicked_Center(float centerX, float centerY, float rectW, float rectH);
+int IsButtonHovered_Center(float centerX, float centerY, float width, float height);
 #define dt CP_System_GetDt()
 typedef struct Vector2 {
 	float x, y;

@@ -9,6 +9,10 @@
     CP_Image button_white;
     CP_Image white_background;
     CP_Image button_green;
+    CP_Image guide1;
+    CP_Image guide2;
+    CP_Image left;
+    CP_Image right;
     //font 
     CP_Font font;
     CP_Font myFont;
@@ -49,6 +53,8 @@
         button_white = CP_Image_Load("Assets/button_rectangle_line.png");
         white_background = CP_Image_Load("Assets/button_rectangle_line-1.png");
         button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
+        guide1 = CP_Image_Load("Assets/guide1.png");
+        guide2 = CP_Image_Load("Assets/guide2.png");
         //load font 
         font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
         myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
@@ -61,7 +67,8 @@
         
         CP_Sound_PlayMusic(themeSound);
         showControls = 0;
-        
+        left = CP_Image_Load("Assets/left.png");
+        right = CP_Image_Load("Assets/right.png");
 
     }
 
@@ -93,9 +100,8 @@
                 255);
         }
 
-        // 
-        // control window on 
-        if (showControls == 1)
+        // ---------------- Controls overlay ----------------
+        if (showControls == 1 || showControls == 2)
         {
             // dark overlay
             CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
@@ -103,35 +109,57 @@
 
             // panel
             CP_Settings_ImageMode(CP_POSITION_CENTER);
-            float panelW = 800, panelH = 500;
+            float panelWidth = 1600;
+            float panelHeight = 900;
             float panelX = screenW / 2;
             float panelY = screenH / 2;
 
-            CP_Image_Draw(white_background, panelX, panelY, panelW, panelH, 255);
+            // Draw different guides for each panel
+            if (showControls == 1)
+                CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
+            else
+                CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
 
-            // text
-            CP_Font_Set(myFont);
-            CP_Settings_TextSize(40);
-            CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-            CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-
-            float lineH = 55;
-            float startY = panelY - 150;
-
-            CP_Font_DrawText("Controls:", panelX, startY);
-            CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineH);
-            CP_Font_DrawText("Interact: [E]", panelX, startY + 2 * lineH);
-            CP_Font_DrawText("Pick up/Drop Tool: [P]", panelX, startY + 3 * lineH);
-            CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineH);
-            CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineH);
-
-            // return to menu
+            // Close overlay with key 1
             if (CP_Input_KeyReleased(KEY_1))
                 showControls = 0;
 
-            return; 
-        }
+            // Right button (panel 1)
+            if (showControls == 1)
+            {
+                float btnRX = 1550, btnRY = 420, btnRSize = 75;
 
+                // Hover effect
+                if (IsButtonHovered_Center(btnRX, btnRY, btnRSize, btnRSize))
+                    CP_Image_Draw(button_green, btnRX, btnRY, btnRSize, btnRSize, 255);
+                else
+                    CP_Image_Draw(button_white, btnRX, btnRY, btnRSize, btnRSize, 255);
+
+                CP_Image_Draw(right, btnRX, btnRY, 67, 67, 255);
+
+                if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize))
+                    showControls = 2;
+            }
+
+            // Left button (panel 2)
+            if (showControls == 2)
+            {
+                float btnLX = 50, btnLY = 420, btnLSize = 75;
+
+                // Hover effect
+                if (IsButtonHovered_Center(btnLX, btnLY, btnLSize, btnLSize))
+                    CP_Image_Draw(button_green, btnLX, btnLY, btnLSize, btnLSize, 255);
+                else
+                    CP_Image_Draw(button_white, btnLX, btnLY, btnLSize, btnLSize, 255);
+
+                CP_Image_Draw(left, btnLX, btnLY, 67, 67, 255);
+
+                if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize))
+                    showControls = 1;
+            }
+
+            return; // skip main menu buttons while overlay is active
+        }
         // normal menu without controls
         
 

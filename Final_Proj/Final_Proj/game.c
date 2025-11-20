@@ -15,18 +15,23 @@
 
 #include "Pest.h"
 
-
+CP_Image guide1;
+CP_Image guide2;
 CP_Font myFont;
 CP_Font Font;
 CP_Image button_white;
 CP_Image button_green;
 CP_Image button_score;
+CP_Image button_square_white;
+CP_Image button_square_green;
 CP_Image button_circle_white;
 CP_Image button_circle_green;
 CP_Image white_background;
 CP_Image repeat;
 CP_Image next;
 CP_Image home;
+CP_Image left;
+CP_Image right;
 
 
 CP_Sound BtnSound;
@@ -53,7 +58,7 @@ CP_Image pot_spritesheet = NULL;
 
 
 //--------------------- Timer ---------------------//
-#define STAGE_TIMER 300.0f
+#define STAGE_TIMER 480.0f
 float stage_timer;
 CP_Image timer_bg_blue = NULL, timer_bg_red = NULL;
 float timer_pos_x, timer_pos_y;
@@ -116,6 +121,7 @@ CP_Color red, green, blue, gray;
 
 void Game_Init(void)
 {
+
 	paused = 1;
 	showControls = 1;
 	gameOver = 0;
@@ -125,7 +131,10 @@ void Game_Init(void)
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	star_default = CP_Image_Load("Assets/star_outline.png");
 	star_achieved = CP_Image_Load("Assets/star.png");
-
+	guide1 = CP_Image_Load("Assets/guide1.png");
+	guide2 = CP_Image_Load("Assets/guide2.png");
+	left = CP_Image_Load("Assets/left.png");
+	right = CP_Image_Load("Assets/right.png");
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
@@ -159,6 +168,8 @@ void Game_Init(void)
 	button_score = CP_Image_Load("Assets/timer_bg_yellow.png");
 	button_circle_white = CP_Image_Load("Assets/button_round_line.png");
 	button_circle_green = CP_Image_Load("Assets/button_round_gloss.png");
+	button_square_white = CP_Image_Load("Assets/button_square_depth_line.png");
+	button_square_green = CP_Image_Load("Assets/button_square_depth_gloss.png");
 	next = CP_Image_Load("Assets/next.png");
 	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
 	home = CP_Image_Load("Assets/menuList.png");
@@ -237,7 +248,7 @@ void Game_Update(void)
 	//--------------------- Hold Tool ---------------------//
 	//If player is not holding anything
 	if (!held_tool && !held_pot) {
-		if (CP_Input_KeyReleased(KEY_Q)) {
+		if (CP_Input_KeyReleased(KEY_J)) {
 			//Picks up the first tool that is in range
 			for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 				if (level1_tools[i].in_range) {
@@ -282,39 +293,58 @@ void Game_Update(void)
 			CP_System_GetWindowWidth(),
 			CP_System_GetWindowHeight());
 
-		if (showControls) {
-			// Draw the controls panel only
+
+
+
+		if (showControls == 1 || showControls == 2) {
+			// Draw the controls overlay
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
-			float panelWidth = 800;
-			float panelHeight = 500;
+			float panelWidth = 1600;
+			float panelHeight = 900;
 			float panelX = (float)CP_System_GetWindowWidth() / 2;
 			float panelY = (float)CP_System_GetWindowHeight() / 2;
 
-			CP_Image_Draw(white_background, panelX, panelY, panelWidth, panelHeight, 255);
+			if (showControls == 1) {
+				CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
 
-			// Draw text line by line
-			CP_Font_Set(myFont);
-			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255)); // black text
-			CP_Settings_TextSize(40);
-			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+				// Draw right button
+				float btnX = 1550, btnY = 420, btnSize = 75;
+				if (IsCircleHovered(btnX, btnY, btnSize))
+					CP_Image_Draw(button_square_green, btnX, btnY, btnSize, btnSize, 255);
+				else
+					CP_Image_Draw(button_square_white, btnX, btnY, btnSize, btnSize, 255);
 
-			float lineHeight = 55.0f; // vertical spacing between lines
-			float startY = panelY - 150; // start higher up so text is centered
+				CP_Image_Draw(right, btnX + 3, btnY - 5, 67, 67, 255);
 
-			CP_Font_DrawText("Controls:", panelX, startY);
-			CP_Font_DrawText("Move: [W,A,S,D]", panelX, startY + lineHeight);
-			CP_Font_DrawText("Interact: [E]", panelX, startY + 2 * lineHeight);
-			CP_Font_DrawText("Pick up/Drop Tool: [P]", panelX, startY + 3 * lineHeight);
-			CP_Font_DrawText("Pause/Resume: [ESCAPE]", panelX, startY + 4 * lineHeight);
-			CP_Font_DrawText("Back: [1]", panelX, startY + 5 * lineHeight);
+				// Navigate
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+					showControls = 2;
 
-			// Close overlay when Key 1 is pressed
-			if (CP_Input_KeyReleased(KEY_1)) {
-				showControls = 0;
 			}
+			else { // showControls == 2
+				CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
+
+				// Draw left button
+				float btnX = 50, btnY = 420, btnSize = 75;
+				if (IsCircleHovered(btnX, btnY, btnSize))
+					CP_Image_Draw(button_square_green, btnX, btnY, btnSize, btnSize, 255);
+				else
+					CP_Image_Draw(button_square_white, btnX, btnY, btnSize, btnSize, 255);
+
+				CP_Image_Draw(left, btnX - 3, btnY - 5, 67, 67, 255);
+
+				// Navigate
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+					showControls = 1;
+			}
+
+			// Close overlay with key 1
+			if (CP_Input_KeyReleased(KEY_1))
+				showControls = 0;
+
 		}
-		else {
-			// Draw the normal pause menu buttons
+		else { // showControls == 0
+			// Draw normal pause menu
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
 			float btnHeight = 90.0f;
@@ -325,15 +355,12 @@ void Game_Update(void)
 			CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 			for (int i = 0; i < 3; i++) {
-				if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight)) {
+				if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight))
 					CP_Image_Draw(button_green, btnX, btnY[i], btnWidth, btnHeight, 255);
-				}
-				else {
+				else
 					CP_Image_Draw(button_white, btnX, btnY[i], btnWidth, btnHeight, 255);
-				}
 			}
 
-			// Play sound on click
 			for (int i = 0; i < 3; i++) {
 				if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
 					CP_Sound_Play(BtnSound);
@@ -341,15 +368,10 @@ void Game_Update(void)
 				}
 			}
 
-			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) {
-				paused = 0; // Resume
-			}
-			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) {
-				showControls = 1; // Show controls overlay
-			}
-			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight)) {
-				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); // Quit
-			}
+			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) paused = 0;
+			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) showControls = 1;
+			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight))
+				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 
 			// Draw button texts
 			CP_Font_Set(Font);
@@ -366,7 +388,6 @@ void Game_Update(void)
 
 		return; // skip the rest of the game logic
 	}
-
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
@@ -563,13 +584,13 @@ void handle_tool_interaction(Tool* tool) {
 
 		//reset stroke color
 		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
-		if (CP_Input_KeyReleased(KEY_Q)) {
+		if (CP_Input_KeyReleased(KEY_J)) {
 			tool->position.x = tool->initial_pos.x;
 			tool->position.y = tool->initial_pos.y;
 			held_tool = NULL;
 			return;
 		}
-		show_tooltip("Press 'Q' to Place Down");
+		show_tooltip("Press 'J' to Place Down");
 	}
 	else tool->in_range = false;
 
@@ -600,7 +621,7 @@ void handle_tool_interaction(Tool* tool) {
 						CP_Settings_StrokeWeight(3.0f);
 
 						// HANDLE WATERING LOGIC
-						if (CP_Input_KeyDown(KEY_E)) {
+						if (CP_Input_KeyDown(KEY_K)) {
 							// Increase fill while holding E
 							level1_pots[i].plant.fillProgress += fillSpeed * dt;
 							if (level1_pots[i].plant.fillProgress > 1.0f)
@@ -654,7 +675,7 @@ void handle_tool_interaction(Tool* tool) {
 						}
 
 						// LOCK POT WHEN E IS RELEASED OR USES RUN OUT
-						if (CP_Input_KeyReleased(KEY_E) || held_tool->uses <= 0) {
+						if (CP_Input_KeyReleased(KEY_K) || held_tool->uses <= 0) {
 							level1_pots[i].plant.wateredOnce = true;
 
 							// Grow plant only if fill is within the target segment
@@ -674,48 +695,50 @@ void handle_tool_interaction(Tool* tool) {
 					}
 				}
 				//Controls tool tip at btm right
-				show_tooltip("Press & Hold 'E' to Water");
+				CP_Font_Set(myFont);
+				show_tooltip("Press & Hold 'K' to Water");
 
 				break;
-
+				
+				
 			case SOIL:
 				if (level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						level1_pots[i].filled = true;
 					}
-					show_tooltip("Press 'E' to Dig Soil");
+					show_tooltip("Press 'K' to Dig Soil");
 				}
 				if (level1_pots[i].plant.seed_type != EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						kill_plant(&level1_pots[i]);
 					}
-					show_tooltip("Press 'E' to Remove Plant");
+					show_tooltip("Press 'K' to Remove Plant");
 				}
 				break;
 			case SEED_1:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, BERRY_BUSH);
 					}
-					show_tooltip("Press 'E' to Plant Berry Bush");
+					show_tooltip("Press 'K' to Plant Berry Bush");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_2:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY) {
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, CACTUS);
 					}
-					show_tooltip("Press 'E' to Plant Cactus");
+					show_tooltip("Press 'K' to Plant Cactus");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
 			case SEED_3:
 				if (level1_pots[i].filled && level1_pots[i].plant.seed_type == EMPTY){
-					if (CP_Input_KeyReleased(KEY_E)) {
+					if (CP_Input_KeyReleased(KEY_K)) {
 						initialize_plant(&level1_pots[i].plant, ORANGE_BUSH);
 					}
-					show_tooltip("Press 'E' to Plant Orange Bush");
+					show_tooltip("Press 'K' to Plant Orange Bush");
 				}
 				else { show_tooltip("Pot must be empty before planting seed"); }
 				break;
@@ -732,11 +755,11 @@ void handle_tool_interaction(Tool* tool) {
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player.position.x, player.position.y)) {
 
-		if (CP_Input_KeyTriggered(KEY_E)) {
+		if (CP_Input_KeyTriggered(KEY_K)) {
 			held_tool->uses = 3;
 			held_tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 		}
-		show_tooltip("Press 'E' to Refill Bucket");
+		show_tooltip("Press 'K' to Refill Bucket");
 	}
 }
 
@@ -791,7 +814,7 @@ void handle_pot_interaction(Pot* pot) {
 					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
 				//place down pot if tile is placeable and not obstructed by other things
-				if (CP_Input_KeyReleased(KEY_Q)) {
+				if (CP_Input_KeyReleased(KEY_J)) {
 					tile->obstructed = true;
 					held_tool = NULL;
 					held_pot = NULL;
@@ -799,7 +822,7 @@ void handle_pot_interaction(Pot* pot) {
 					pot->position.y = tile->y;
 					pot->occupied_tile = tile;
 				}
-				show_tooltip("Press 'Q' to Place Down");
+				show_tooltip("Press 'K' to Place Down");
 			}
 		}
 	}
@@ -849,25 +872,26 @@ void customer_request() {
 	//--------------------- Create Requests ---------------------//
 	spawnTimer += dt;
 
-	// Spawn every few seconds
+	// --- START DELAY HANDLING ---
 	if (startDelay > 0.0f) {
 		startDelay -= dt;
+
 		if (startDelay <= 0.0f) {
+			// First request appears after the 10s delay
 			spawn_box();
-			spawnTimer = -10.0f;
+
+			// Reset timers cleanly
+			spawnTimer = 0.0f;
+			startDelay = 0.0f;
 		}
+
+		return; // Do not spawn normally yet
 	}
-	else {
-		if (0 == boxCount) {
-			if (spawnTimer >= REQUEST_INTERVAL / 2.0f) {
-				spawn_box();
-				spawnTimer = 0.0f;
-			}
-			else if (spawnTimer >= REQUEST_INTERVAL) {
-				spawn_box();
-				spawnTimer = 0.0f;
-			}
-		}
+
+	// --- NORMAL SPAWNING (after delay finishes) ---
+	if (spawnTimer >= REQUEST_INTERVAL && boxCount < MAX_BOXES) {
+		spawn_box();
+		spawnTimer = 0.0f;
 	}
 
 	for (int i = 0; i < boxCount; i++) {
@@ -1041,13 +1065,13 @@ void draw_gameover_panel(int score)
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
 	int stars = 0;
-	if (score > 1000) {
+	if (score > 5000) {
 		stars = 1;
 	}
-	if (score > 2000) {
+	if (score > 6000) {
 		stars = 2;
 	}
-	if (score > 3000) {
+	if (score > 7000) {
 		stars = 3;
 	}
 
@@ -1059,23 +1083,21 @@ void draw_gameover_panel(int score)
 	// Panel
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	float panelW = 800, panelH = 500;
-	CP_Image_Draw(white_background, w / 2, h / 2, panelW, panelH, 255);
+	CP_Image_Draw(white_background,w / 2, h / 2, panelW, panelH,255);
+	CP_Font_Set(myFont);
+	CP_Settings_TextSize(70);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 
 	if (stars == 0) {
 		// Title
-		CP_Font_Set(myFont);
-		CP_Settings_TextSize(70);
-		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+		
 		CP_Font_DrawText("Level Failed", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
 	else {
 		// Title
-		CP_Font_Set(myFont);
-		CP_Settings_TextSize(70);
-		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
 		CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}

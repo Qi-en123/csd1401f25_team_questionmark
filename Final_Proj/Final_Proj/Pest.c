@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "cprocessing.h"
+#include "plants.h"
+
 
 Pest pests[MAX_PESTS];
 CP_Image pest_spritesheet; // set in Game_Init or elsewhere
@@ -30,16 +32,16 @@ void initialize_pests(void) {
 
 // Spawn pest at top-right, set descend target
 void spawn_pest(Pot* pots, int potCount) {
-    // Build a list of valid pots with plants
+    // Build a list of valid pots (filled, with seed, not being carried)
     int validIndices[MAX_PESTS];
     int validCount = 0;
     for (int i = 0; i < potCount; i++) {
-        if (pots[i].filled && pots[i].plant.seed_type != EMPTY) {
+        if (pots[i].filled && pots[i].plant.seed_type != EMPTY && !pots[i].beingCarried) {
             validIndices[validCount++] = i;
         }
     }
 
-    if (validCount == 0) return; // No pots with plants, don't spawn
+    if (validCount == 0) return; // No valid pots, don't spawn
 
     for (int i = 0; i < MAX_PESTS; i++) {
         if (pests[i].state == PEST_INACTIVE) {
@@ -82,6 +84,11 @@ static float distance(Vector2 a, Vector2 b) {
     return sqrtf(dx * dx + dy * dy);
 }
 
+// Returns true if pot is valid for pest to target
+static bool is_pot_valid(Pot* pot) {
+    return pot->filled && pot->plant.seed_type != EMPTY && !pot->beingCarried;
+}
+
 // Update pests
 void update_pests(Pot* pots, int potCount, Player* player) {
     for (int i = 0; i < MAX_PESTS; i++) {
@@ -108,20 +115,45 @@ void update_pests(Pot* pots, int potCount, Player* player) {
                 p->state = PEST_CHASING;
         }
         else if (p->state == PEST_CHASING) {
-            dir.x = p->target.x - p->position.x;
-            dir.y = p->target.y - p->position.y;
+            Pot* targetPot = &pots[p->targetPotIndex];
+
+            // Check every frame if target is still valid (not carried, filled, has seed)
+            if (!is_pot_valid(targetPot)) {
+                int validIndices[MAX_PESTS];
+                int validCount = 0;
+
+                // Build list of valid pots
+                for (int j = 0; j < potCount; j++) {
+                    if (is_pot_valid(&pots[j])) {
+                        validIndices[validCount++] = j;
+                    }
+                }
+
+                if (validCount > 0) {
+                    // Pick a new random valid pot
+                    int randomIndex = rand() % validCount;
+                    p->targetPotIndex = validIndices[randomIndex];
+                    targetPot = &pots[p->targetPotIndex];
+                }
+                else {
+                    // No valid pots left, flee
+                    p->state = PEST_FLEEING;
+                    continue;
+                }
+            }
+
+            // Move toward the current valid targetPot
+            Vector2 dir;
+            dir.x = targetPot->position.x - p->position.x;
+            dir.y = targetPot->position.y - p->position.y;
             dir = normalize(dir);
 
             p->position.x += dir.x * p->speed * dt;
             p->position.y += dir.y * p->speed * dt;
 
-            // Check if reached target
-            if (distance(p->position, p->target) < 5.0f) {
-                // Only affect pots with plants
-                Pot* targetPot = &pots[p->targetPotIndex];
-                if (targetPot->filled && targetPot->plant.seed_type != EMPTY) {
-                    kill_plant(targetPot); // reset the pot
-                }
+            // Reached pot
+            if (distance(p->position, targetPot->position) < 5.0f) {
+                kill_plant(targetPot);
                 p->state = PEST_INACTIVE;
             }
         }
@@ -152,10 +184,10 @@ void update_pests(Pot* pots, int potCount, Player* player) {
                 p->state = PEST_INACTIVE;
         }
 
-        //flips pest sprite based on x-axis direction
+        // Flip sprite
         p->rotation = (dir.x < 0) ? -1 : 1;
 
-        // Animation
+        // Animate
         p->time_between_frame += dt;
         if (p->time_between_frame > FRAME_DURATION) {
             p->time_between_frame = 0.0f;
@@ -163,6 +195,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
         }
     }
 }
+
 
 // Render pests
 void render_pests(void) {
