@@ -19,6 +19,36 @@ int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 
     return 0;
 }
+int IsButtonHovered_Center(float centerX, float centerY, float width, float height)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - width / 2;
+	float right = centerX + width / 2;
+	float top = centerY - height / 2;
+	float bottom = centerY + height / 2;
+
+	return (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom);
+}
+int IsButtonClicked_Center(float centerX, float centerY, float rectW, float rectH)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - rectW / 2;
+	float right = centerX + rectW / 2;
+	float top = centerY - rectH / 2;
+	float bottom = centerY + rectH / 2;
+
+	if (mouseX >= left && mouseX <= right &&
+		mouseY >= top && mouseY <= bottom)
+	{
+		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
+			return 1;
+	}
+	return 0;
+}
 int IsCircleHovered(float center_x, float center_y, float diameter)
 {
 	float mx = CP_Input_GetMouseX();

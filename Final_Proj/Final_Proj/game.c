@@ -15,18 +15,23 @@
 
 #include "Pest.h"
 
-CP_Image guide;
+CP_Image guide1;
+CP_Image guide2;
 CP_Font myFont;
 CP_Font Font;
 CP_Image button_white;
 CP_Image button_green;
 CP_Image button_score;
+CP_Image button_square_white;
+CP_Image button_square_green;
 CP_Image button_circle_white;
 CP_Image button_circle_green;
 CP_Image white_background;
 CP_Image repeat;
 CP_Image next;
 CP_Image home;
+CP_Image left;
+CP_Image right;
 
 
 CP_Sound BtnSound;
@@ -126,7 +131,10 @@ void Game_Init(void)
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	star_default = CP_Image_Load("Assets/star_outline.png");
 	star_achieved = CP_Image_Load("Assets/star.png");
-	guide = CP_Image_Load("Assets/guide.png");
+	guide1 = CP_Image_Load("Assets/guide1.png");
+	guide2 = CP_Image_Load("Assets/guide2.png");
+	left = CP_Image_Load("Assets/left.png");
+	right = CP_Image_Load("Assets/right.png");
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
@@ -160,6 +168,8 @@ void Game_Init(void)
 	button_score = CP_Image_Load("Assets/timer_bg_yellow.png");
 	button_circle_white = CP_Image_Load("Assets/button_round_line.png");
 	button_circle_green = CP_Image_Load("Assets/button_round_gloss.png");
+	button_square_white = CP_Image_Load("Assets/button_square_depth_line.png");
+	button_square_green = CP_Image_Load("Assets/button_square_depth_gloss.png");
 	next = CP_Image_Load("Assets/next.png");
 	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
 	home = CP_Image_Load("Assets/menuList.png");
@@ -283,25 +293,58 @@ void Game_Update(void)
 			CP_System_GetWindowWidth(),
 			CP_System_GetWindowHeight());
 
-		if (showControls) {
-			// Draw the controls panel only
+
+
+
+		if (showControls == 1 || showControls == 2) {
+			// Draw the controls overlay
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
 			float panelWidth = 1600;
 			float panelHeight = 900;
-			float panelX = (float)CP_System_GetWindowWidth() / 2 ;
+			float panelX = (float)CP_System_GetWindowWidth() / 2;
 			float panelY = (float)CP_System_GetWindowHeight() / 2;
 
-			CP_Image_Draw(guide, panelX, panelY, panelWidth, panelHeight, 255);
+			if (showControls == 1) {
+				CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
 
-			
+				// Draw right button
+				float btnX = 1550, btnY = 420, btnSize = 75;
+				if (IsCircleHovered(btnX, btnY, btnSize))
+					CP_Image_Draw(button_square_green, btnX, btnY, btnSize, btnSize, 255);
+				else
+					CP_Image_Draw(button_square_white, btnX, btnY, btnSize, btnSize, 255);
 
-			// Close overlay when Key 1 is pressed
-			if (CP_Input_KeyReleased(KEY_1)) {
-				showControls = 0;
+				CP_Image_Draw(right, btnX + 3, btnY - 5, 67, 67, 255);
+
+				// Navigate
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+					showControls = 2;
+
 			}
+			else { // showControls == 2
+				CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
+
+				// Draw left button
+				float btnX = 50, btnY = 420, btnSize = 75;
+				if (IsCircleHovered(btnX, btnY, btnSize))
+					CP_Image_Draw(button_square_green, btnX, btnY, btnSize, btnSize, 255);
+				else
+					CP_Image_Draw(button_square_white, btnX, btnY, btnSize, btnSize, 255);
+
+				CP_Image_Draw(left, btnX - 3, btnY - 5, 67, 67, 255);
+
+				// Navigate
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+					showControls = 1;
+			}
+
+			// Close overlay with key 1
+			if (CP_Input_KeyReleased(KEY_1))
+				showControls = 0;
+
 		}
-		else {
-			// Draw the normal pause menu buttons
+		else { // showControls == 0
+			// Draw normal pause menu
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
 			float btnHeight = 90.0f;
@@ -312,15 +355,12 @@ void Game_Update(void)
 			CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 			for (int i = 0; i < 3; i++) {
-				if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight)) {
+				if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight))
 					CP_Image_Draw(button_green, btnX, btnY[i], btnWidth, btnHeight, 255);
-				}
-				else {
+				else
 					CP_Image_Draw(button_white, btnX, btnY[i], btnWidth, btnHeight, 255);
-				}
 			}
 
-			// Play sound on click
 			for (int i = 0; i < 3; i++) {
 				if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
 					CP_Sound_Play(BtnSound);
@@ -328,15 +368,10 @@ void Game_Update(void)
 				}
 			}
 
-			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) {
-				paused = 0; // Resume
-			}
-			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) {
-				showControls = 1; // Show controls overlay
-			}
-			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight)) {
-				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); // Quit
-			}
+			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) paused = 0;
+			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) showControls = 1;
+			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight))
+				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 
 			// Draw button texts
 			CP_Font_Set(Font);
@@ -353,7 +388,6 @@ void Game_Update(void)
 
 		return; // skip the rest of the game logic
 	}
-
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
