@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "game.h"
 #include "mainmenu.h"
+#include "level2.h"
+
 //image
 CP_Image spriteSheet_level;
 CP_Image mainmenu_bg_level;
@@ -147,7 +149,9 @@ void Level_Update(void)
     if (IsButtonClicked(btnX[0], btnY, btnWidth, btnHeight) == 1) {
         CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
     }
-
+    if (IsButtonClicked(btnX[1], btnY, btnWidth, btnHeight) == 1) {
+        CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
+    }
 
     //draw exit button
     if (IsButtonHovered(50, 50, 100, 100) || IsButtonClicked(50, 50, 100, 100)) {
