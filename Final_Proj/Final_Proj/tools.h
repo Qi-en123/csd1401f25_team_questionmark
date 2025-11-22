@@ -24,18 +24,18 @@ typedef enum Tool_name {
 typedef struct Tool {
 	Tool_name tool_name;
 	Vector2 position;
-	Vector2 initial_pos;
 	float rotation;
 	CP_Image tool_sprite;
 	bool in_range; //checks if player is within range of tool
 	bool rotatable;
 	bool selected;
 	int uses;
+	Tile* occupied_tile; //pointer to tile that its occupying, used to de-occupy when picked up
 }Tool;
 
 void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tile* tile);
 
-void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool* held_tool);
+void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool* held_tool, void* held_pot);
 void render_held_tool(Tool* tool);
 
 #endif // !TOOLS_H

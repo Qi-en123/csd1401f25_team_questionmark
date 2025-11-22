@@ -8,6 +8,7 @@ You can use this for player Movement & Interactions
 
 #include "cprocessing.h"
 #include "utils.h"
+#include "map.h"
 
 #define PLAYER_WIDTH 18
 #define PLAYER_HEIGHT 18
@@ -32,6 +33,7 @@ void initialize_player(Player* player, float speed, float posx, float posy);
 void handle_player_input(Player* player);
 
 void move_player(float* pos, float speed);
+void detect_collision_player(float* posx, float* posy, Tile* tiles, float speed);
 void render_player(Player* player, CP_Image spritesheet);
 
 #endif // !PLAYER_H

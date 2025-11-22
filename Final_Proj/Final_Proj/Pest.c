@@ -143,7 +143,6 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             }
 
             // Move toward the current valid targetPot
-            Vector2 dir;
             dir.x = targetPot->position.x - p->position.x;
             dir.y = targetPot->position.y - p->position.y;
             dir = normalize(dir);

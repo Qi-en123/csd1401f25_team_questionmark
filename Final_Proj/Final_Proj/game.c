@@ -47,7 +47,7 @@ Tool level1_tools[L1_TOOL_SIZE];
 /*!!!!Due to time constraint thrs a bug, DO NOT skip seed numbers : !!!!
   !!!!		e.g. do SEED_1,2,3, DO NOT DO SEED_2,3 or SEED_1,3		!!!!
   !!!!Tools must always have WATERING_CAN, SOIL & SEED_1 (Minimum)  !!!!*/
-Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2 };
+Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2};
 Tool* held_tool; // a pointer to the tool held
 
 //--------------------- Pots ---------------------//
@@ -212,6 +212,7 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
+	CP_Graphics_ClearBackground(green);
 	// Don't allow pause if game is over
 	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
 		paused = !paused;
@@ -232,13 +233,22 @@ void Game_Update(void)
 	draw_tile_map(map_tiles);
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
-	draw_modified_map();
+	draw_modified_map(map_tiles);
+
+	//Player shadow
+	CP_Settings_EllipseMode(CP_POSITION_CENTER);
+	CP_Settings_NoStroke();
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
+
+	float shadow_x = player.position.x;
+	float shadow_y = player.position.y + (PLAYER_HEIGHT - 2.0f) * PLAYER_SCALE / 2.0f;
+	CP_Graphics_DrawEllipse(shadow_x, shadow_y, PLAYER_WIDTH * PLAYER_SCALE * 0.65f, 20.0f);
 
 	//--------------------- Pots ---------------------//
 	render_pots(level1_pots, pot_spritesheet, L1_POT_SIZE, player.position.x, player.position.y, held_pot, held_tool);
 
 	//--------------------- Tools ---------------------//
-	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool);
+	render_tools(level1_tools, L1_TOOL_SIZE, player.position.x, player.position.y, held_tool, held_pot);
 	//Render tool behind player if player facing Left or Up
 	if (90 == player.rotation || 180 == player.rotation) {
 		if (held_tool) { render_held_tool(held_tool); }
@@ -252,6 +262,7 @@ void Game_Update(void)
 			//Picks up the first tool that is in range
 			for (int i = 0; i < L1_TOOL_SIZE; ++i) {
 				if (level1_tools[i].in_range) {
+					level1_tools[i].occupied_tile->obstructed = false;
 					held_tool = &level1_tools[i];
 					break;
 				}
@@ -399,6 +410,8 @@ void Game_Update(void)
 
 	//--------------------- Player ---------------------//
 	handle_player_input(&player);
+	detect_collision_player(&player.position.x, &player.position.y, map_tiles, player.speed);
+
 	//Render tool infront if player facing Right or Down
 	if (0 == player.rotation || 270 == player.rotation) {
 		if (held_tool) { render_held_tool(held_tool); }
@@ -416,7 +429,6 @@ void Game_Update(void)
 	if (stage_timer <= 0 && !gameOver)
 	{
 		gameOver = 1;
-		starCount = 0;      // Fail
 	}
 
 	//--------------------- Score ---------------------//
@@ -544,54 +556,55 @@ void move_tool(float* posx, float* posy, float* rotation) {
 	//Have to make it look like the player is holding it (right handed)
 	switch (player.rotation) {
 	case 0: //DOWN
-		offset_x = 0.0f;
-		offset_y = 44.0f;
+		offset_x = -3.5f;
+		offset_y = 6.2f;
 		break;
 	case 90: //LEFT
-		offset_x = 0.0f;
-		offset_y = 30.0f;
+		offset_x = -3.0f;
+		offset_y = 3.0f;
 		break;
 	case 180: //UP
-		offset_x = 35.0f;
-		offset_y = 15.0f;
+		offset_x = 3.5f;
+		offset_y = 1.0f;
 		break;
 	case 270: //RIGHT
-		offset_x = 25.0f;
-		offset_y = 38.0f;
+		offset_x = 2.5f;
+		offset_y = 5.0f;
 		break;
 	default:
 		break;
 	}
-	*posx = player.position.x + offset_x;
-	*posy = player.position.y + offset_y;
+	*posx = player.position.x + offset_x * PLAYER_SCALE;
+	*posy = player.position.y + offset_y * PLAYER_SCALE;
 	*rotation = player.rotation - 180.0f;
 }
 
 //only called when player is holding tool
 void handle_tool_interaction(Tool* tool) {
-	//if player is back at where he picked up the tool
-	if (AreCirclesIntersecting(player.position.x, player.position.y + 8.0f, 9.0f, //abit of offset on y-axis for accuracy
-		tool->initial_pos.x, tool->initial_pos.y - TOOL_RANGE_Y_OFFSET, 40.0f + TOOL_RANGE)) {
+	for (int row = 0; row < TILE_ROWS; ++row) {
+		for (int col = 0; col < TILE_COLS; ++col) {
+			Tile* const tile = &map_tiles[row][col];
 
-		tool->in_range = true;
-		//highlights initial grid
-		CP_Settings_RectMode(CP_POSITION_CORNER);
-		CP_Settings_NoStroke();
-		CP_Settings_Fill(CP_Color_Create(255, 255, 0, 80));
-		CP_Graphics_DrawRect(tool->initial_pos.x, tool->initial_pos.y,
-			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
+			if (IsWithinRect(tile->x, tile->y,
+				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+				player.position.x, player.position.y) &&
+				!(tile->obstructed) && //if no pots on tile
+				tile->placeable) { //if tile is placeable (set manually)
 
-		//reset stroke color
-		CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
-		if (CP_Input_KeyReleased(KEY_J)) {
-			tool->position.x = tool->initial_pos.x;
-			tool->position.y = tool->initial_pos.y;
-			held_tool = NULL;
-			return;
+				if (CP_Input_KeyReleased(KEY_J)) {
+					tile->obstructed = true;
+					held_tool = NULL;
+					tool->position.x = tile->x;
+					tool->position.y = tile->y;
+					tool->occupied_tile = tile;
+					return;
+				}
+
+				//show_tooltip("Press 'J' to Place Down");
+			}
+		
 		}
-		show_tooltip("Press 'J' to Place Down");
-	}
-	else tool->in_range = false;
+	}	
 
 	// Progress bar logic
 	float rectWidth = 40.0f;
@@ -611,9 +624,8 @@ void handle_tool_interaction(Tool* tool) {
 
 					// Only proceed if tool has uses
 					if (held_tool->uses > 0) {
-						float rectX = level1_pots[i].position.x - (rectWidth * potBarSegments / 2)
-							+ (POT_HEIGHT * POT_SCALE / 2);
-						float rectY = level1_pots[i].position.y - rectHeight - 30.0f;
+						float rectX = level1_pots[i].position.x - rectWidth * potBarSegments / 2.0f;
+						float rectY = level1_pots[i].position.y - POT_HEIGHT * POT_SCALE - rectHeight;
 
 						CP_Settings_RectMode(CP_POSITION_CORNER);
 						CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
@@ -625,12 +637,6 @@ void handle_tool_interaction(Tool* tool) {
 							level1_pots[i].plant.fillProgress += fillSpeed * dt;
 							if (level1_pots[i].plant.fillProgress > 1.0f)
 								level1_pots[i].plant.fillProgress = 1.0f;
-
-							// Gradually decrease uses while holding E
-							//float useDrainRate = 1.0f; // adjust to change how fast uses drain
-							//held_tool->uses -= dt * useDrainRate;
-							//if (held_tool->uses < 0)
-							//	held_tool->uses = 0;
 						}
 
 						// DRAW PROGRESS BAR (always draw, even if E is not held)
@@ -678,7 +684,7 @@ void handle_tool_interaction(Tool* tool) {
 							level1_pots[i].plant.wateredOnce = true;
 
 							// Grow plant only if fill is within the target segment
-							int targetSegment = level1_pots[i].plant.water_needed; // 2nd last segment
+							int targetSegment = level1_pots[i].plant.water_needed;
 							float segmentStart = targetSegment * (rectWidth + spacing);
 							float segmentEnd = segmentStart + rectWidth;
 
@@ -770,27 +776,27 @@ void move_pot(float* posx, float* posy) {
 	//Rough offset for now
 	switch (player.rotation) {
 	case 0: //DOWN
-		offset_x += 0.0f;
-		offset_y += 15.0f;
+		offset_x += 0.5f;
+		offset_y += 4.0f;
 		break;
 	case 180: //UP
-		offset_x += 0.0f;
-		offset_y -= 12.0f;
+		offset_x += 0.5f;
+		offset_y -= 3.0f;
 		break;
 	case 90: //LEFT
-		offset_x -= 40.0f;
-		offset_y += 10.0f;
+		offset_x -= 9.0f;
+		offset_y += 0.0f;
 		break;
 	case 270: //RIGHT
-		offset_x += 32.0f;
-		offset_y += 10.0f;
+		offset_x += 9.0f;
+		offset_y += 0.0f;
 		break;
 	default:
 		break;
 	}
 
-	*posx = player.position.x + (PLAYER_WIDTH * PLAYER_SCALE / 2) + offset_x;
-	*posy = player.position.y + (PLAYER_HEIGHT * PLAYER_SCALE / 2) + offset_y;
+	*posx = player.position.x + offset_x * PLAYER_SCALE;
+	*posy = player.position.y + offset_y * PLAYER_SCALE;
 }
 
 //only called when player is holding pot
@@ -806,7 +812,7 @@ void handle_pot_interaction(Pot* pot) {
 				tile->placeable) { //if tile is placeable (set manually)
 
 				//highlights grid that pot would be placed
-				CP_Settings_RectMode(CP_POSITION_CORNER);
+				CP_Settings_RectMode(CP_POSITION_CENTER);
 				CP_Settings_NoStroke();
 				CP_Settings_Fill(CP_Color_Create(255, 255, 0, 80));
 				CP_Graphics_DrawRect(tile->x, tile->y,
