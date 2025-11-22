@@ -32,9 +32,9 @@ CP_Image next;
 CP_Image home;
 CP_Image left;
 CP_Image right;
-
-
 CP_Sound BtnSound;
+
+extern int level;
 //--------------------- Player ---------------------//
 Player player;
 float player_speed;
@@ -121,7 +121,7 @@ CP_Color red, green, blue, gray;
 
 void Game_Init(void)
 {
-
+	level = loadLevel();
 	paused = 1;
 	showControls = 1;
 	gameOver = 0;
@@ -1074,6 +1074,10 @@ void draw_gameover_panel(int score)
 		stars = 3;
 	}
 
+	if (stars > 0) {
+		level = 2;
+		saveLevel(level);
+	}
 
 	// Dim background
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));

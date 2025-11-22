@@ -1,5 +1,7 @@
 #include <math.h>
 #include "cprocessing.h"
+#include <stdio.h>
+#include "utils.h"
 // Returns 1 if mouse clicked inside rectangle
 int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 {
@@ -122,4 +124,30 @@ void show_tooltip(const char* text) {
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_RIGHT, CP_TEXT_ALIGN_V_TOP);
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Font_DrawText(text, 1550.0f, 830.0f);
+}
+int loadLevel() {
+	FILE* file = fopen("savelevel.txt", "r");
+	int level = 1;
+
+	if (file == NULL) {
+		return level;
+	}
+
+	fscanf_s(file, "%d", &level);
+	fclose(file);
+
+	// Print inside game window later, not here.
+	return level;
+}
+void saveLevel(int level) {
+	FILE* file = fopen("savelevel.txt", "w");  // open file for writing
+	if (file == NULL) {
+		printf("Failed to save level.\n");
+		return;
+	}
+
+	fprintf(file, "%d\n", level);  // write the level number
+	fclose(file);
+
+	printf("Level saved: %d\n", level);
 }

@@ -21,7 +21,7 @@
     CP_Sound themeSound;
     int quitClicked = 0;       // flag if Quit was clicked
     float quitStartTime = 0;   // time when quit button was clicked
-
+   
     // Number of clouds
     #define NUM_CLOUDS 3
 
@@ -43,10 +43,11 @@
     int bgWidth;
 
     int showControls;
-
+    int level = 1;
 
     void Main_Menu_Init(void)
     {
+        level = loadLevel();
         //load mainmenu background and spritesheet for cloud from asset folder
         mainmenu_bg = CP_Image_Load("Assets/backgroundColorGrass.png");
         spriteSheet = CP_Image_Load("Assets/spritesheet_default.png");

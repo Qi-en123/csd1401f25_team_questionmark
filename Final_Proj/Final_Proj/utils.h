@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include "cprocessing.h"
 // Sound for button clicked
 CP_Sound BtnSound;
@@ -18,3 +20,6 @@ typedef struct Vector2 {
 void show_tooltip(const char* text);
 
 typedef enum { false, true } bool;
+
+int loadLevel();
+void saveLevel(int level);
