@@ -212,7 +212,6 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
-	CP_Graphics_ClearBackground(green);
 	// Don't allow pause if game is over
 	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
 		paused = !paused;
