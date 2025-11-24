@@ -97,7 +97,7 @@ void Game_Exit(void);
 
 void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font);
 void move_tool(float* posx, float* posy, float* rotation, Player* player);
-void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool);
+void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool, int size);
 void spawn_box(Request_State* request, int tool_size);
 
 

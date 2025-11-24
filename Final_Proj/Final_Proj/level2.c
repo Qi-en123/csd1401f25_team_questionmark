@@ -230,7 +230,7 @@ void Level2_Update(void) {
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
-			handle_tool_interaction(held_tool, &player, map_tiles, level2_pots, &held_tool);
+			handle_tool_interaction(held_tool, &player, map_tiles, level2_pots, &held_tool, L2_POT_SIZE);
 		}
 	}
 	//draw player

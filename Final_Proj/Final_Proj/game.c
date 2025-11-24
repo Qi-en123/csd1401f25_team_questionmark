@@ -264,7 +264,7 @@ void Game_Update(void)
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
-			handle_tool_interaction(held_tool, &player, map_tiles, level1_pots, &held_tool);
+			handle_tool_interaction(held_tool, &player, map_tiles, level1_pots, &held_tool, L1_POT_SIZE);
 		}
 	}
 	//draw player
@@ -592,7 +592,7 @@ void move_tool(float* posx, float* posy, float* rotation, Player* player) {
 }
 
 //only called when player is holding tool
-void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool) {
+void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool, int size) {
 	for (int row = 0; row < TILE_ROWS; ++row) {
 		for (int col = 0; col < TILE_COLS; ++col) {
 			Tile* const tile = tiles + row * TILE_COLS + col;
@@ -625,7 +625,7 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 	float spacing = 0.0f;
 	float fillSpeed = 0.4f;
 	//--------------------- Plant Interaction ---------------------//
-	for (int i = 0; i < L1_POT_SIZE; ++i) {
+	for (int i = 0; i < size; ++i) {
 		if (pots[i].selected) {
 			switch (tool->tool_name) {
 			case WATERING_CAN:
