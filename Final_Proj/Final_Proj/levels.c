@@ -159,7 +159,7 @@ void Level_Update(void)
     if (IsButtonClicked(btnX[1], btnY, btnWidth, btnHeight) == 1) {
         if (level == 2) {
             CP_Sound_Play(BtnSound);
-            CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+            CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
         }
         else {
             // Only trigger flash once when button is clicked

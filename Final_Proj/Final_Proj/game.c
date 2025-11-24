@@ -4,7 +4,7 @@
 #include "utils.h" //for intersecting function
 #include "game.h"
 #include <stdio.h>
-
+#include "level2.h"
 #include "player.h"
 #include "tools.h"
 #include "plants.h"
@@ -418,7 +418,7 @@ void Game_Update(void)
 	CP_Settings_TextSize(40);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	CP_Font_DrawText(buffer_score, timer_pos_x, 130);
+	CP_Font_DrawText(buffer_score, timer.pos_x, 130);
 
 
 	// Flashing logic
@@ -1202,7 +1202,7 @@ void draw_gameover_panel(int score, void *init, void *update, void *exit)
 	}
 
 	if (IsCircleClicked(btnX[1], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-		CP_Engine_SetNextGameStateForced(init, update, exit);
+		CP_Engine_SetNextGameStateForced(Game_Init, Game_Update, Game_Exit);
 	}
 
 	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
@@ -1212,7 +1212,7 @@ void draw_gameover_panel(int score, void *init, void *update, void *exit)
 			flashTimer = 0;
 		}
 		else {
-			CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+			CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
 		}
 	}
 

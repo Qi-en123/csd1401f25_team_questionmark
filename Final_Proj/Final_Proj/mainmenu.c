@@ -122,15 +122,7 @@ void Main_Menu_Update(void)
 		else
 			CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
 
-		// Close overlay with key 1
-		if (CP_Input_KeyReleased(KEY_1))
-			showControls = 0;
-
-                if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize)) {
-                    CP_Sound_Play(BtnSound);
-                    showControls = 2;
-                }
-            }
+	
 		// Right button (panel 1)
 		if (showControls == 1)
 		{
@@ -146,13 +138,20 @@ void Main_Menu_Update(void)
 
 			if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize))
 				showControls = 2;
-		}
 
-                if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize)) {
-                    CP_Sound_Play(BtnSound);
-                    showControls = 1;
-                }
-            }
+			// Close overlay with key 1
+			if (CP_Input_KeyReleased(KEY_1))
+				showControls = 0;
+
+			if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize)) {
+				CP_Sound_Play(BtnSound);
+				showControls = 2;
+			}
+		}
+		
+
+              
+            
 		// Left button (panel 2)
 		if (showControls == 2)
 		{
@@ -166,8 +165,12 @@ void Main_Menu_Update(void)
 
 			CP_Image_Draw(left, btnLX, btnLY, 67, 67, 255);
 
-			if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize))
+		
+
+			if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize)) {
+				CP_Sound_Play(BtnSound);
 				showControls = 1;
+			}
 		}
 
 		return; // skip main menu buttons while overlay is active
