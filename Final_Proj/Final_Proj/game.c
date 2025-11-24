@@ -1226,6 +1226,9 @@ void draw_gameover_panel(int score)
 			showText = true;
 			flashTimer = 0;
 		}
+		else {
+			CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+		}
 	}
 
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
