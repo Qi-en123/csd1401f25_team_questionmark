@@ -4,7 +4,7 @@
 #include "plants.h"
 
 //Initializes the tools needed/unlocked for each level
-void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tile* tile) {
+void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tile* tile, int uses) {
 	//each tool diff initialpos and different sprites
 	//this function just to set the initial pos of each tool
 	for (int i = 0; i < tool_size; i++) {
@@ -19,7 +19,7 @@ void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tile* t
 		tool->tool_name = tool_names[i];
 		tool->in_range = false;
 		tool->rotation = 0.0f;
-		tool->uses = 3; //only used for watering_can :p
+		tool->uses = uses; //only used for watering_can :p
 		tool->selected = false; 
 
 		//Setting the sprites of the tools

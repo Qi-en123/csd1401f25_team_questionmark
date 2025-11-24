@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "game.h"
 #include "mainmenu.h"
+#include "level2.h"
+
 //image
 CP_Image spriteSheet_level;
 CP_Image mainmenu_bg_level;

@@ -33,7 +33,7 @@ typedef struct Tool {
 	Tile* occupied_tile; //pointer to tile that its occupying, used to de-occupy when picked up
 }Tool;
 
-void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tile* tile);
+void initialize_tools(Tool* tools, int size, Tool_name* tool_names, Tile* tile, int uses);
 
 void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool* held_tool, void* held_pot);
 void render_held_tool(Tool* tool);
