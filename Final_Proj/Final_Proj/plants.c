@@ -1,5 +1,8 @@
 #include "plants.h"
 #include "cprocessing.h"
+#include "player.h"
+#include "tools.h"
+#include "utils.h"
 
 //Initialize all the pot values, based on how many in the level
 void initialize_pots(Pot *pots, int size, Tile* tile) {
@@ -32,18 +35,24 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size,
 		pots[i].selected = false;
 	}
 
+	float range = -2.5f;
 	//highlights nearby pot
 	for (int i = 0; i < size; ++i) {
 		if (&pots[i] == pot) { continue; } //skips rendering held pot
-		if (IsWithinRect(pots[i].position.x, pots[i].position.y, //pot pos
-			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,  //pot height & width
-			player_posx, player_posy + 8.0f) &&  //player pos, abit of offset on y-axis for accuracy
+
+		float pot_x = pots[i].position.x;
+		float pot_y = pots[i].position.y;
+
+		if (AreRectsIntersecting(pot_x, pot_y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
+			player_posx, player_posy + (1.0f * PLAYER_SCALE),
+			(PLAYER_WIDTH + range) * PLAYER_SCALE, (PLAYER_HEIGHT + range) * PLAYER_SCALE) &&
 			pot == NULL) { //if player isnt holding a pot
+
 			if (!pot_selected) {
 				pots[i].selected = true;
 				pot_selected = true;
 			}
-			if (!held_tool) { show_tooltip("Press 'Q' to Pick Up"); }
+			if (!held_tool) { show_tooltip("Press 'J' to Pick Up"); }
 		}
 		else {
 			pots[i].selected = false;
@@ -57,11 +66,12 @@ void render_pots(Pot* pots, CP_Image pot_spritesheet, int size,
 		CP_Settings_NoStroke();
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 120));
 
-		float shadow_x = pots[i].position.x + (POT_WIDTH * POT_SCALE / 2) - 1.0f;
-		float shadow_y = pots[i].position.y + POT_HEIGHT * POT_SCALE - 5.0f;
-		CP_Graphics_DrawEllipse(shadow_x, shadow_y, POT_WIDTH * POT_SCALE * 0.65f, 15.0f);
+		float shadow_x = pots[i].position.x - 1.0f;
+		float shadow_y = pots[i].position.y + POT_HEIGHT * POT_SCALE / 2.0f - 6.0f;
+		CP_Graphics_DrawEllipse(shadow_x, shadow_y, POT_WIDTH * POT_SCALE * 0.78f, 22.0f);
 
 		//Pot
+		CP_Settings_ImageMode(CP_POSITION_CENTER);
 		CP_Image_DrawSubImage(pot_spritesheet, pots[i].position.x, pots[i].position.y, POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 			start_x, start_y, start_x + POT_WIDTH, start_y + POT_HEIGHT, 255);
 
@@ -126,7 +136,9 @@ void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
 void render_plant(Plant* plant, float posx, float posy, bool selected) {
 	//sprites are in order (seed, seedling, youth, adult): growth_stage 0 == seed; x=0 etc.
 	//y=0, non-highlighted, y=1, highlighted
-	CP_Image_DrawSubImage(plant->plant_spritesheet, posx + PLANT_OFFSETX, posy + PLANT_OFFSETY,
+	float plant_x = posx + POT_WIDTH * POT_SCALE * 0.01f;
+	float plant_y = posy - POT_HEIGHT * POT_SCALE * 0.48f;
+	CP_Image_DrawSubImage(plant->plant_spritesheet, plant_x, plant_y,
 		POT_WIDTH * POT_SCALE, POT_HEIGHT * POT_SCALE,
 		PLANT_WIDTH * plant->growth_stage, PLANT_HEIGHT * selected,
 		PLANT_WIDTH + PLANT_WIDTH * plant->growth_stage, PLANT_HEIGHT + PLANT_HEIGHT * selected, 255);
@@ -170,14 +182,19 @@ void render_sunlight_bar(Plant* plant, float posx, float posy) {
 	//Bar background
 	float bar_width = 200.0f;
 	float bar_height = 24.0f;
+	float bar_x = posx - bar_width / 2.0f;
+	float bar_y = posy - POT_HEIGHT * POT_SCALE;
+
+	CP_Settings_RectMode(CP_POSITION_CORNER);
 	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 100));
-	CP_Graphics_DrawRect(posx - (bar_width / 2) + (POT_WIDTH * POT_SCALE / 2),
-		posy - 30.0f, bar_width, bar_height);
+	//CP_Graphics_DrawRect(posx - (bar_width / 2) + (POT_WIDTH * POT_SCALE / 2),
+	//	posy - 30.0f, bar_width, bar_height);
+	CP_Graphics_DrawRect(bar_x, bar_y, bar_width, bar_height);
 
 	//Sunlight bar
 	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 180));
-	CP_Graphics_DrawRect(posx - (bar_width / 2) + (POT_WIDTH * POT_SCALE / 2),
-		posy - 30.0f, bar_width * plant->sunlight_amount, bar_height);
+	CP_Graphics_DrawRect(bar_x, bar_y, bar_width * plant->sunlight_amount, bar_height);
+	
 }
 
 void kill_plant(Pot* pot) {

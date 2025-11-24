@@ -17,6 +17,8 @@ typedef struct Vector2 {
 	float x, y;
 }Vector2;
 
+int AreRectsIntersecting(float rect1_x, float rect1_y, float width1, float height1,
+	float rect2_x, float rect2_y, float width2, float height2);
 void show_tooltip(const char* text);
 
 typedef enum { false, true } bool;

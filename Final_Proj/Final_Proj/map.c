@@ -4,8 +4,8 @@ int map[TILE_ROWS][TILE_COLS] = {
 
 {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
 {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 6, 6},
-	{1,1,2,1,2,2,1,2,1,2,1,1,2,1,2,2,1,1,1,2},
-	{2,1,1,9,2,1,2,2,1,2,1,1,2,2,1,2,1,1,2,1},
+	{1,1,2,9,2,2,1,2,1,2,1,1,2,1,2,2,1,1,1,2},
+	{2,1,1,1,2,1,2,2,1,2,1,1,2,2,1,2,1,1,2,1},
 	{1,2,1,1,2,2,1,2,1,2,2,1,1,1,2,1,2,1,1,2},
 	{2,2,1,2,1,1,2,1,1,2,1,1,1,2,1,2,2,1,2,1},
 	{1,1,2,1,1,2,2,1,1,2,2,1,1,2,1,2,1,2,1,2},
@@ -23,7 +23,7 @@ int modified_map[TILE_ROWS][TILE_COLS] = {
 {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
 {11, 11, 11, 8, 4, 7, 7, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
 	{1, 2, 2, 9, 2, 9, 9, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2},
-	{2, 1, 1, 9, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
+	{2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
 	{1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2},
 	{2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1},
 	{1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2},
@@ -83,11 +83,13 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 	right -= 1;
 	bottom -= 1;
 
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	CP_Image_DrawSubImage(spriteSheetTiles,
 		x, y, w, h,
 		left, top, right, bottom,
 		255);
 }
+
 void draw_tile_map(Tile* map_tile)
 {
 	// Get current window size
@@ -107,14 +109,15 @@ void draw_tile_map(Tile* map_tile)
 			tile->tile_index = map[row][col];
 
 			// Use integer positions to avoid gaps
-			tile->x = col * tile_w;
-			tile->y = row * tile_h;
+			tile->x = col * tile_w + tile_w/2.0f;
+			tile->y = row * tile_h + tile_h/2.0f;
 
 			draw_tile(tile->tile_index, tile->x, tile->y, tile_w, tile_h);
 		}
 	}
 }
-void draw_modified_map(void)
+
+void draw_modified_map(Tile* map_tile)
 {
 	float screen_w = CP_System_GetWindowWidth();
 	float screen_h = CP_System_GetWindowHeight();
@@ -126,8 +129,15 @@ void draw_modified_map(void)
 		for (int col = 0; col < TILE_COLS; col++)
 		{
 			int tile = modified_map[row][col];
-			float x = col * tile_w;
-			float y = row * tile_h;
+			float x = col * tile_w + tile_w/2.0f;
+			float y = row * tile_h + tile_h/2.0f;
+
+			//no time kinda bs paiseh
+			if (tile == 11 || tile == 5 || tile == 4 || tile == 8) {
+				map_tile[row * TILE_COLS + col].walkable = false;
+			}
+			else { map_tile[row * TILE_COLS + col].walkable = true; }
+
 
 			// If tile is 8, stretch it vertically to cover 2 tiles
 			if (tile == 8 )
