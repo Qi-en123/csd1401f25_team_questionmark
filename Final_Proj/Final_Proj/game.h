@@ -101,9 +101,9 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 void spawn_box(Request_State* request, int tool_size);
 
 
-void draw_gameover_panel(int score, void* init, void *update, void *exit);
+void draw_gameover_panel(int* score, void* init, void *update, void *exit);
 void move_pot(float* posx, float* posy, Player* player);
 void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_tool, Pot** held_pot);
-void customer_request(Request_State* request, Pot* pots, Tile* tiles, int score, int tool_size, int pot_size);
+void customer_request(Request_State* request, Pot* pots, Tile* tiles, int* score, int tool_size, int pot_size);
 void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* player, CP_Image pest_spritesheet);
 #endif // !GAME_H

@@ -342,7 +342,7 @@ void Level2_Update(void) {
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(score, Level2_Init, Level2_Update, Level2_Exit);
+		draw_gameover_panel(&score, Level2_Init, Level2_Update, Level2_Exit);
 		return;   // Stop all other game updates
 	}
 
@@ -357,7 +357,7 @@ void Level2_Update(void) {
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request(&l2_request, level2_pots, map_tiles, score, L2_TOOL_SIZE, L2_POT_SIZE);
+	customer_request(&l2_request, level2_pots, map_tiles, &score, L2_TOOL_SIZE, L2_POT_SIZE);
 	simulate_pests(pest_spawn_interval, level2_pots, L2_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
