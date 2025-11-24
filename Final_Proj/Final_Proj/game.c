@@ -35,6 +35,9 @@ CP_Image right;
 CP_Sound BtnSound;
 
 extern int level;
+extern int flashTimer; // timer for flashing
+extern int flashInterval; // frames between flashes
+extern bool showText;
 //--------------------- Player ---------------------//
 Player player;
 float player_speed;
@@ -122,6 +125,10 @@ CP_Color red, green, blue, gray;
 void Game_Init(void)
 {
 	level = loadLevel();
+	showText = false;
+	flashTimer = 0;
+	flashInterval = 30;
+
 	paused = 1;
 	showControls = 1;
 	gameOver = 0;
@@ -317,8 +324,10 @@ void Game_Update(void)
 				CP_Image_Draw(right, btnX + 3, btnY - 5, 67, 67, 255);
 
 				// Navigate
-				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize)) {
+					CP_Sound_Play(BtnSound);
 					showControls = 2;
+				}
 
 			}
 			else { // showControls == 2
@@ -334,8 +343,10 @@ void Game_Update(void)
 				CP_Image_Draw(left, btnX - 3, btnY - 5, 67, 67, 255);
 
 				// Navigate
-				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
+				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize)) {
+					CP_Sound_Play(BtnSound);
 					showControls = 1;
+				}
 			}
 
 			// Close overlay with key 1
@@ -428,6 +439,25 @@ void Game_Update(void)
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	CP_Font_DrawText(buffer_score, timer_pos_x, 130);
+
+
+	// Flashing logic
+	if (showText) {
+		flashTimer++;
+		if (flashTimer % flashInterval < flashInterval / 2) {
+			CP_Font_Set(Font);
+			CP_Settings_TextSize(64.0f);
+			CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
+			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+			CP_Font_DrawText("Level not unlocked", CP_System_GetWindowWidth() / 2.0f, 100.0f);
+		}
+
+		//  stop flashing after some time
+		if (flashTimer > flashInterval * 2.5) { // 
+			showText = false;
+		}
+	}
+
 }
 
 void Game_Exit(void)
@@ -1075,8 +1105,14 @@ void draw_gameover_panel(int score)
 	}
 
 	if (stars > 0) {
-		level = 2;
-		saveLevel(level);
+		if (level == 1) {
+			level = 2; // unlock level 2
+			saveLevel(level);
+		}
+		else if (level >= 2) {
+			saveLevel(level);
+		}
+		// if level >= 2, no need to change
 	}
 
 	// Dim background
@@ -1181,6 +1217,10 @@ void draw_gameover_panel(int score)
 
 	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 	{
+		if (level < 2) {
+			showText = true;
+			flashTimer = 0;
+		}
 	}
 
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {

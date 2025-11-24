@@ -33,11 +33,14 @@ float bgSpeed_level = 0.5f;
 // leaving a thin black line in between.
 int bgWidth_level;
 
-
-
+extern int level;
+int flashTimer; // timer for flashing
+int flashInterval; // frames between flashes
+bool showText;
+extern CP_Font Font;
 void Level_Init(void)
 {
-    
+    level = loadLevel();
     //load mainmenu background and mainmenu_bg_level_Level for cloud from asset folder
     mainmenu_bg_level = CP_Image_Load("Assets/backgroundColorGrass.png");
     spriteSheet_level = CP_Image_Load("Assets/spriteSheet_level_default.png");
@@ -55,7 +58,11 @@ void Level_Init(void)
     bgX_level = 0;
     // Get background width
     bgWidth_level = CP_Image_GetWidth(mainmenu_bg_level);
+    Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
+    showText = false;
+    flashTimer = 0;
+    flashInterval = 30;
 
 
 }
@@ -146,6 +153,44 @@ void Level_Update(void)
 
     if (IsButtonClicked(btnX[0], btnY, btnWidth, btnHeight) == 1) {
         CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+    }
+    if (IsButtonClicked(btnX[1], btnY, btnWidth, btnHeight) == 1) {
+        if (level == 2) {
+            CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+        }
+        else {
+            // Only trigger flash once when button is clicked
+            showText = true;
+            flashTimer = 0;
+        }
+    }
+    if (IsButtonClicked(btnX[2], btnY, btnWidth, btnHeight) == 1) {
+        if (level == 3) {
+            CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+        }
+        else {
+            // Only trigger flash once when button is clicked
+            showText = true;
+            flashTimer = 0;
+        }
+    }
+
+
+    // Flashing logic
+    if (showText) {
+        flashTimer++;
+        if (flashTimer % flashInterval < flashInterval / 2) {
+            CP_Font_Set(Font);
+            CP_Settings_TextSize(64.0f);
+            CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
+            CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+            CP_Font_DrawText("Level not unlocked", CP_System_GetWindowWidth() / 2.0f, 100.0f);
+        }
+
+        //  stop flashing after some time
+        if (flashTimer > flashInterval * 2.5) { // 
+            showText = false;
+        }
     }
 
 

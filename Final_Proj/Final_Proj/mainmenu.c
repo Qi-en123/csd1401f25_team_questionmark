@@ -138,8 +138,10 @@
 
                 CP_Image_Draw(right, btnRX, btnRY, 67, 67, 255);
 
-                if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize))
+                if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize)) {
+                    CP_Sound_Play(BtnSound);
                     showControls = 2;
+                }
             }
 
             // Left button (panel 2)
@@ -155,8 +157,10 @@
 
                 CP_Image_Draw(left, btnLX, btnLY, 67, 67, 255);
 
-                if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize))
+                if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize)) {
+                    CP_Sound_Play(BtnSound);
                     showControls = 1;
+                }
             }
 
             return; // skip main menu buttons while overlay is active
