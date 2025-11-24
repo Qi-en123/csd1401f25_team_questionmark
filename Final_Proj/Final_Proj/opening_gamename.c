@@ -2,13 +2,15 @@
 #include "mainmenu.h"
 
 CP_Image gameName;
+
 CP_BOOL opening_gameName = FALSE;
 int alpha_gameName = 0;
-
+extern CP_Sound openingSound;
 float startTime_gameName = 0;
 
 void Opening_GameName_Init(void)
 {
+    openingSound = CP_Sound_LoadMusic("Assets/opening.wav");
     gameName = CP_Image_Load("Assets/gamename.png");
     alpha_gameName = 0;
     opening_gameName = FALSE;
@@ -51,5 +53,5 @@ void Opening_GameName_Update(void)
 void Opening_GameName_Exit(void)
 {
     CP_Image_Free(gameName);
-
+  
 }

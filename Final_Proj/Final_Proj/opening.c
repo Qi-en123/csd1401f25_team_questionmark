@@ -3,16 +3,19 @@
 
 CP_Image logo;
 CP_BOOL opening = FALSE;
+CP_Sound openingSound;
 int alpha = 0;
 
 float startTime = 0;
 
 void Opening_Init(void)
 {
+    openingSound = CP_Sound_LoadMusic("Assets/opening.wav");
     logo = CP_Image_Load("Assets/DigiPen_BLACK.png");
     alpha = 0;
     opening = FALSE;
     startTime = CP_System_GetSeconds();
+    CP_Sound_PlayMusic(openingSound);
 }
 
 void Opening_Update(void)

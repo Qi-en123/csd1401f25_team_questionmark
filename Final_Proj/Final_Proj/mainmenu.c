@@ -19,7 +19,7 @@ CP_Font font;
 CP_Font myFont;
 CP_Sound BtnSound;
 //sound
-CP_Sound themeSound;
+extern CP_Sound openingSound;
 int quitClicked = 0;       // flag if Quit was clicked
 float quitStartTime = 0;   // time when quit button was clicked
 
@@ -60,7 +60,7 @@ void Main_Menu_Init(void)
 	//load font 
 	font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
-	themeSound = CP_Sound_LoadMusic("Assets/ENCOURAGEMENT-CorporateMSCCRP1_58.wav");
+	//themeSound = CP_Sound_LoadMusic("Assets/mainmenu.wav");
 	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
 	// x coordinate of background initate to 0 whenever we reopen mainmenu
 	bgX = 0;
@@ -250,7 +250,7 @@ void Main_Menu_Exit(void)
 	CP_Image_Free(mainmenu_bg);
 	CP_Font_Free(font);
 	CP_Font_Free(myFont);
-	CP_Sound_Free(themeSound);
+	CP_Sound_Free(openingSound);
 	CP_Image_Free(button_white);
 	CP_Image_Free(white_background);
 	CP_Image_Free(button_green);
