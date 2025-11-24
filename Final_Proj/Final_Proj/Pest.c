@@ -197,7 +197,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
 
 
 // Render pests
-void render_pests(void) {
+void render_pests(CP_Image pest_spritesheet) {
     CP_Settings_ImageMode(CP_POSITION_CORNER);
     for (int i = 0; i < MAX_PESTS; i++) {
         Pest* p = &pests[i];

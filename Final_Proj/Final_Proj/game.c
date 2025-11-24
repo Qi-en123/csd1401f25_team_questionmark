@@ -27,17 +27,33 @@ Tool level1_tools[L1_TOOL_SIZE];
   !!!!Tools must always have WATERING_CAN, SOIL & SEED_1 (Minimum)  !!!!*/
 Tool_name level1_tool_names[L1_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2 };
 Tool* held_tool; // a pointer to the tool held
+int watering_can_capacity;
 
 //--------------------- Pots ---------------------//
 #define L1_POT_SIZE 5
 Pot level1_pots[L1_POT_SIZE];
 Pot* held_pot; // a pointer to the pot held
 
+Request_State l1_request;
+
+//Ctrls
+CP_Image white_background;
+CP_Image repeat;
+CP_Image next;
+CP_Image home;
+CP_Image star_default;
+CP_Image star_achieved;
+CP_Image button_circle_white;
+CP_Image button_circle_green;
+
 //Frequently used colors
 CP_Color red, green, blue, gray;
 
+CP_Font myFont;
+CP_Font Font;
 
-void load_assets() {
+void Game_Init(void)
+{
 	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	star_default = CP_Image_Load("Assets/star_outline.png");
@@ -49,11 +65,11 @@ void load_assets() {
 	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 
 	//Request
-	requestbg = CP_Image_Load("Assets/button_square_gradient-1.png");
-	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
-	berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
-	cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
-	orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
+	l1_request.requestBg = CP_Image_Load("Assets/button_square_gradient-1.png");
+	l1_request.customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
+	l1_request.berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
+	l1_request.cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
+	l1_request.orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
 
 	//player
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
@@ -89,11 +105,8 @@ void load_assets() {
 	timer.pos_y = 30.0f + timer.height / 2;
 	timer.font_color = CP_Color_Create(255, 255, 255, 255);
 #pragma endregion
-}
 
-void Game_Init(void)
-{
-	load_assets();
+
 	level = loadLevel();
 	paused = 1;
 	showControls = 1;
@@ -112,9 +125,12 @@ void Game_Init(void)
 	srand((unsigned int)time(NULL));
 	
 	CP_System_SetFrameRate(60);
-	boxCount = 0;
-	spawnTimer = 0;
-	startDelay = 10.0f;
+	l1_request.boxCount = 0;
+	l1_request.spawn_timer = 0;
+	l1_request.start_delay = 10.0f;
+	l1_request.boxes = boxes;
+	l1_request.request_timer = 80.0f;
+	l1_request.request_interval = 20.0f;
 
 	//Initialize player with default values
 	player_speed = 400.0f;
@@ -123,7 +139,8 @@ void Game_Init(void)
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	
 	//Tools
-	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &map_tiles[4][1]);
+	watering_can_capacity = 3;
+	initialize_tools(level1_tools, L1_TOOL_SIZE, level1_tool_names, &map_tiles[4][1], watering_can_capacity);
 	held_tool = NULL;
 
 
@@ -132,6 +149,7 @@ void Game_Init(void)
 	held_pot = NULL;
 
 	//pest
+	pest_spawn_interval = 40.0f;
 	initialize_pests();
 
 	//Colors
@@ -213,7 +231,7 @@ void Game_Update(void)
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y, &player);
-			handle_pot_interaction(held_pot);
+			handle_pot_interaction(held_pot, &player, map_tiles, &held_tool, &held_pot);
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
@@ -347,8 +365,8 @@ void Game_Update(void)
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request();
-	simulate_pests();
+	customer_request(&l1_request, level1_pots, map_tiles, score, L1_TOOL_SIZE, L1_POT_SIZE);
+	simulate_pests(pest_spawn_interval, level1_pots, L1_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
@@ -420,16 +438,16 @@ void Game_Exit(void)
 	}
 
 	//Request sprites
-	CP_Image_Free(requestbg);
-	CP_Image_Free(berrybush);
-	CP_Image_Free(cactus);
-	CP_Image_Free(orangebush);
+	CP_Image_Free(l1_request.requestBg);
+	CP_Image_Free(l1_request.berrybush);
+	CP_Image_Free(l1_request.cactus);
+	CP_Image_Free(l1_request.orangebush);
 
 	CP_Image_Free(star_default);
 	CP_Image_Free(star_achieved);
 
 	//--------------------- Free Audio ---------------------//
-	CP_Sound_Free(customerNoti);
+	CP_Sound_Free(l1_request.customerNoti);
 	CP_Sound_Free(BtnSound);
 }
 
@@ -531,10 +549,6 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 				player->position.x, player->position.y) &&
 				!(tile->obstructed) && //if no pots on tile
 				tile->placeable) { //if tile is placeable (set manually)
-
-				CP_Settings_Fill(CP_Color_Create(0, 0, 0, 100));
-				CP_Graphics_DrawRect(tile->x, tile->y,
-					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
 
 				if (CP_Input_KeyReleased(KEY_J)) {
 					tile->obstructed = true;
@@ -745,14 +759,14 @@ void move_pot(float* posx, float* posy, Player* player) {
 }
 
 //only called when player is holding pot
-void handle_pot_interaction(Pot* pot) {
+void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_tool, Pot** held_pot) {
 	for (int row = 0; row < TILE_ROWS; ++row) {
 		for (int col = 0; col < TILE_COLS; ++col) {
-			Tile* const tile = &map_tiles[row][col];
+			Tile* const tile = tiles + row * TILE_COLS + col;
 
 			if (IsWithinRect(tile->x, tile->y,
 				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
-				player.position.x, player.position.y) &&
+				player->position.x, player->position.y) &&
 				!(tile->obstructed) && //if no pots on tile
 				tile->placeable) { //if tile is placeable (set manually)
 
@@ -766,28 +780,28 @@ void handle_pot_interaction(Pot* pot) {
 				//place down pot if tile is placeable and not obstructed by other things
 				if (CP_Input_KeyReleased(KEY_J)) {
 					tile->obstructed = true;
-					held_tool = NULL;
-					held_pot = NULL;
+					*held_tool = NULL;
+					*held_pot = NULL;
 					pot->position.x = tile->x;
 					pot->position.y = tile->y;
 					pot->occupied_tile = tile;
 				}
-				show_tooltip("Press 'K' to Place Down");
+				show_tooltip("Press 'J' to Place Down");
 			}
 		}
 	}
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
-void spawn_box(void) {
-	if (boxCount >= MAX_BOXES) return;
+void spawn_box(Request_State* request, int tool_size) {
+	if (request->boxCount >= MAX_BOXES) return;
 
 	float screenW = (float)CP_System_GetWindowWidth();
 	float screenH = (float)CP_System_GetWindowHeight();
 
 	//  Shift all existing boxes left
-	for (int i = 0; i < boxCount; i++) {
-		boxes[i].targetX -= (boxes[i].width + 10);  // push left
+	for (int i = 0; i < request->boxCount; i++) {
+		request->boxes[i].targetX -= (request->boxes[i].width + 10);  // push left
 	}
 
 	//  Create new box on the right
@@ -801,117 +815,118 @@ void spawn_box(void) {
 
 	newBox.removing = 0;
 	newBox.removeSpeed = 0.0f;
-	newBox.lateTimer = REQUEST_TIMER;
+	newBox.lateTimer = request->request_timer;
 
 	// --- Random plant request setup ---
 	newBox.numPlants = CP_Random_RangeInt(0, 1); // gives 1, 2, or 3
 	if (newBox.numPlants < 1) newBox.numPlants = 1; // So that it will spawn at least 1
 	if (newBox.numPlants > 3) newBox.numPlants = 3;
 	for (int i = 0; i < newBox.numPlants; i++) {
-		newBox.plantType = CP_Random_RangeInt(0, L1_TOOL_SIZE - 3);
+		newBox.plantType = CP_Random_RangeInt(0, tool_size - 3);
 		if (newBox.plantType > 2) newBox.plantType = 2; // safety clamp
 		if (newBox.plantType < 0) newBox.plantType = 0;
 	}
 
 	// Add new box to array
-	boxes[boxCount++] = newBox;
-	//CP_Sound_Play(customerNoti);
+	request->boxes[request->boxCount++] = newBox;
+	//CP_Sound_Play(request->customerNoti);
 }
 
-void customer_request() {
+void customer_request(Request_State* request, Pot* pots, Tile* tiles, int score, int tool_size, int pot_size) {
 	//--------------------- Create Requests ---------------------//
-	spawnTimer += dt;
+	request->spawn_timer += dt;
 
 	// --- START DELAY HANDLING ---
-	if (startDelay > 0.0f) {
-		startDelay -= dt;
+	if (request->start_delay > 0.0f) {
+		request->start_delay -= dt;
 
-		if (startDelay <= 0.0f) {
+		if (request->start_delay <= 0.0f) {
 			// First request appears after the 10s delay
-			spawn_box();
+			spawn_box(request, tool_size);
 
 			// Reset timers cleanly
-			spawnTimer = 0.0f;
-			startDelay = 0.0f;
+			request->spawn_timer = 0.0f;
+			request->start_delay = 0.0f;
 		}
 
 		return; // Do not spawn normally yet
 	}
 
 	// --- NORMAL SPAWNING (after delay finishes) ---
-	if (spawnTimer >= REQUEST_INTERVAL && boxCount < MAX_BOXES) {
-		spawn_box();
-		spawnTimer = 0.0f;
+	if (request->spawn_timer >= request->request_interval && request->boxCount < MAX_BOXES) {
+		spawn_box(request, tool_size);
+		request->spawn_timer = 0.0f;
 	}
 
-	for (int i = 0; i < boxCount; i++) {
-		if (!boxes[i].removing)
+	for (int i = 0; i < request->boxCount; i++) {
+		if (!request->boxes[i].removing)
 		{
-			boxes[i].lateTimer -= dt;
+			request->boxes[i].lateTimer -= dt;
 
-			if (boxes[i].lateTimer <= 0.0f)
+			if (request->boxes[i].lateTimer <= 0.0f)
 			{
-				boxes[i].removing = 1;
-				boxes[i].removeSpeed = 300.0f;
+				request->boxes[i].removing = 1;
+				request->boxes[i].removeSpeed = 300.0f;
 			}
 		}
 	}
 
-	for (int i = 0; i < boxCount; i++) {
+	for (int i = 0; i < request->boxCount; i++) {
 
-		if (boxes[i].removing)
+		if (request->boxes[i].removing)
 		{
-			boxes[i].y -= boxes[i].removeSpeed * dt;
+			request->boxes[i].y -= request->boxes[i].removeSpeed * dt;
 
 			// If off-screen, delete it
-			if (boxes[i].y + boxes[i].height < 0)
+			if (request->boxes[i].y + request->boxes[i].height < 0)
 			{
 				// shift boxes down
-				for (int j = 0; j < boxCount - i; ++j) {
-					boxes[i + j] = boxes[i + j + 1];
+				for (int j = 0; j < request->boxCount - i; ++j) {
+					request->boxes[i + j] = request->boxes[i + j + 1];
 				}
 				if (i != 0) {
 					for (int j = 0; j < i; ++j) {
-						boxes[j].targetX += boxes[j].width + 10;
+						request->boxes[j].targetX += request->boxes[j].width + 10;
 					}
 				}
 
-				boxCount--;
+				request->boxCount--;
 				i--; // loop checks next box correctly
 				continue;
 			}
 		}
 
-		if (boxes[i].x > boxes[i].targetX + 1.5f) {
-			boxes[i].x -= boxes[i].speed * dt;
+		if (request->boxes[i].x > request->boxes[i].targetX + 1.5f) {
+			request->boxes[i].x -= request->boxes[i].speed * dt;
 		}
-		else if (boxes[i].x < boxes[i].targetX - 1.5f) {
-			boxes[i].x += boxes[i].speed * dt;
+		else if (request->boxes[i].x < request->boxes[i].targetX - 1.5f) {
+			request->boxes[i].x += request->boxes[i].speed * dt;
 		}
 		else {
-			boxes[i].x = boxes[i].targetX;
+			request->boxes[i].x = request->boxes[i].targetX;
 		}
 
 		CP_Settings_ImageMode(CP_POSITION_CORNER);
-		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
+		CP_Image_Draw(request->requestBg, request->boxes[i].x, request->boxes[i].y,
+			request->boxes[i].width, request->boxes[i].height, 170);
 		CP_Image plantImage = NULL;
 		float imgSize = 60.0f; // plant icon size
 		float spacing = 10.0f; // space between icons
 
 
-		int num = boxes[i].numPlants;
+		int num = request->boxes[i].numPlants;
 		if (num > 0) {
 			//float totalWidth = num * imgSize + (num - 1) * spacing;
-			float startX = boxes[i].x + (boxes[i].width - imgSize) / 2.0f;
-			float startY = boxes[i].y + (boxes[i].height - imgSize) / 2.0f;
+			float startX = request->boxes[i].x + (request->boxes[i].width - imgSize) / 2.0f;
+			float startY = request->boxes[i].y + (request->boxes[i].height - imgSize) / 2.0f;
 
 			CP_Image plantImage = NULL;
 
-			switch (boxes[i].plantType) {
-			case 0: plantImage = berrybush; break;
-			case 1: plantImage = cactus; break;
-			case 2: plantImage = orangebush; break;
-			default: plantImage = berrybush; break; // fallback
+			switch (request->boxes[i].plantType) {
+			case 0: plantImage = request->berrybush; break;
+			case 1: plantImage = request->cactus; break;
+			case 2: plantImage = request->orangebush; break;
+			default: plantImage = request->berrybush; break; // fallback
 			}
 
 			CP_Image_Draw(
@@ -922,7 +937,7 @@ void customer_request() {
 			);
 		}
 
-		float timeLeft = boxes[i].lateTimer;
+		float timeLeft = request->boxes[i].lateTimer;
 		if (timeLeft < 0) timeLeft = 0;
 
 		CP_Font_Set(Font);
@@ -933,11 +948,12 @@ void customer_request() {
 		char timerStr[8];
 		snprintf(timerStr, sizeof(timerStr), "%.1f", timeLeft);
 
-		CP_Font_DrawText(timerStr, boxes[i].x + boxes[i].width / 2, boxes[i].y + boxes[i].height + 20);
+		CP_Font_DrawText(timerStr, request->boxes[i].x + request->boxes[i].width / 2,
+			request->boxes[i].y + request->boxes[i].height + 20);
 	}
 
 	//--------------------- Fulfill Request ---------------------//
-	Tile* dropoff[2] = { &map_tiles[2][5], &map_tiles[2][6] };
+	Tile* dropoff[2] = { tiles + 2 * TILE_COLS + 5, tiles + 2 * TILE_COLS + 6 };
 
 	const char* praises[] = { "NICE!", "AWESOME!", "GOOD JOB!" };
 	int numPraises = 3;
@@ -949,26 +965,26 @@ void customer_request() {
 		//if drop-off point is occupied
 		if (dropoff[i]->obstructed) {
 
-			for (int j = 0; j < L1_POT_SIZE; ++j) {
+			for (int j = 0; j < pot_size; ++j) {
 				//find pot that is occupying drop-off point
-				if (level1_pots[j].occupied_tile == dropoff[i] &&
-					level1_pots[j].plant.growth_stage == ADULT &&
-					boxCount > 0) {
+				if (pots[j].occupied_tile == dropoff[i] &&
+					pots[j].plant.growth_stage == ADULT &&
+					request->boxCount > 0) {
 
-					for (int k = 0; k < boxCount; ++k) {
-						if (level1_pots[j].plant.seed_type == boxes[k].plantType) {
-							if (0 == boxes[k].removing) {
-								score += 1000.0f * (1.0f + (boxes[k].lateTimer / 60.0f));
+					for (int k = 0; k < request->boxCount; ++k) {
+						if (pots[j].plant.seed_type == request->boxes[k].plantType) {
+							if (0 == request->boxes[k].removing) {
+								score += 1000.0f * (1.0f + (request->boxes[k].lateTimer / 60.0f));
 
 								int idx = rand() % numPraises;
 								snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
 								praiseTimer = 1.0f;
 
-								boxes[k].removing = 1;
-								boxes[k].removeSpeed = 300.0f;
+								request->boxes[k].removing = 1;
+								request->boxes[k].removeSpeed = 300.0f;
 
 								//remove plant								
-								kill_plant(&level1_pots[j]);
+								kill_plant(&pots[j]);
 								break; //exit early
 							}
 						}
@@ -992,20 +1008,20 @@ void customer_request() {
 	}
 }
 
-void simulate_pests() {
+void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* player, CP_Image pest_spritesheet) {
 	//--------------------- Pests ---------------------//
 	static float pestSpawnTimer = 0.0f;
 	static float nextSpawnTime = 0.0f;
 
 	if (pestSpawnTimer >= nextSpawnTime) {
-		spawn_pest(level1_pots, L1_POT_SIZE);
+		spawn_pest(pots, pot_size);
 		pestSpawnTimer = 0.0f;
-		nextSpawnTime = PEST_SPAWN_INTERVAL + ((float)rand() / RAND_MAX) * 5.0f;
+		nextSpawnTime = spawn_interval + ((float)rand() / RAND_MAX) * 5.0f;
 	}
 
 	// pass player to update_pests
-	update_pests(level1_pots, L1_POT_SIZE, &player);
-	render_pests();
+	update_pests(pots, pot_size, player);
+	render_pests(pest_spritesheet);
 
 	pestSpawnTimer += dt;
 }

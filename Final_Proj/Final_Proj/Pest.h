@@ -33,6 +33,6 @@ extern CP_Image pest_spritesheet; // global reference to the sprite sheet
 void initialize_pests(void);
 void spawn_pest(Pot* pots, int potCount);
 void update_pests(Pot* pots, int potCount, Player* player);
-void render_pests(void);
+void render_pests(CP_Image pest_spritesheet);
 
 #endif // PEST_H

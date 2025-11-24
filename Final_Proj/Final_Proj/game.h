@@ -9,19 +9,11 @@
 #pragma region Variables
 static CP_Image guide1;
 static CP_Image guide2;
-static CP_Font myFont;
-static CP_Font Font;
 static CP_Image button_white;
 static CP_Image button_green;
 static CP_Image button_score;
 static CP_Image button_square_white;
 static CP_Image button_square_green;
-static CP_Image button_circle_white;
-static CP_Image button_circle_green;
-static CP_Image white_background;
-static CP_Image repeat;
-static CP_Image next;
-static CP_Image home;
 static CP_Image left;
 static CP_Image right;
 
@@ -35,7 +27,6 @@ static CP_Image player_spritesheet = NULL;
 //--------------------- Pots ---------------------//
 static CP_Image pot_spritesheet = NULL;
 
-
 //--------------------- Timer ---------------------//
 typedef struct Timer {
 	float stage_timer;
@@ -46,21 +37,10 @@ typedef struct Timer {
 	CP_Color font_color;
 }Timer;
 
-//--------------------- Requests ---------------------//
-static CP_Image requestbg = NULL;
-static CP_Image berrybush = NULL;
-static CP_Image orangebush = NULL;
-static CP_Image cactus = NULL;
-static CP_Image pest_spritesheet = NULL;
-static CP_Sound customerNoti;
-static float startDelay;
-#define REQUEST_TIMER 80.0f
-#define REQUEST_INTERVAL 20.0f
-
 //--------------------- Pests ---------------------//
-#define PEST_SPAWN_INTERVAL 40.0f
+static float pest_spawn_interval;
 
-typedef struct {
+typedef struct Box{
 	float x, y;
 	float targetX;
 	float width, height;
@@ -76,6 +56,21 @@ typedef struct {
 
 } Box;
 
+
+//--------------------- Requests ---------------------//
+typedef struct Request_State{
+	Box* boxes;
+	int boxCount;
+	float spawn_timer;
+	float start_delay;
+	CP_Image berrybush;
+	CP_Image cactus;
+	CP_Image orangebush;
+	CP_Image requestBg;
+	CP_Sound customerNoti;
+	float request_interval;
+	float request_timer;
+}Request_State;
 // Maximum number of box
 #define MAX_BOXES 5
 static Box boxes[MAX_BOXES];
@@ -92,10 +87,7 @@ static int showControls = 1; // 0 = hidden, 1 = showing
 static int gameOver = 0;   // 0 = running, 1 = ended
 static int starCount = 0;  // 0-3 stars
 static int score = 0;
-static CP_Image star_default;
-static CP_Image star_achieved;
 #pragma endregion
-
 
 void Game_Init(void);
 
@@ -106,14 +98,12 @@ void Game_Exit(void);
 void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font);
 void move_tool(float* posx, float* posy, float* rotation, Player* player);
 void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool);
-void spawn_box(void);
+void spawn_box(Request_State* request, int tool_size);
 
 
 void draw_gameover_panel(int score, void* init, void *update, void *exit);
 void move_pot(float* posx, float* posy, Player* player);
-void handle_pot_interaction(Pot* pot);
-void customer_request();
-void simulate_pests();
-
-void load_assets();
+void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_tool, Pot** held_pot);
+void customer_request(Request_State* request, Pot* pots, Tile* tiles, int score, int tool_size, int pot_size);
+void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* player, CP_Image pest_spritesheet);
 #endif // !GAME_H

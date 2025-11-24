@@ -16,7 +16,7 @@
 
 #include "Pest.h"
 
-#define L2_TIMER 300.0f
+#define L2_TIMER 360.0f
 static Timer timer;
 
 //--------------------- Tools ---------------------//
@@ -27,14 +27,29 @@ Tool level2_tools[L2_TOOL_SIZE];
   !!!!Tools must always have WATERING_CAN, SOIL & SEED_1 (Minimum)  !!!!*/
 Tool_name level2_tool_names[L2_TOOL_SIZE] = { WATERING_CAN, SOIL, SEED_1, SEED_2, SEED_3 };
 Tool* held_tool; // a pointer to the tool held
+int watering_can_capacity;
 
 //--------------------- Pots ---------------------//
 #define L2_POT_SIZE 8
 Pot level2_pots[L2_POT_SIZE];
 Pot* held_pot; // a pointer to the pot held
 
+Request_State l2_request;
+
+CP_Image white_background;
+CP_Image repeat;
+CP_Image next;
+CP_Image home;
+CP_Image star_default;
+CP_Image star_achieved;
+CP_Image button_circle_white;
+CP_Image button_circle_green;
+
 //Frequently used colors
 CP_Color red, green, blue, gray;
+
+CP_Font myFont;
+CP_Font Font;
 
 void Level2_Init(void) {
 	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
@@ -48,11 +63,11 @@ void Level2_Init(void) {
 	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
 
 	//Request
-	requestbg = CP_Image_Load("Assets/button_square_gradient-1.png");
-	customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
-	berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
-	cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
-	orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
+	l2_request.requestBg = CP_Image_Load("Assets/button_square_gradient-1.png");
+	l2_request.customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
+	l2_request.berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
+	l2_request.cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
+	l2_request.orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
 
 	//player
 	player_spritesheet = CP_Image_Load("Assets/farmer_spritesheet.png");
@@ -105,9 +120,12 @@ void Level2_Init(void) {
 	srand((unsigned int)time(NULL));
 
 	CP_System_SetFrameRate(60);
-	boxCount = 0;
-	spawnTimer = 0;
-	startDelay = 10.0f;
+	l2_request.boxCount = 0;
+	l2_request.spawn_timer = 0;
+	l2_request.start_delay = 10.0f;
+	l2_request.boxes = boxes;
+	l2_request.request_timer = 80.0f;
+	l2_request.request_interval = 20.0f;
 
 	//Initialize player with default values
 	player_speed = 400.0f;
@@ -116,7 +134,8 @@ void Level2_Init(void) {
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 
 	//Tools
-	initialize_tools(level2_tools, L2_TOOL_SIZE, level2_tool_names, &map_tiles[4][1]);
+	watering_can_capacity = 5;
+	initialize_tools(level2_tools, L2_TOOL_SIZE, level2_tool_names, &map_tiles[4][1], watering_can_capacity);
 	held_tool = NULL;
 
 
@@ -125,6 +144,7 @@ void Level2_Init(void) {
 	held_pot = NULL;
 
 	//pest
+	pest_spawn_interval = 3.0f;
 	initialize_pests();
 
 	//Colors
@@ -156,6 +176,7 @@ void Level2_Update(void) {
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	draw_modified_map(map_tiles);
+
 
 	//Player shadow
 	CP_Settings_EllipseMode(CP_POSITION_CENTER);
@@ -205,7 +226,7 @@ void Level2_Update(void) {
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y, &player);
-			handle_pot_interaction(held_pot);
+			handle_pot_interaction(held_pot, &player, map_tiles, &held_tool, &held_pot);
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
@@ -215,7 +236,7 @@ void Level2_Update(void) {
 	//draw player
 	render_player(&player, player_spritesheet);
 	//------------------------------Paused -----------------------------------------------
-// If paused, draw pause overlay and skip game logic
+	// If paused, draw pause overlay and skip game logic
 	if (paused) {
 		// Semi-transparent black overlay
 
@@ -336,8 +357,8 @@ void Level2_Update(void) {
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request();
-	simulate_pests();
+	customer_request(&l2_request, level2_pots, map_tiles, score, L2_TOOL_SIZE, L2_POT_SIZE);
+	simulate_pests(pest_spawn_interval, level2_pots, L2_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
@@ -357,6 +378,24 @@ void Level2_Update(void) {
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	CP_Font_DrawText(buffer_score, timer.pos_x, 130);
+
+
+	//--------------------- Show Level Changes ---------------------//
+	CP_Settings_Fill(red);
+	CP_Settings_TextSize(50.0f);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
+	if (timer.stage_timer >= L2_TIMER - 6.0f) {
+		if (0 == (int)(timer.stage_timer * 2) % 2) {
+			//Watering can
+			CP_Font_DrawText("Watering can capacity increased to 5!",
+				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 - 50.0f);
+
+			//Pests
+			CP_Font_DrawText("Pest spawn at higher frequencies!",
+				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 + 50.0f);
+		}
+	}
 }
 
 void Level2_Exit(void) {
@@ -408,15 +447,15 @@ void Level2_Exit(void) {
 	}
 
 	//Request sprites
-	CP_Image_Free(requestbg);
-	CP_Image_Free(berrybush);
-	CP_Image_Free(cactus);
-	CP_Image_Free(orangebush);
+	CP_Image_Free(l2_request.requestBg);
+	CP_Image_Free(l2_request.berrybush);
+	CP_Image_Free(l2_request.cactus);
+	CP_Image_Free(l2_request.orangebush);
 
 	CP_Image_Free(star_default);
 	CP_Image_Free(star_achieved);
 
 	//--------------------- Free Audio ---------------------//
-	CP_Sound_Free(customerNoti);
+	CP_Sound_Free(l2_request.customerNoti);
 	CP_Sound_Free(BtnSound);
 }
