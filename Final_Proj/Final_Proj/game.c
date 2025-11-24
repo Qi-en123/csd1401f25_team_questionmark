@@ -381,7 +381,7 @@ void Game_Update(void)
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(score, Game_Init, Game_Update, Game_Exit);
+		draw_gameover_panel(&score, Game_Init, Game_Update, Game_Exit);
 		return;   // Stop all other game updates
 	}
 
@@ -398,7 +398,7 @@ void Game_Update(void)
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request(&l1_request, level1_pots, map_tiles, score, L1_TOOL_SIZE, L1_POT_SIZE);
+	customer_request(&l1_request, level1_pots, map_tiles, &score, L1_TOOL_SIZE, L1_POT_SIZE);
 	simulate_pests(pest_spawn_interval, level1_pots, L1_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
@@ -524,7 +524,7 @@ void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, C
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
 	if (tp->stage_timer <= 0.0f) {
-		draw_gameover_panel(score, init, update, exit);
+		draw_gameover_panel(&score, init, update, exit);
 	}
 
 	//blinking effect
@@ -773,7 +773,7 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 			player->position.x, player->position.y)) {
 
 		if (CP_Input_KeyTriggered(KEY_K)) {
-			tool->uses = 3;
+			tool->uses = watering_can_capacity;
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
 		}
 		show_tooltip("Press 'K' to Refill Bucket");
@@ -885,7 +885,7 @@ void spawn_box(Request_State* request, int tool_size) {
 	//CP_Sound_Play(request->customerNoti);
 }
 
-void customer_request(Request_State* request, Pot* pots, Tile* tiles, int score, int tool_size, int pot_size) {
+void customer_request(Request_State* request, Pot* pots, Tile* tiles, int* score, int tool_size, int pot_size) {
 	//--------------------- Create Requests ---------------------//
 	request->spawn_timer += dt;
 
@@ -1027,7 +1027,7 @@ void customer_request(Request_State* request, Pot* pots, Tile* tiles, int score,
 					for (int k = 0; k < request->boxCount; ++k) {
 						if (pots[j].plant.seed_type == request->boxes[k].plantType) {
 							if (0 == request->boxes[k].removing) {
-								score += 1000.0f * (1.0f + (request->boxes[k].lateTimer / 60.0f));
+								*score += 1000.0f * (1.0f + (request->boxes[k].lateTimer / 60.0f));
 
 								int idx = rand() % numPraises;
 								snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
@@ -1079,18 +1079,18 @@ void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* playe
 	pestSpawnTimer += dt;
 }
 
-void draw_gameover_panel(int score, void *init, void *update, void *exit)
+void draw_gameover_panel(int* score, void *init, void *update, void *exit)
 {
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
 	int stars = 0;
-	if (score > 5000) {
+	if (*score > 5000) {
 		stars = 1;
 	}
-	if (score > 6000) {
+	if (*score > 6000) {
 		stars = 2;
 	}
-	if (score > 7000) {
+	if (*score > 7000) {
 		stars = 3;
 	}
 
@@ -1133,7 +1133,7 @@ void draw_gameover_panel(int score, void *init, void *update, void *exit)
 	}
 
 	char buffer[50];
-	sprintf_s(buffer, 50, "%d", score);
+	sprintf_s(buffer, 50, "%d", *score);
 	CP_Settings_TextSize(100);
 	CP_Font_DrawText(buffer, w / 2, h / 2 + 70);
 	// Draw stars
