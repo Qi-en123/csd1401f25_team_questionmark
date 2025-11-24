@@ -67,7 +67,7 @@ void Main_Menu_Init(void)
 	// Get background width
 	bgWidth = CP_Image_GetWidth(mainmenu_bg);
 
-	CP_Sound_PlayMusic(themeSound);
+	//CP_Sound_PlayMusic(themeSound);
 	showControls = 0;
 	left = CP_Image_Load("Assets/left.png");
 	right = CP_Image_Load("Assets/right.png");
