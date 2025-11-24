@@ -979,7 +979,7 @@ void customer_request() {
 		CP_Settings_ImageMode(CP_POSITION_CORNER);
 		CP_Image_Draw(requestbg, boxes[i].x, boxes[i].y, boxes[i].width, boxes[i].height, 170);
 		CP_Image plantImage = NULL;
-		float imgSize = 60.0f; // plant icon size
+		float imgSize = 80.0f; // plant icon size
 		float spacing = 10.0f; // space between icons
 
 

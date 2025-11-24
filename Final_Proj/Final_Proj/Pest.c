@@ -9,8 +9,8 @@ Pest pests[MAX_PESTS];
 CP_Image pest_spritesheet; // set in Game_Init or elsewhere
 
 #define PLAYER_DETECT_RADIUS 100.0f
-#define TOP_RIGHT_X 1200.0f
-#define TOP_RIGHT_Y 20.0f
+#define WINDOW_WIDTH CP_System_GetWindowWidth() //+ 200.0f
+#define WINDOW_HEIGHT CP_System_GetWindowHeight()//20.0f
 #define DESCEND_DISTANCE 270.0f
 #define POT_AVOID_RADIUS 50.0f
 
@@ -32,7 +32,7 @@ void initialize_pests(void) {
 
 // Spawn pest at top-right, set descend target
 void spawn_pest(Pot* pots, int potCount) {
-    // Build a list of valid pots (filled, with seed, not being carried)
+    // Build list of valid pots as you already do
     int validIndices[MAX_PESTS];
     int validCount = 0;
     for (int i = 0; i < potCount; i++) {
@@ -40,21 +40,38 @@ void spawn_pest(Pot* pots, int potCount) {
             validIndices[validCount++] = i;
         }
     }
-
-    if (validCount == 0) return; // No valid pots, don't spawn
+    if (validCount == 0) return;
 
     for (int i = 0; i < MAX_PESTS; i++) {
         if (pests[i].state == PEST_INACTIVE) {
             pests[i].state = PEST_DESCENDING;
-            pests[i].position.x = TOP_RIGHT_X + 100;
-            pests[i].position.y = TOP_RIGHT_Y;
+
+            // Pick a random side: 0 = right, 1 = bottom, 2 = left
+            int side = rand() % 3;
+
+            switch (side) {
+            case 0: // right
+                pests[i].position.x = WINDOW_WIDTH + 50; // just off-screen
+                pests[i].position.y = rand() % WINDOW_HEIGHT; // random y
+                break;
+            case 1: // bottom
+                pests[i].position.x = rand() % WINDOW_WIDTH; // random x
+                pests[i].position.y = WINDOW_HEIGHT + 50; // just off-screen
+                break;
+            case 2: // left
+                pests[i].position.x = -50; // just off-screen
+                pests[i].position.y = rand() % WINDOW_HEIGHT; // random y
+                break;
+            }
+
             pests[i].speed = 200.0f + (rand() % 50);
             pests[i].rotation = 1;
 
-            pests[i].descendTarget.x = TOP_RIGHT_X;
-            pests[i].descendTarget.y = TOP_RIGHT_Y + DESCEND_DISTANCE;
+            // Descend target can be somewhere near the center or random
+            pests[i].descendTarget.x = WINDOW_WIDTH / 2;
+            pests[i].descendTarget.y = WINDOW_HEIGHT / 2;
 
-            // Pick a random valid pot
+            // Pick a random valid pot as target
             int randomIndex = rand() % validCount;
             pests[i].targetPotIndex = validIndices[randomIndex];
             pests[i].target = pots[pests[i].targetPotIndex].position;
@@ -65,6 +82,7 @@ void spawn_pest(Pot* pots, int potCount) {
         }
     }
 }
+
 
 
 // Helper: normalize vector
@@ -157,8 +175,8 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             }
         }
         else if (p->state == PEST_FLEEING) {
-            dir.x = TOP_RIGHT_X - p->position.x;
-            dir.y = TOP_RIGHT_Y - p->position.y;
+            dir.x = WINDOW_WIDTH - p->position.x;
+            dir.y = WINDOW_HEIGHT - p->position.y;
 
             // Avoid pots
             for (int j = 0; j < potCount; j++) {
@@ -179,7 +197,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             p->position.x += dir.x * p->speed * dt;
             p->position.y += dir.y * p->speed * dt;
 
-            if (distance(p->position, (Vector2) { TOP_RIGHT_X, TOP_RIGHT_Y }) < 5.0f)
+            if (distance(p->position, (Vector2) { WINDOW_WIDTH, WINDOW_HEIGHT }) < 5.0f)
                 p->state = PEST_INACTIVE;
         }
 
@@ -201,25 +219,25 @@ void render_pests(void) {
     CP_Settings_ImageMode(CP_POSITION_CORNER);
     for (int i = 0; i < MAX_PESTS; i++) {
         Pest* p = &pests[i];
-		if (p->state != PEST_INACTIVE) {
-			float srcX = p->current_frame * PEST_WIDTH;
+        if (p->state != PEST_INACTIVE) {
+            float srcX = p->current_frame * PEST_WIDTH;
 
             //makes it so when sprite width is inverted, sprite appears on same location
             float imgX;
-            imgX = (p->rotation<0) ? p->position.x + PEST_WIDTH * SCALE : p->position.x;
+            imgX = (p->rotation < 0) ? p->position.x + PEST_WIDTH * SCALE : p->position.x;
 
-			CP_Image_DrawSubImage(
-				pest_spritesheet,
-				imgX,
-				p->position.y,
-				PEST_WIDTH * SCALE * p->rotation,
-				PEST_HEIGHT * SCALE,
-				srcX,
-				0.0f,
-				PEST_WIDTH + srcX,
-				PEST_HEIGHT,
-				255
-			);
-		}
+            CP_Image_DrawSubImage(
+                pest_spritesheet,
+                imgX,
+                p->position.y,
+                PEST_WIDTH * SCALE * p->rotation,
+                PEST_HEIGHT * SCALE,
+                srcX,
+                0.0f,
+                PEST_WIDTH + srcX,
+                PEST_HEIGHT,
+                255
+            );
+        }
     }
 }
