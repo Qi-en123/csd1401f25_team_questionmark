@@ -20,6 +20,7 @@ CP_Font myFont;
 CP_Sound BtnSound;
 //sound
 extern CP_Sound openingSound;
+CP_Sound mainmenuSound;
 int quitClicked = 0;       // flag if Quit was clicked
 float quitStartTime = 0;   // time when quit button was clicked
 
@@ -48,6 +49,8 @@ int level = 1;
 
 void Main_Menu_Init(void)
 {
+	openingSound = CP_Sound_LoadMusic("Assets/opening.wav");
+	mainmenuSound = CP_Sound_LoadMusic("Assets/mainmenu.wav");
 	level = loadLevel();
 	//load mainmenu background and spritesheet for cloud from asset folder
 	mainmenu_bg = CP_Image_Load("Assets/backgroundColorGrass.png");
@@ -71,7 +74,7 @@ void Main_Menu_Init(void)
 	showControls = 0;
 	left = CP_Image_Load("Assets/left.png");
 	right = CP_Image_Load("Assets/right.png");
-
+	CP_Sound_PlayMusic(mainmenuSound);
 }
 
 void Main_Menu_Update(void)
@@ -251,6 +254,7 @@ void Main_Menu_Exit(void)
 	CP_Font_Free(font);
 	CP_Font_Free(myFont);
 	CP_Sound_Free(openingSound);
+	CP_Sound_Free(mainmenuSound);
 	CP_Image_Free(button_white);
 	CP_Image_Free(white_background);
 	CP_Image_Free(button_green);

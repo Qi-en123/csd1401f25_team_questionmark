@@ -25,6 +25,7 @@ CP_Image repeat;
 CP_Image next;
 CP_Image home;
 
+
 extern int level;
 extern int flashTimer; // timer for flashing
 extern int flashInterval; // frames between flashes
@@ -71,6 +72,15 @@ CP_Color red, green, blue, gray;
 CP_Font myFont;
 CP_Font Font;
 
+CP_Sound refill;
+CP_Sound watering;
+CP_Sound win;
+CP_Sound lose;
+
+int playedLose = 0;
+int playedWin = 0;
+
+
 void Game_Init(void)
 {
 	level = loadLevel();
@@ -116,6 +126,9 @@ void Game_Init(void)
 	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
 	home = CP_Image_Load("Assets/menuList.png");
 	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+	watering = CP_Sound_Load("Assets/Watering Soil.wav");
+	lose = CP_Sound_Load("Assets/You Lost.wav");
+	win = CP_Sound_Load("Assets/You won.wav");
 
 	//Pots
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
@@ -190,6 +203,7 @@ void Game_Init(void)
 
 void Game_Update(void)
 {
+
 	// Don't allow pause if game is over
 	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
 		paused = !paused;
@@ -200,7 +214,7 @@ void Game_Update(void)
 	}
 	if (CP_Input_KeyReleased(KEY_2)) {
 		gameOver = 1;
-		score = 100000;
+		score = 00000;
 	}
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -272,7 +286,6 @@ void Game_Update(void)
 // If paused, draw pause overlay and skip game logic
 	if (paused) {
 		// Semi-transparent black overlay
-
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
 		CP_Settings_RectMode(CP_POSITION_CENTER);
 		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
@@ -501,6 +514,9 @@ void Game_Exit(void)
 	//--------------------- Free Audio ---------------------//
 	CP_Sound_Free(l1_request.customerNoti);
 	CP_Sound_Free(BtnSound);
+	CP_Sound_Free(refill);
+	CP_Sound_Free(watering);
+	CP_Sound_Free(lose);
 }
 
 void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font,
@@ -624,6 +640,9 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 	int potBarSegments = 5;
 	float spacing = 0.0f;
 	float fillSpeed = 0.4f;
+
+	static bool is_playing;
+
 	//--------------------- Plant Interaction ---------------------//
 	for (int i = 0; i < size; ++i) {
 		if (pots[i].selected) {
@@ -649,6 +668,10 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 							pots[i].plant.fillProgress += fillSpeed * dt;
 							if (pots[i].plant.fillProgress > 1.0f)
 								pots[i].plant.fillProgress = 1.0f;
+							if (!is_playing) {
+								CP_Sound_PlayAdvanced(watering, 1, 1, FALSE, CP_SOUND_GROUP_7);
+								is_playing = true;
+							}
 						}
 
 						// DRAW PROGRESS BAR (always draw, even if E is not held)
@@ -699,7 +722,8 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 							int targetSegment = pots[i].plant.water_needed;
 							float segmentStart = targetSegment * (rectWidth + spacing);
 							float segmentEnd = segmentStart + rectWidth;
-
+							CP_Sound_StopGroup(CP_SOUND_GROUP_7);
+							is_playing = false;
 							tool->uses--;
 
 							if (filledWidth >= segmentStart && filledWidth <= segmentEnd) {
@@ -772,9 +796,11 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
 			player->position.x, player->position.y)) {
 
-		if (CP_Input_KeyTriggered(KEY_K)) {
+		if (CP_Input_KeyReleased(KEY_K)) {
 			tool->uses = watering_can_capacity;
 			tool->tool_sprite = CP_Image_Load("Assets/tool_sprites/water_bucket_full.png");
+			refill = CP_Sound_Load("Assets/Refilling Bucket.wav");
+			CP_Sound_PlayAdvanced(refill, 1, 1, FALSE, CP_SOUND_GROUP_8);
 		}
 		show_tooltip("Press 'K' to Refill Bucket");
 	}
@@ -1085,6 +1111,7 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
 	int stars = 0;
+
 	if (*score > 5000) {
 		stars = 1;
 	}
@@ -1128,16 +1155,23 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 	CP_Settings_TextSize(70);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-
+	
 	if (stars == 0) {
 		// Title
-		
+		if (!playedLose) {
+			CP_Sound_Play(lose);
+			playedLose = 1;
+		}
+
 		CP_Font_DrawText("Level Failed", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
 	else {
 		// Title
-
+		if (!playedWin) {
+			CP_Sound_Play(win);
+			playedWin = 1;
+		}
 		CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
@@ -1206,11 +1240,15 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 
 	// Button actions
 	if (IsCircleClicked(btnX[0], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+		playedLose = 0;
+		playedWin = 0;
 		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 	}
 
 	//restart
 	if (IsCircleClicked(btnX[1], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+		playedLose = 0;
+		playedWin = 0;
 		CP_Engine_SetNextGameStateForced(init, update, exit);
 	}
 
