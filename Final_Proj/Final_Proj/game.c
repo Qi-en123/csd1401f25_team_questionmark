@@ -200,8 +200,7 @@ void Game_Update(void)
 	}
 	if (CP_Input_KeyReleased(KEY_2)) {
 		gameOver = 1;
-		starCount = 3;
-
+		score = 100000;
 	}
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -381,7 +380,7 @@ void Game_Update(void)
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(&score, Game_Init, Game_Update, Game_Exit);
+		draw_gameover_panel(&score, Game_Init, Game_Update, Game_Exit, Level2_Init, Level2_Update, Level2_Exit, 1);
 		return;   // Stop all other game updates
 	}
 
@@ -403,7 +402,7 @@ void Game_Update(void)
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Game_Init, Game_Update, Game_Exit, L1_TIMER, &timer, Font);
+	start_timer(Game_Init, Game_Update, Game_Exit, L1_TIMER, &timer, Font, Level2_Init, Level2_Update, Level2_Exit, 1);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{
@@ -504,7 +503,8 @@ void Game_Exit(void)
 	CP_Sound_Free(BtnSound);
 }
 
-void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font) {
+void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font,
+	void* next_init, void* next_update, void* next_exit, int curr_lvl) { //lol sry, no time
 	//countdown
 	if (tp->stage_timer == 0.0f) {
 		tp->stage_timer = timer;
@@ -524,7 +524,7 @@ void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, C
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
 	if (tp->stage_timer <= 0.0f) {
-		draw_gameover_panel(&score, init, update, exit);
+		draw_gameover_panel(&score, init, update, exit, next_init, next_update, next_exit, curr_lvl);
 	}
 
 	//blinking effect
@@ -1079,7 +1079,8 @@ void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* playe
 	pestSpawnTimer += dt;
 }
 
-void draw_gameover_panel(int* score, void *init, void *update, void *exit)
+void draw_gameover_panel(int* score, void* init, void* update, void* exit,
+	void* next_init, void* next_update, void* next_exit, int curr_lvl)
 {
 	float w = CP_System_GetWindowWidth();
 	float h = CP_System_GetWindowHeight();
@@ -1087,21 +1088,30 @@ void draw_gameover_panel(int* score, void *init, void *update, void *exit)
 	if (*score > 5000) {
 		stars = 1;
 	}
-	if (*score > 6000) {
+	if (*score > 8000) {
 		stars = 2;
 	}
-	if (*score > 7000) {
+	if (*score > 12000) {
 		stars = 3;
 	}
 
+	//rmb to change lvl2.c & lvl3.c parameters
 	if (stars > 0) {
-		if (level == 1) {
+		if (level == 1 && curr_lvl ==1) {
 			level = 2; // unlock level 2
 			saveLevel(level);
 		}
 		else if (level >= 2) {
 			saveLevel(level);
 		}
+		if (level == 2 && curr_lvl == 2) {
+			level = 3; // unlock level 2
+			saveLevel(level);
+		}
+		else if (level >= 3) {
+			saveLevel(level);
+		}
+
 		// if level >= 2, no need to change
 	}
 
@@ -1169,8 +1179,6 @@ void draw_gameover_panel(int* score, void *init, void *update, void *exit)
 
 	// Draw buttons
 	for (int i = 0; i < 3; i++) {
-
-
 		if (IsCircleHovered(btnX[i], btnY, btnWidth))
 			CP_Image_Draw(button_circle_green, btnX[i], btnY, btnWidth, btnHeight, 255);
 		else
@@ -1201,18 +1209,20 @@ void draw_gameover_panel(int* score, void *init, void *update, void *exit)
 		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 	}
 
+	//restart
 	if (IsCircleClicked(btnX[1], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-		CP_Engine_SetNextGameStateForced(Game_Init, Game_Update, Game_Exit);
+		CP_Engine_SetNextGameStateForced(init, update, exit);
 	}
 
+	//nxt level
 	if (IsCircleClicked(btnX[2], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 	{
-		if (level < 2) {
+		if (level < curr_lvl+1) {
 			showText = true;
 			flashTimer = 0;
 		}
 		else {
-			CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
+			CP_Engine_SetNextGameState(next_init, next_update, next_exit);
 		}
 	}
 

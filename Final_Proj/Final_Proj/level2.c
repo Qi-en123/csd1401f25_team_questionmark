@@ -15,8 +15,9 @@
 #include "ui.h"
 
 #include "Pest.h"
+#include "level3.h"
 
-#define L2_TIMER 360.0f
+#define L2_TIMER 370.0f
 static Timer timer;
 
 //--------------------- Tools ---------------------//
@@ -144,7 +145,7 @@ void Level2_Init(void) {
 	held_pot = NULL;
 
 	//pest
-	pest_spawn_interval = 3.0f;
+	pest_spawn_interval = 30.0f;
 	initialize_pests();
 
 	//Colors
@@ -165,7 +166,7 @@ void Level2_Update(void) {
 	}
 	if (CP_Input_KeyReleased(KEY_2)) {
 		gameOver = 1;
-		starCount = 3;
+		score = 1000000;
 
 	}
 
@@ -342,7 +343,7 @@ void Level2_Update(void) {
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(&score, Level2_Init, Level2_Update, Level2_Exit);
+		draw_gameover_panel(&score, Level2_Init, Level2_Update, Level2_Exit, Level3_Init, Level3_Update, Level3_Exit, 2);
 		return;   // Stop all other game updates
 	}
 
@@ -362,7 +363,7 @@ void Level2_Update(void) {
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Level2_Init, Level2_Update, Level2_Exit, L2_TIMER, &timer, Font);
+	start_timer(Level2_Init, Level2_Update, Level2_Exit, L2_TIMER, &timer, Font, Level3_Init, Level3_Update, Level3_Exit, 2);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{

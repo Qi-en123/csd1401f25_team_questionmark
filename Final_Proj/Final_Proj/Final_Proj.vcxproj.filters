@@ -18,6 +18,9 @@
     <ClCompile Include="level2.c">
       <Filter>Levels</Filter>
     </ClCompile>
+    <ClCompile Include="level3.c">
+      <Filter>Levels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="credits.h" />
@@ -34,6 +37,9 @@
     <ClInclude Include="ui.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="level2.h">
+      <Filter>Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="level3.h">
       <Filter>Levels</Filter>
     </ClInclude>
   </ItemGroup>

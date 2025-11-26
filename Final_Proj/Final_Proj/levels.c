@@ -3,6 +3,7 @@
 #include "game.h"
 #include "mainmenu.h"
 #include "level2.h"
+#include "level3.h"
 
 //image
 CP_Image spriteSheet_level;
@@ -157,7 +158,7 @@ void Level_Update(void)
         CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
     }
     if (IsButtonClicked(btnX[1], btnY, btnWidth, btnHeight) == 1) {
-        if (level == 2) {
+        if (level >= 2) {
             CP_Sound_Play(BtnSound);
             CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
         }
@@ -170,7 +171,7 @@ void Level_Update(void)
     if (IsButtonClicked(btnX[2], btnY, btnWidth, btnHeight) == 1) {
         if (level == 3) {
             CP_Sound_Play(BtnSound);
-            CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
+            CP_Engine_SetNextGameState(Level3_Init, Level3_Update, Level3_Exit);
         }
         else {
             // Only trigger flash once when button is clicked

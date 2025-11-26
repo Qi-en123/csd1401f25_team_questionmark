@@ -95,13 +95,15 @@ void Game_Update(void);
 
 void Game_Exit(void);	
 
-void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font);
+void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font,
+	void* next_init, void* next_update, void* next_exit, int curr_lvl);
 void move_tool(float* posx, float* posy, float* rotation, Player* player);
 void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots, Tool** held_tool, int size);
 void spawn_box(Request_State* request, int tool_size);
 
 
-void draw_gameover_panel(int* score, void* init, void *update, void *exit);
+void draw_gameover_panel(int* score, void* init, void* update, void* exit,
+	void* next_init, void* next_update, void* next_exit, int curr_lvl);
 void move_pot(float* posx, float* posy, Player* player);
 void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_tool, Pot** held_pot);
 void customer_request(Request_State* request, Pot* pots, Tile* tiles, int* score, int tool_size, int pot_size);
