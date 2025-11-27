@@ -130,8 +130,8 @@ void Level2_Init(void) {
 
 	//Initialize player with default values
 	player_speed = 400.0f;
-	player_startpos_x = CP_System_GetWindowWidth() / 2;
-	player_startpos_y = CP_System_GetWindowHeight() / 2;
+	player_startpos_x = (float)CP_System_GetWindowWidth() / 2;
+	player_startpos_y = (float)CP_System_GetWindowHeight() / 2;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 
 	//Tools
@@ -243,10 +243,10 @@ void Level2_Update(void) {
 
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
 		CP_Settings_RectMode(CP_POSITION_CENTER);
-		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
-			CP_System_GetWindowHeight() / 2,
-			CP_System_GetWindowWidth(),
-			CP_System_GetWindowHeight());
+		CP_Graphics_DrawRect((float)CP_System_GetWindowWidth() / 2,
+			(float)CP_System_GetWindowHeight() / 2,
+			(float)CP_System_GetWindowWidth(),
+			(float)CP_System_GetWindowHeight());
 
 		if (showControls == 1 || showControls == 2) {
 			// Draw the controls overlay
@@ -390,11 +390,11 @@ void Level2_Update(void) {
 		if (0 == (int)(timer.stage_timer * 2) % 2) {
 			//Watering can
 			CP_Font_DrawText("Watering can capacity increased to 5!",
-				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 - 50.0f);
+				(float)CP_System_GetWindowWidth() / 2, (float)CP_System_GetWindowHeight() / 2 - 50.0f);
 
 			//Pests
 			CP_Font_DrawText("Pest spawn at higher frequencies!",
-				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 + 50.0f);
+				(float)CP_System_GetWindowWidth() / 2, (float)CP_System_GetWindowHeight() / 2 + 50.0f);
 		}
 	}
 }

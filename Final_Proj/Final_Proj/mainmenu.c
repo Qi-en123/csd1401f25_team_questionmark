@@ -79,8 +79,8 @@ void Main_Menu_Init(void)
 
 void Main_Menu_Update(void)
 {
-	float screenW = CP_System_GetWindowWidth();
-	float screenH = CP_System_GetWindowHeight();
+	float screenW = (float)CP_System_GetWindowWidth();
+	float screenH = (float)CP_System_GetWindowHeight();
 
 	// ---------------- Background scrolling ----------------
 	bgX += bgSpeed;
@@ -91,10 +91,10 @@ void Main_Menu_Update(void)
 	int bgDrawX3 = bgDrawX2 + bgWidth;
 
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
-	CP_Image_Draw(mainmenu_bg, bgDrawX1, screenH / 2, bgWidth, screenH, 255);
-	CP_Image_Draw(mainmenu_bg, bgDrawX2, screenH / 2, bgWidth, screenH, 255);
-	CP_Image_Draw(mainmenu_bg, bgDrawX3, screenH / 2, bgWidth, screenH, 255);
-
+	CP_Image_Draw(mainmenu_bg, (float)bgDrawX1, screenH / 2.0f, (float)bgWidth, screenH, 255);
+	CP_Image_Draw(mainmenu_bg, (float)bgDrawX2, screenH / 2.0f, (float)bgWidth, screenH, 255);
+	CP_Image_Draw(mainmenu_bg, (float)bgDrawX3, screenH / 2.0f, (float)bgWidth, screenH, 255);
+																
 	// ---------------- Clouds ----------------
 	for (int i = 0; i < NUM_CLOUDS; i++) {
 		cloudX[i] += cloudSpeed[i];
@@ -184,7 +184,7 @@ void Main_Menu_Update(void)
 	int x_coord = 650;
 	float btnWidth = 500.0f;
 	float btnHeight = 90.0f;
-	float btnX = x_coord - 100;
+	float btnX = x_coord - 100.0f;
 	float btnY[5] = { 225, 325, 425, 525, 625 };
 	const char* btnText[5] = { "Start", "Levels", "Controls", "Credits", "Quit" };
 

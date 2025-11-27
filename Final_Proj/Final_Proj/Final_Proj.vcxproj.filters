@@ -1,14 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="credits.c" />
-    <ClCompile Include="game.c" />
-    <ClCompile Include="levels.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="mainmenu.c" />
     <ClCompile Include="map.c" />
-    <ClCompile Include="opening.c" />
-    <ClCompile Include="opening_gamename.c" />
     <ClCompile Include="plants.c" />
     <ClCompile Include="player.c" />
     <ClCompile Include="Pest.c" />
@@ -21,15 +15,27 @@
     <ClCompile Include="level3.c">
       <Filter>Levels</Filter>
     </ClCompile>
+    <ClCompile Include="game.c">
+      <Filter>Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="mainmenu.c">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="opening.c">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="opening_gamename.c">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="credits.c">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="levels.c">
+      <Filter>Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="credits.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="levels.h" />
-    <ClInclude Include="mainmenu.h" />
     <ClInclude Include="map.h" />
-    <ClInclude Include="opening.h" />
-    <ClInclude Include="opening_gamename.h" />
     <ClInclude Include="Pest.h" />
     <ClInclude Include="plants.h" />
     <ClInclude Include="player.h" />
@@ -42,10 +48,31 @@
     <ClInclude Include="level3.h">
       <Filter>Levels</Filter>
     </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="mainmenu.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="opening.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="opening_gamename.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="credits.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="levels.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Levels">
       <UniqueIdentifier>{9a281b7b-f1fc-4644-b646-ebb37b2fb9a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Menu">
+      <UniqueIdentifier>{e4cc0a82-d1a6-4519-bfb6-4c1ceded6698}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

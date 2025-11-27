@@ -33,7 +33,7 @@ void initialize_pests(void) {
 // Spawn pest at top-right, set descend target
 void spawn_pest(Pot* pots, int potCount) {
     // Build list of valid pots as you already do
-    int validIndices[MAX_PESTS];
+    int validIndices[MAX_PESTS] = { 0 };
     int validCount = 0;
     for (int i = 0; i < potCount; i++) {
         if (pots[i].filled && pots[i].plant.seed_type != EMPTY && !pots[i].beingCarried) {
@@ -51,16 +51,16 @@ void spawn_pest(Pot* pots, int potCount) {
 
             switch (side) {
             case 0: // right
-                pests[i].position.x = WINDOW_WIDTH + 50; // just off-screen
-                pests[i].position.y = rand() % WINDOW_HEIGHT; // random y
+                pests[i].position.x = WINDOW_WIDTH + 50.0f; // just off-screen
+                pests[i].position.y = (float)(rand() % WINDOW_HEIGHT); // random y
                 break;
             case 1: // bottom
-                pests[i].position.x = rand() % WINDOW_WIDTH; // random x
-                pests[i].position.y = WINDOW_HEIGHT + 50; // just off-screen
+                pests[i].position.x = (float)(rand() % WINDOW_WIDTH); // random x
+                pests[i].position.y = WINDOW_HEIGHT + 50.0f; // just off-screen
                 break;
             case 2: // left
                 pests[i].position.x = -50; // just off-screen
-                pests[i].position.y = rand() % WINDOW_HEIGHT; // random y
+                pests[i].position.y = (float)(rand() % WINDOW_HEIGHT); // random y
                 break;
             }
 
@@ -68,8 +68,8 @@ void spawn_pest(Pot* pots, int potCount) {
             pests[i].rotation = 1;
 
             // Descend target can be somewhere near the center or random
-            pests[i].descendTarget.x = WINDOW_WIDTH / 2;
-            pests[i].descendTarget.y = WINDOW_HEIGHT / 2;
+            pests[i].descendTarget.x = WINDOW_WIDTH / 2.0f;
+            pests[i].descendTarget.y = WINDOW_HEIGHT / 2.0f;
 
             // Pick a random valid pot as target
             int randomIndex = rand() % validCount;
@@ -137,7 +137,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
 
             // Check every frame if target is still valid (not carried, filled, has seed)
             if (!is_pot_valid(targetPot)) {
-                int validIndices[MAX_PESTS];
+                int validIndices[MAX_PESTS] = { 0 };
                 int validCount = 0;
 
                 // Build list of valid pots
@@ -180,7 +180,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
 
             // Avoid pots
             for (int j = 0; j < potCount; j++) {
-                Vector2 away;
+                Vector2 away = { 0 };
                 away.x = p->position.x - pots[j].position.x;
                 away.y = p->position.y - pots[j].position.y;
                 float dist = sqrtf(away.x * away.x + away.y * away.y);
@@ -197,7 +197,7 @@ void update_pests(Pot* pots, int potCount, Player* player) {
             p->position.x += dir.x * p->speed * dt;
             p->position.y += dir.y * p->speed * dt;
 
-            if (distance(p->position, (Vector2) { WINDOW_WIDTH, WINDOW_HEIGHT }) < 5.0f)
+            if (distance(p->position, (Vector2) { (float)WINDOW_WIDTH, (float)WINDOW_HEIGHT }) < 5.0f)
                 p->state = PEST_INACTIVE;
         }
 
@@ -220,7 +220,7 @@ void render_pests(CP_Image pest_spritesheet) {
     for (int i = 0; i < MAX_PESTS; i++) {
         Pest* p = &pests[i];
         if (p->state != PEST_INACTIVE) {
-            float srcX = p->current_frame * PEST_WIDTH;
+            float srcX = (float)p->current_frame * PEST_WIDTH;
 
             //makes it so when sprite width is inverted, sprite appears on same location
             float imgX;
@@ -230,8 +230,8 @@ void render_pests(CP_Image pest_spritesheet) {
                 pest_spritesheet,
                 imgX,
                 p->position.y,
-                PEST_WIDTH * SCALE * p->rotation,
-                PEST_HEIGHT * SCALE,
+                (float)PEST_WIDTH * SCALE * p->rotation,
+                (float)PEST_HEIGHT * SCALE,
                 srcX,
                 0.0f,
                 PEST_WIDTH + srcX,

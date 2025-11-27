@@ -73,8 +73,8 @@ void Level_Init(void)
 void Level_Update(void)
 {
     //screen width and height
-    float screenW = CP_System_GetWindowWidth();
-    float screenH = CP_System_GetWindowHeight();
+    float screenW = (float)CP_System_GetWindowWidth();
+    float screenH = (float)CP_System_GetWindowHeight();
 
     // Update positions of bg
     bgX_level += bgSpeed_level;
@@ -115,7 +115,7 @@ void Level_Update(void)
    
 
     // --- Buttons setup ---
-    int btnY = screenH/2 - 100; // shared x coordinate for all buttons
+    float btnY = screenH/2 - 100.0f; // shared x coordinate for all buttons
     float btnWidth = 150.0f;
     float btnHeight = 150.0f;
     float btnX[3] = { 225.0f, 725.0f, 1225.0f };

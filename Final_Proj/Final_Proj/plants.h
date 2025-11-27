@@ -5,11 +5,11 @@
 #include "cprocessing.h"
 #include "map.h"
 
-#define POT_WIDTH 17
-#define POT_HEIGHT 17
-#define POT_SCALE 4
-#define PLANT_WIDTH 19
-#define PLANT_HEIGHT 19
+#define POT_WIDTH 17.0f
+#define POT_HEIGHT 17.0f
+#define POT_SCALE 4.0f
+#define PLANT_WIDTH 19.0f
+#define PLANT_HEIGHT 19.0f
 
 typedef enum SEED_TYPE {
 	BERRY_BUSH,

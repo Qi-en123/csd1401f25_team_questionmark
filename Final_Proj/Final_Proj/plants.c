@@ -165,7 +165,7 @@ void grow_plant(Plant* plant) {
 	GROWTH_STAGE* growth_stage = &plant->growth_stage;
 	*growth_stage = *growth_stage >= ADULT ? *growth_stage : *growth_stage + 1;
 	
-	if (growth_stage != ADULT) {
+	if (*growth_stage != ADULT) {
 		plant->sunlight_amount = 0; //reset sunlight bar
 		plant->sunlight_needed *= 1.25f; //increase sunlight needed per growth stage
 		plant->water_amount = 0;

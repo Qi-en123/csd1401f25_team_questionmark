@@ -29,7 +29,7 @@ float bgSpeed_credits = 0.5f;
 // Tileable background width (in pixels)
 // use tileable if not when the bg is moving, the two bg doesnt align perfectly
 // leaving a thin black line in between.
-int bgWidth_credits;
+float bgWidth_credits;
 
 // Rolling credits
 float yPos_credits; // vertical position of credits
@@ -80,17 +80,17 @@ void Credits_Init(void)
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX_credits = 0;
     // Get background width
-    bgWidth_credits = CP_Image_GetWidth(mainmenu_bg_credits);
+    bgWidth_credits = (float)CP_Image_GetWidth(mainmenu_bg_credits);
 
     // initialize credits starting position at bottom of screen
-    yPos_credits = CP_System_GetWindowHeight();
+    yPos_credits = (float)CP_System_GetWindowHeight();
 }
 
 void Credits_Update(void)
 {
     //screen width and height
-    float screenW = CP_System_GetWindowWidth();
-    float screenH = CP_System_GetWindowHeight();
+    float screenW = (float)CP_System_GetWindowWidth();
+    float screenH = (float)CP_System_GetWindowHeight();
 
     // Update positions of bg
     bgX_credits += bgSpeed_credits;
@@ -99,15 +99,15 @@ void Credits_Update(void)
     // Draw tileable background
     // Calculate positions for two tiles so they appear seamless
     // cast first drawing to int, so that there wont be pixel offsets which eventually becomes thin line in the ui
-    int bgDrawX1 = -(int)bgX_credits + bgWidth_credits / 2;  // first tile center
-    int bgDrawX2 = bgDrawX1 + bgWidth_credits;               // second tile immediately to the right
-    int bgDrawX3 = bgDrawX2 + bgWidth_credits;               // third tile to ensure full coverage 
+    int bgDrawX1 = (int)(- bgX_credits + bgWidth_credits / 2);  // first tile center
+    int bgDrawX2 = (int)(bgDrawX1 + bgWidth_credits);               // second tile immediately to the right
+    int bgDrawX3 = (int)(bgDrawX2 + bgWidth_credits);               // third tile to ensure full coverage 
 
     // set the rectangle drawing mode to center for background
     CP_Settings_ImageMode(CP_POSITION_CENTER);
-    CP_Image_Draw(mainmenu_bg_credits, bgDrawX1, screenH / 2, bgWidth_credits, screenH, 255);
-    CP_Image_Draw(mainmenu_bg_credits, bgDrawX2, screenH / 2, bgWidth_credits, screenH, 255);
-    CP_Image_Draw(mainmenu_bg_credits, bgDrawX3, screenH / 2, bgWidth_credits, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_credits, (float)bgDrawX1, screenH / 2, bgWidth_credits, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_credits, (float)bgDrawX2, screenH / 2, bgWidth_credits, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_credits, (float)bgDrawX3, screenH / 2, bgWidth_credits, screenH, 255);
 
     // --- Update clouds ---
     for (int i = 0; i < NUM_CLOUDS; i++) {

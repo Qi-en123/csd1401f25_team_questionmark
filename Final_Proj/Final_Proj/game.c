@@ -176,8 +176,8 @@ void Game_Init(void)
 
 	//Initialize player with default values
 	player_speed = 400.0f;
-	player_startpos_x = CP_System_GetWindowWidth() / 2;
-	player_startpos_y = CP_System_GetWindowHeight() / 2;
+	player_startpos_x = CP_System_GetWindowWidth() / 2.0f;
+	player_startpos_y = CP_System_GetWindowHeight() / 2.0f;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 	
 	//Tools
@@ -220,10 +220,10 @@ void Game_Update(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-	draw_tile_map(map_tiles);
+	draw_tile_map(*map_tiles);
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
-	draw_modified_map(map_tiles);
+	draw_modified_map(*map_tiles);
 
 	//Player shadow
 	CP_Settings_EllipseMode(CP_POSITION_CENTER);
@@ -288,10 +288,10 @@ void Game_Update(void)
 		// Semi-transparent black overlay
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
 		CP_Settings_RectMode(CP_POSITION_CENTER);
-		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
-			CP_System_GetWindowHeight() / 2,
-			CP_System_GetWindowWidth(),
-			CP_System_GetWindowHeight());
+		CP_Graphics_DrawRect((float)CP_System_GetWindowWidth() / 2,
+			(float)CP_System_GetWindowHeight() / 2,
+			(float)CP_System_GetWindowWidth(),
+			(float)CP_System_GetWindowHeight());
 
 
 		if (showControls == 1 || showControls == 2) {
@@ -614,7 +614,7 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 			Tile* const tile = tiles + row * TILE_COLS + col;
 
 			if (IsWithinRect(tile->x, tile->y,
-				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+				(float)CP_System_GetWindowWidth() / TILE_COLS, (float)CP_System_GetWindowHeight() / TILE_ROWS,
 				player->position.x, player->position.y) &&
 				!(tile->obstructed) && //if no pots on tile
 				tile->placeable) { //if tile is placeable (set manually)
@@ -793,7 +793,7 @@ void handle_tool_interaction(Tool* tool, Player* player, Tile* tiles, Pot* pots,
 	//--------------------- Refill Water ---------------------//
 	if (tool->tool_name == WATERING_CAN &&
 		IsWithinRect((tiles + 2 * TILE_COLS + 3)->x, (tiles + 2 * TILE_COLS + 3)->y, // <-- COORDS TO BE CHANGED WITH WELL COORDS
-			CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+			(float)CP_System_GetWindowWidth() / TILE_COLS, (float)CP_System_GetWindowHeight() / TILE_ROWS,
 			player->position.x, player->position.y)) {
 
 		if (CP_Input_KeyReleased(KEY_K)) {
@@ -844,7 +844,7 @@ void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_t
 			Tile* const tile = tiles + row * TILE_COLS + col;
 
 			if (IsWithinRect(tile->x, tile->y,
-				CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS,
+				(float)CP_System_GetWindowWidth() / TILE_COLS, (float)CP_System_GetWindowHeight() / TILE_ROWS,
 				player->position.x, player->position.y) &&
 				!(tile->obstructed) && //if no pots on tile
 				tile->placeable) { //if tile is placeable (set manually)
@@ -854,7 +854,7 @@ void handle_pot_interaction(Pot* pot, Player* player, Tile* tiles, Tool** held_t
 				CP_Settings_NoStroke();
 				CP_Settings_Fill(CP_Color_Create(255, 255, 0, 80));
 				CP_Graphics_DrawRect(tile->x, tile->y,
-					CP_System_GetWindowWidth() / TILE_COLS, CP_System_GetWindowHeight() / TILE_ROWS);
+					(float)CP_System_GetWindowWidth() / TILE_COLS, (float)CP_System_GetWindowHeight() / TILE_ROWS);
 
 				//place down pot if tile is placeable and not obstructed by other things
 				if (CP_Input_KeyReleased(KEY_J)) {
@@ -884,7 +884,7 @@ void spawn_box(Request_State* request, int tool_size) {
 	}
 
 	//  Create new box on the right
-	Box newBox;
+	Box newBox = {0};
 	newBox.width = 120; // size of req box // old numbers: 250
 	newBox.height = 120; // old numbers: 150
 	newBox.x = screenW;        // start off-screen right

@@ -113,8 +113,8 @@ void Level3_Init(void) {
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
-	draw_tile_map(map_tiles);
-	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
+	draw_tile_map(*map_tiles);
+	set_tile_placeable(*map_tiles, placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	//Request
 	srand((unsigned int)time(NULL));
@@ -129,8 +129,8 @@ void Level3_Init(void) {
 
 	//Initialize player with default values
 	player_speed = 400.0f;
-	player_startpos_x = CP_System_GetWindowWidth() / 2;
-	player_startpos_y = CP_System_GetWindowHeight() / 2;
+	player_startpos_x = CP_System_GetWindowWidth() / 2.0f;
+	player_startpos_y = CP_System_GetWindowHeight() / 2.0f;
 	initialize_player(&player, player_speed, player_startpos_x, player_startpos_y);
 
 	//Tools
@@ -171,10 +171,10 @@ void Level3_Update(void) {
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-	draw_tile_map(map_tiles);
+	draw_tile_map(*map_tiles);
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
-	draw_modified_map(map_tiles);
+	draw_modified_map(*map_tiles);
 
 
 	//Player shadow
@@ -225,11 +225,11 @@ void Level3_Update(void) {
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y, &player);
-			handle_pot_interaction(held_pot, &player, map_tiles, &held_tool, &held_pot);
+			handle_pot_interaction(held_pot, &player, *map_tiles, &held_tool, &held_pot);
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
-			handle_tool_interaction(held_tool, &player, map_tiles, level3_pots, &held_tool, L3_POT_SIZE);
+			handle_tool_interaction(held_tool, &player, *map_tiles, level3_pots, &held_tool, L3_POT_SIZE);
 		}
 	}
 	//draw player
@@ -241,18 +241,18 @@ void Level3_Update(void) {
 
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 150));
 		CP_Settings_RectMode(CP_POSITION_CENTER);
-		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2,
-			CP_System_GetWindowHeight() / 2,
-			CP_System_GetWindowWidth(),
-			CP_System_GetWindowHeight());
+		CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2.0f,
+			CP_System_GetWindowHeight() / 2.0f,
+			(float)CP_System_GetWindowWidth(),
+			(float)CP_System_GetWindowHeight());
 
 		if (showControls == 1 || showControls == 2) {
 			// Draw the controls overlay
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
 			float panelWidth = 1600;
 			float panelHeight = 900;
-			float panelX = (float)CP_System_GetWindowWidth() / 2;
-			float panelY = (float)CP_System_GetWindowHeight() / 2;
+			float panelX = CP_System_GetWindowWidth() / 2.0f;
+			float panelY = CP_System_GetWindowHeight() / 2.0f;
 
 			if (showControls == 1) {
 				CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
@@ -298,7 +298,7 @@ void Level3_Update(void) {
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
 			float btnHeight = 90.0f;
-			float btnX = x_coord - 100;
+			float btnX = x_coord - 100.0f;
 			float btnY[3] = { 225.0f, 425.0f, 625.0f };
 			const char* btnText[3] = { "Resume","Controls", "Quit" };
 
@@ -347,7 +347,7 @@ void Level3_Update(void) {
 
 	//--------------------- Player ---------------------//
 	handle_player_input(&player);
-	detect_collision_player(&player.position.x, &player.position.y, map_tiles, player.speed);
+	detect_collision_player(&player.position.x, &player.position.y, *map_tiles, player.speed);
 
 	//Render tool infront if player facing Right or Down
 	if (0 == player.rotation || 270 == player.rotation) {
@@ -356,7 +356,7 @@ void Level3_Update(void) {
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request(&l3_request, level3_pots, map_tiles, &score, L3_TOOL_SIZE, L3_POT_SIZE);
+	customer_request(&l3_request, level3_pots, *map_tiles, &score, L3_TOOL_SIZE, L3_POT_SIZE);
 	simulate_pests(pest_spawn_interval, level3_pots, L3_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
@@ -388,11 +388,11 @@ void Level3_Update(void) {
 		if (0 == (int)(timer.stage_timer * 2) % 2) {
 			//Watering can
 			CP_Font_DrawText("Watering can capacity increased to 6!",
-				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 - 50.0f);
+				CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f - 50.0f);
 
 			//Pests
 			CP_Font_DrawText("Pest spawn at even higher frequencies!!",
-				CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2 + 50.0f);
+				CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f + 50.0f);
 		}
 	}
 }
