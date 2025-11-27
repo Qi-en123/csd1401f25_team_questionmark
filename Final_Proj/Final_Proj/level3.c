@@ -16,7 +16,7 @@
 
 #include "Pest.h"
 
-#define L3_TIMER 350.0f
+#define L3_TIMER 3.0f
 static Timer timer;
 
 //--------------------- Tools ---------------------//
@@ -50,6 +50,11 @@ CP_Color red, green, blue, gray;
 
 CP_Font myFont;
 CP_Font Font;
+
+CP_Sound refill;
+CP_Sound watering;
+CP_Sound win;
+CP_Sound lose;
 
 void Level3_Init(void) {
 	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
@@ -85,6 +90,12 @@ void Level3_Init(void) {
 	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
 	home = CP_Image_Load("Assets/menuList.png");
 	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+
+	playedWin = 0;
+	playedLose = 0;
+	watering = CP_Sound_Load("Assets/Watering Soil.wav");
+	lose = CP_Sound_Load("Assets/You Lost.wav");
+	win = CP_Sound_Load("Assets/You won.wav");
 
 	//Pots
 	pot_spritesheet = CP_Image_Load("Assets/tool_sprites/pot_spritesheet.png");
@@ -341,7 +352,7 @@ void Level3_Update(void) {
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(&score, Level3_Init, Level3_Update, Level3_Exit, Level3_Init, Level3_Update, Level3_Exit, 3);
+		draw_gameover_panel(&score, Level3_Init, Level3_Update, Level3_Exit, Level3_Init, Level3_Update, Level3_Exit, 3, &playedWin, &playedLose);
 		return;   // Stop all other game updates
 	}
 
@@ -361,7 +372,7 @@ void Level3_Update(void) {
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Level3_Init, Level3_Update, Level3_Exit, L3_TIMER, &timer, Font, Level3_Init, Level3_Update, Level3_Exit, 3);
+	start_timer(Level3_Init, Level3_Update, Level3_Exit, L3_TIMER, &timer, Font, Level3_Init, Level3_Update, Level3_Exit, 3, &playedWin, &playedLose);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{
@@ -422,6 +433,11 @@ void Level3_Exit(void) {
 	CP_Image_Free(home);
 	CP_Image_Free(left);
 	CP_Image_Free(right);
+
+	CP_Sound_Free(refill);
+	CP_Sound_Free(watering);
+	CP_Sound_Free(lose);
+	CP_Sound_Free(win);
 
 	//Guides
 	CP_Image_Free(guide1);

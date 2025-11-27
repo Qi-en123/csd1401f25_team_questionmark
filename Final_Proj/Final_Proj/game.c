@@ -77,8 +77,6 @@ CP_Sound watering;
 CP_Sound win;
 CP_Sound lose;
 
-int playedLose = 0;
-int playedWin = 0;
 
 
 void Game_Init(void)
@@ -214,7 +212,7 @@ void Game_Update(void)
 	}
 	if (CP_Input_KeyReleased(KEY_2)) {
 		gameOver = 1;
-		score = 00000;
+		score = 100000;
 	}
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
@@ -393,7 +391,7 @@ void Game_Update(void)
 	//---------------- GAME OVER -----------------------------
 	if (gameOver)
 	{
-		draw_gameover_panel(&score, Game_Init, Game_Update, Game_Exit, Level2_Init, Level2_Update, Level2_Exit, 1);
+		draw_gameover_panel(&score, Game_Init, Game_Update, Game_Exit, Level2_Init, Level2_Update, Level2_Exit, 1, &playedWin, &playedLose);
 		return;   // Stop all other game updates
 	}
 
@@ -415,7 +413,7 @@ void Game_Update(void)
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Game_Init, Game_Update, Game_Exit, L1_TIMER, &timer, Font, Level2_Init, Level2_Update, Level2_Exit, 1);
+	start_timer(Game_Init, Game_Update, Game_Exit, L1_TIMER, &timer, Font, Level2_Init, Level2_Update, Level2_Exit, 1, &playedWin, &playedLose);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{
@@ -517,10 +515,11 @@ void Game_Exit(void)
 	CP_Sound_Free(refill);
 	CP_Sound_Free(watering);
 	CP_Sound_Free(lose);
+	CP_Sound_Free(win);
 }
 
 void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font,
-	void* next_init, void* next_update, void* next_exit, int curr_lvl) { //lol sry, no time
+	void* next_init, void* next_update, void* next_exit, int curr_lvl, int *playedWin, int *playedLose) { //lol sry, no time
 	//countdown
 	if (tp->stage_timer == 0.0f) {
 		tp->stage_timer = timer;
@@ -540,7 +539,7 @@ void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, C
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
 	if (tp->stage_timer <= 0.0f) {
-		draw_gameover_panel(&score, init, update, exit, next_init, next_update, next_exit, curr_lvl);
+		draw_gameover_panel(&score, init, update, exit, next_init, next_update, next_exit, curr_lvl, playedWin, playedLose);
 	}
 
 	//blinking effect
@@ -1106,7 +1105,7 @@ void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* playe
 }
 
 void draw_gameover_panel(int* score, void* init, void* update, void* exit,
-	void* next_init, void* next_update, void* next_exit, int curr_lvl)
+	void* next_init, void* next_update, void* next_exit, int curr_lvl, int *playedWin, int *playedLose)
 {
 	float w = (float)CP_System_GetWindowWidth();
 	float h = (float)CP_System_GetWindowHeight();
@@ -1158,9 +1157,9 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 	
 	if (stars == 0) {
 		// Title
-		if (!playedLose) {
+		if (!(*playedLose)) {
 			CP_Sound_Play(lose);
-			playedLose = 1;
+			*playedLose = 1;
 		}
 
 		CP_Font_DrawText("Level Failed", w / 2, h / 2 - 130);
@@ -1168,11 +1167,11 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 	}
 	else {
 		// Title
-		if (!playedWin) {
+		if (!(*playedWin)) {
 			CP_Sound_Play(win);
-			playedWin = 1;
+			*playedWin = 1;
 		}
-		CP_Font_DrawText("Level 1", w / 2, h / 2 - 130);
+		CP_Font_DrawText("Level Cleared", w / 2, h / 2 - 130);
 		CP_Font_DrawText("Score", w / 2, h / 2 - 30);
 	}
 
@@ -1240,15 +1239,15 @@ void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 
 	// Button actions
 	if (IsCircleClicked(btnX[0], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-		playedLose = 0;
-		playedWin = 0;
+		*playedLose = 0;
+		*playedWin = 0;
 		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 	}
 
 	//restart
 	if (IsCircleClicked(btnX[1], btnY, 150, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-		playedLose = 0;
-		playedWin = 0;
+		*playedLose = 0;
+		*playedWin = 0;
 		CP_Engine_SetNextGameStateForced(init, update, exit);
 	}
 
