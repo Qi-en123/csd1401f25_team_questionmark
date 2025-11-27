@@ -86,15 +86,15 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
 	CP_Image_DrawSubImage(spriteSheetTiles,
 		x, y, w, h,
-		left, top, right, bottom,
+		(float)left, (float)top, (float)right, (float)bottom,
 		255);
 }
 
 void draw_tile_map(Tile* map_tile)
 {
 	// Get current window size
-	float screen_w = CP_System_GetWindowWidth();
-	float screen_h = CP_System_GetWindowHeight();
+	float screen_w = (float)CP_System_GetWindowWidth();
+	float screen_h = (float)CP_System_GetWindowHeight();
 
 	// Calculate tile size so map fills the whole screen
 	float tile_w = screen_w / TILE_COLS;
@@ -119,8 +119,8 @@ void draw_tile_map(Tile* map_tile)
 
 void draw_modified_map(Tile* map_tile)
 {
-	float screen_w = CP_System_GetWindowWidth();
-	float screen_h = CP_System_GetWindowHeight();
+	float screen_w = (float)CP_System_GetWindowWidth();
+	float screen_h = (float)CP_System_GetWindowHeight();
 	float tile_w = screen_w / TILE_COLS;
 	float tile_h = screen_h / TILE_ROWS;
 

@@ -30,7 +30,7 @@ void Opening_GameName_Update(void)
         CP_Image_Draw(gameName,
             CP_System_GetWindowWidth() / 2.0f,
             CP_System_GetWindowHeight() / 2.0f,
-            CP_System_GetWindowWidth(), CP_System_GetWindowHeight(), alpha_gameName);
+            (float)CP_System_GetWindowWidth(), (float)CP_System_GetWindowHeight(), alpha_gameName);
 
 
 

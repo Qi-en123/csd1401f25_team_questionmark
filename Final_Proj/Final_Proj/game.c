@@ -160,8 +160,8 @@ void Game_Init(void)
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 	
-	draw_tile_map(map_tiles);
-	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
+	draw_tile_map(*map_tiles);
+	set_tile_placeable(*map_tiles, placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	//Request
 	srand((unsigned int)time(NULL));
@@ -273,11 +273,11 @@ void Game_Update(void)
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y, &player);
-			handle_pot_interaction(held_pot, &player, map_tiles, &held_tool, &held_pot);
+			handle_pot_interaction(held_pot, &player, *map_tiles, &held_tool, &held_pot);
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
-			handle_tool_interaction(held_tool, &player, map_tiles, level1_pots, &held_tool, L1_POT_SIZE);
+			handle_tool_interaction(held_tool, &player, *map_tiles, level1_pots, &held_tool, L1_POT_SIZE);
 		}
 	}
 	//draw player
@@ -350,7 +350,7 @@ void Game_Update(void)
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
 			float btnHeight = 90.0f;
-			float btnX = x_coord - 100;
+			float btnX = x_coord - 100.0f;
 			float btnY[3] = { 225.0f, 425.0f, 625.0f };
 			const char* btnText[3] = { "Resume","Controls", "Quit" };
 
@@ -401,7 +401,7 @@ void Game_Update(void)
 
 	//--------------------- Player ---------------------//
 	handle_player_input(&player);
-	detect_collision_player(&player.position.x, &player.position.y, map_tiles, player.speed);
+	detect_collision_player(&player.position.x, &player.position.y, *map_tiles, player.speed);
 
 	//Render tool infront if player facing Right or Down
 	if (0 == player.rotation || 270 == player.rotation) {
@@ -410,7 +410,7 @@ void Game_Update(void)
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request(&l1_request, level1_pots, map_tiles, &score, L1_TOOL_SIZE, L1_POT_SIZE);
+	customer_request(&l1_request, level1_pots, *map_tiles, &score, L1_TOOL_SIZE, L1_POT_SIZE);
 	simulate_pests(pest_spawn_interval, level1_pots, L1_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
@@ -567,7 +567,7 @@ void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, C
 
 	//Timer background
 	CP_Image_Draw(tp->timer_bg_blue, tp->pos_x, tp->pos_y, tp->width, tp->height, 255);
-	CP_Image_Draw(tp->timer_bg_red, tp->pos_x, tp->pos_y, tp->width, tp->height, timer_red_alpha);
+	CP_Image_Draw(tp->timer_bg_red, tp->pos_x, tp->pos_y, tp->width, tp->height, (int)timer_red_alpha);
 
 	//Timer 
 	CP_Font_Set(font);
@@ -1053,7 +1053,7 @@ void customer_request(Request_State* request, Pot* pots, Tile* tiles, int* score
 					for (int k = 0; k < request->boxCount; ++k) {
 						if (pots[j].plant.seed_type == request->boxes[k].plantType) {
 							if (0 == request->boxes[k].removing) {
-								*score += 1000.0f * (1.0f + (request->boxes[k].lateTimer / 60.0f));
+								*score += (int)(1000.0f * (1.0f + (request->boxes[k].lateTimer / 60.0f)));
 
 								int idx = rand() % numPraises;
 								snprintf(currentPraise, sizeof(currentPraise), "%s", praises[idx]);
@@ -1108,8 +1108,8 @@ void simulate_pests(float spawn_interval, Pot* pots, int pot_size, Player* playe
 void draw_gameover_panel(int* score, void* init, void* update, void* exit,
 	void* next_init, void* next_update, void* next_exit, int curr_lvl)
 {
-	float w = CP_System_GetWindowWidth();
-	float h = CP_System_GetWindowHeight();
+	float w = (float)CP_System_GetWindowWidth();
+	float h = (float)CP_System_GetWindowHeight();
 	int stars = 0;
 
 	if (*score > 5000) {

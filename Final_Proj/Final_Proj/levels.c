@@ -93,9 +93,9 @@ void Level_Update(void)
 
     // set the rectangle drawing mode to center for background
     CP_Settings_ImageMode(CP_POSITION_CENTER);
-    CP_Image_Draw(mainmenu_bg_level, bgDrawX1, screenH / 2, bgWidth_level, screenH, 255);
-    CP_Image_Draw(mainmenu_bg_level, bgDrawX2, screenH / 2, bgWidth_level, screenH, 255);
-    CP_Image_Draw(mainmenu_bg_level, bgDrawX3, screenH / 2, bgWidth_level, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_level, (float)bgDrawX1, screenH / 2.0f, (float)bgWidth_level, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_level, (float)bgDrawX2, screenH / 2.0f, (float)bgWidth_level, screenH, 255);
+    CP_Image_Draw(mainmenu_bg_level, (float)bgDrawX3, screenH / 2.0f, (float)bgWidth_level, screenH, 255);
 
 
 

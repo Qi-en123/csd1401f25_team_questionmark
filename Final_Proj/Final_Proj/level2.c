@@ -114,8 +114,8 @@ void Level2_Init(void) {
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
-	draw_tile_map(map_tiles);
-	set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
+	draw_tile_map(*map_tiles);
+	set_tile_placeable(*map_tiles, placeable, sizeof(placeable) / sizeof(placeable[0]));
 
 	//Request
 	srand((unsigned int)time(NULL));
@@ -173,10 +173,10 @@ void Level2_Update(void) {
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 	CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
 
-	draw_tile_map(map_tiles);
+	draw_tile_map(*map_tiles);
 	//set_tile_placeable(map_tiles, &placeable, sizeof(placeable) / sizeof(placeable[0]));
 
-	draw_modified_map(map_tiles);
+	draw_modified_map(*map_tiles);
 
 
 	//Player shadow
@@ -227,11 +227,11 @@ void Level2_Update(void) {
 	else {
 		if (held_pot) {
 			move_pot(&held_pot->position.x, &held_pot->position.y, &player);
-			handle_pot_interaction(held_pot, &player, map_tiles, &held_tool, &held_pot);
+			handle_pot_interaction(held_pot, &player, *map_tiles, &held_tool, &held_pot);
 		}
 		else {
 			move_tool(&held_tool->position.x, &held_tool->position.y, &held_tool->rotation, &player);
-			handle_tool_interaction(held_tool, &player, map_tiles, level2_pots, &held_tool, L2_POT_SIZE);
+			handle_tool_interaction(held_tool, &player, *map_tiles, level2_pots, &held_tool, L2_POT_SIZE);
 		}
 	}
 	//draw player
@@ -300,7 +300,7 @@ void Level2_Update(void) {
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
 			float btnHeight = 90.0f;
-			float btnX = x_coord - 100;
+			float btnX = x_coord - 100.0f;
 			float btnY[3] = { 225.0f, 425.0f, 625.0f };
 			const char* btnText[3] = { "Resume","Controls", "Quit" };
 
@@ -349,7 +349,7 @@ void Level2_Update(void) {
 
 	//--------------------- Player ---------------------//
 	handle_player_input(&player);
-	detect_collision_player(&player.position.x, &player.position.y, map_tiles, player.speed);
+	detect_collision_player(&player.position.x, &player.position.y, *map_tiles, player.speed);
 
 	//Render tool infront if player facing Right or Down
 	if (0 == player.rotation || 270 == player.rotation) {
@@ -358,7 +358,7 @@ void Level2_Update(void) {
 	}
 
 	/*-----------------------------------------------------------------------*/
-	customer_request(&l2_request, level2_pots, map_tiles, &score, L2_TOOL_SIZE, L2_POT_SIZE);
+	customer_request(&l2_request, level2_pots, *map_tiles, &score, L2_TOOL_SIZE, L2_POT_SIZE);
 	simulate_pests(pest_spawn_interval, level2_pots, L2_POT_SIZE, &player, pest_spritesheet);
 
 	//--------------------- Timer ---------------------//
