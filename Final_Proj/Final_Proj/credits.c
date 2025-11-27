@@ -35,6 +35,7 @@ int bgWidth_credits;
 float yPos_credits; // vertical position of credits
 const char* credits[] = {
     "Team Questionmark",
+    "Team Members:",
     "DIRECTOR and PROGRAMMER",
     "Ahmad Qusyairi",
     "PRODUCER, DESIGN LEAD and PROGRAMMER",
@@ -43,7 +44,7 @@ const char* credits[] = {
     "Jerod Lim",
     "   ",
     "Faculty and Advisors",
-    "Lab management and IT",
+    "Lab management and Instructor",
     "MR Gerald Wong",
     "MR Tommy Tan",
     "DR Soroor",
