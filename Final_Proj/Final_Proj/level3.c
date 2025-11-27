@@ -372,7 +372,7 @@ void Level3_Update(void) {
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Level3_Init, Level3_Update, Level3_Exit, L3_TIMER, &timer, Font, Level3_Init, Level3_Update, Level3_Exit, 3, &playedWin, &playedLose);
+	start_timer(L3_TIMER, &timer, Font);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{

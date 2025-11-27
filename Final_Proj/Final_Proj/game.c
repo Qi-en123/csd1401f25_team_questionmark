@@ -36,7 +36,7 @@ float player_speed;
 float player_startpos_x, player_startpos_y;
 CP_Image player_spritesheet;
 //Timer
-#define L1_TIMER 480.0f
+#define L1_TIMER 3.0f
 static Timer timer;
 
 //--------------------- Tools ---------------------//
@@ -413,7 +413,7 @@ void Game_Update(void)
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(Game_Init, Game_Update, Game_Exit, L1_TIMER, &timer, Font, Level2_Init, Level2_Update, Level2_Exit, 1, &playedWin, &playedLose);
+	start_timer( L1_TIMER, &timer, Font);
 
 	if (timer.stage_timer <= 0 && !gameOver)
 	{
@@ -518,8 +518,7 @@ void Game_Exit(void)
 	CP_Sound_Free(win);
 }
 
-void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, CP_Font font,
-	void* next_init, void* next_update, void* next_exit, int curr_lvl, int *playedWin, int *playedLose) { //lol sry, no time
+void start_timer(float timer, Timer* tp, CP_Font font) { //lol sry, no time
 	//countdown
 	if (tp->stage_timer == 0.0f) {
 		tp->stage_timer = timer;
@@ -538,9 +537,9 @@ void start_timer(void* init, void* update, void* exit, float timer, Timer* tp, C
 	//converts stage_timer into a string/char*
 	sprintf_s(countdown, 50, "%d:%02d", minutes, seconds); // seconds formatted to have leading 0 if 1 digit
 
-	if (tp->stage_timer <= 0.0f) {
-		draw_gameover_panel(&score, init, update, exit, next_init, next_update, next_exit, curr_lvl, playedWin, playedLose);
-	}
+	//if (tp->stage_timer <= 0.0f) {
+	//	draw_gameover_panel(&score, init, update, exit, next_init, next_update, next_exit, curr_lvl, playedWin, playedLose);
+	//}
 
 	//blinking effect
 	if (tp->stage_timer < 30.0f) {
