@@ -47,6 +47,7 @@ void move_player(float* pos, float speed) {
 	*pos += speed * dt;
 }
 
+//detects collision between player & window borders || player and & obstacles
 void detect_collision_player(float *posx, float *posy, Tile* tiles, float speed) {
 	float tile_width = (float)CP_System_GetWindowWidth() / TILE_COLS;
 	float tile_height = (float)CP_System_GetWindowHeight() / TILE_ROWS;
@@ -72,7 +73,6 @@ void detect_collision_player(float *posx, float *posy, Tile* tiles, float speed)
 float time_between_frame = 0.0f; //to check time between each frame
 int current_frame = 0; //to check current frame
 
-//#define FRAMES 12
 //To draw the player
 void render_player(Player* player, CP_Image spritesheet) {
 	//--------------------- MOVEMENT ---------------------//

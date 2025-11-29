@@ -3,19 +3,19 @@
 
 CP_Image logo;
 CP_BOOL opening = FALSE;
-CP_Sound openingSound;
+CP_Sound opening_sound;
 int alpha = 0;
 
-float startTime = 0;
+float start_time = 0;
 
 void Opening_Init(void)
 {
-    openingSound = CP_Sound_LoadMusic("Assets/opening.wav");
+    opening_sound = CP_Sound_LoadMusic("Assets/opening.wav");
     logo = CP_Image_Load("Assets/DigiPen_BLACK.png");
     alpha = 0;
     opening = FALSE;
-    startTime = CP_System_GetSeconds();
-    CP_Sound_PlayMusic(openingSound);
+    start_time = CP_System_GetSeconds();
+    CP_Sound_PlayMusic(opening_sound);
 }
 
 void Opening_Update(void)
@@ -33,16 +33,8 @@ void Opening_Update(void)
             CP_System_GetWindowHeight() / 2.0f,
             1200, 700, alpha);
 
-
-
-
-
-
-
-
-
         // After 4 seconds, go to next state
-        if (CP_System_GetSeconds() - startTime > 3.0f)
+        if (CP_System_GetSeconds() - start_time > 3.0f)
             opening = TRUE;
     }
     else
@@ -54,5 +46,4 @@ void Opening_Update(void)
 void Opening_Exit(void)
 {
     CP_Image_Free(logo);
-
 }

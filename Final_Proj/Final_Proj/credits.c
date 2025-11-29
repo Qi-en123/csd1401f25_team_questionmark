@@ -76,7 +76,7 @@ void Credits_Init(void)
     button_exitW_credits = CP_Image_Load("Assets/check_square_grey_cross.png");
     button_exitG_credits = CP_Image_Load("Assets/check_square_green_cross.png");
     // for button click sound
-    BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+    btn_sound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX_credits = 0;
     // Get background width
@@ -154,7 +154,7 @@ void Credits_Update(void)
     }
     // play button click sound when exit button is clicked
     if (IsButtonClicked(50, 50, 100, 100)) {
-        CP_Sound_Play(BtnSound);
+        CP_Sound_Play(btn_sound);
     }
 
     // if exit button is clicked

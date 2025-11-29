@@ -1,10 +1,4 @@
-/* prasana say must have file level document
-THIS FILE CONTAINS THE PLAYER FUNCTIONS AS WELL 
-AS THE PLAYER STATS (none for now)
-You can use this for player Movement & Interactions
-*/
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "cprocessing.h"
 #include "utils.h"
@@ -18,9 +12,8 @@ typedef enum Player_State {
 	IDLE,		//0
 	WALKING,	//1
 	WATERING,	//2
-	PLANTING,
+	PLANTING,   //3
 } Player_State;
-
 
 typedef struct Player {
 	Vector2 position;
@@ -29,12 +22,17 @@ typedef struct Player {
 	Player_State player_state;
 } Player;
 
+//Initialize player values defined in each level: speed, spawn pos
 void initialize_player(Player* player, float speed, float posx, float posy);
+
+//Handles player inputs for movement
 void handle_player_input(Player* player);
 
+//Updates player position on the given axis (posx || posy)
 void move_player(float* pos, float speed);
+
+//detects collision between player & window borders || player and & obstacles
 void detect_collision_player(float* posx, float* posy, Tile* tiles, float speed);
+
+//Draws player
 void render_player(Player* player, CP_Image spritesheet);
-
-#endif // !PLAYER_H
-

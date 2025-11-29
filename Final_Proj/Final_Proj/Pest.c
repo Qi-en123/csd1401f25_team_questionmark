@@ -1,25 +1,14 @@
-#include "Pest.h"
+#include "pest.h"
+#include "cprocessing.h"
 #include <stdlib.h>
 #include <math.h>
-#include "cprocessing.h"
 #include "plants.h"
-
 
 Pest pests[MAX_PESTS];
 CP_Image pest_spritesheet; // set in Game_Init or elsewhere
 
-#define PLAYER_DETECT_RADIUS 100.0f
-#define WINDOW_WIDTH CP_System_GetWindowWidth() //+ 200.0f
-#define WINDOW_HEIGHT CP_System_GetWindowHeight()//20.0f
-#define DESCEND_DISTANCE 270.0f
-#define POT_AVOID_RADIUS 50.0f
-
-// Sprite animation
-#define PEST_WIDTH 19       // width of 1 frame
-#define PEST_HEIGHT 19      // height of 1 frame
-#define PEST_FRAMES 3       // total frames
-#define FRAME_DURATION 0.3f // seconds per frame
-#define SCALE 3             // scale factor on screen
+#define WINDOW_WIDTH CP_System_GetWindowWidth()
+#define WINDOW_HEIGHT CP_System_GetWindowHeight()
 
 // Initialize all pests as inactive
 void initialize_pests(void) {
@@ -82,8 +71,6 @@ void spawn_pest(Pot* pots, int potCount) {
         }
     }
 }
-
-
 
 // Helper: normalize vector
 static Vector2 normalize(Vector2 v) {
@@ -212,7 +199,6 @@ void update_pests(Pot* pots, int potCount, Player* player) {
         }
     }
 }
-
 
 // Render pests
 void render_pests(CP_Image pest_spritesheet) {

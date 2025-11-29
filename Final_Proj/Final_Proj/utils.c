@@ -1,7 +1,8 @@
-#include <math.h>
-#include "cprocessing.h"
-#include <stdio.h>
 #include "utils.h"
+#include "cprocessing.h"
+#include <math.h>
+#include <stdio.h>
+
 // Returns 1 if mouse clicked inside rectangle
 int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 {
@@ -21,49 +22,6 @@ int IsButtonClicked(float rectX, float rectY, float rectW, float rectH)
 
     return 0;
 }
-int IsButtonHovered_Center(float centerX, float centerY, float width, float height)
-{
-	float mouseX = CP_Input_GetMouseX();
-	float mouseY = CP_Input_GetMouseY();
-
-	float left = centerX - width / 2;
-	float right = centerX + width / 2;
-	float top = centerY - height / 2;
-	float bottom = centerY + height / 2;
-
-	return (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom);
-}
-int IsButtonClicked_Center(float centerX, float centerY, float rectW, float rectH)
-{
-	float mouseX = CP_Input_GetMouseX();
-	float mouseY = CP_Input_GetMouseY();
-
-	float left = centerX - rectW / 2;
-	float right = centerX + rectW / 2;
-	float top = centerY - rectH / 2;
-	float bottom = centerY + rectH / 2;
-
-	if (mouseX >= left && mouseX <= right &&
-		mouseY >= top && mouseY <= bottom)
-	{
-		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
-			return 1;
-	}
-	return 0;
-}
-int IsCircleHovered(float center_x, float center_y, float diameter)
-{
-	float mx = CP_Input_GetMouseX();
-	float my = CP_Input_GetMouseY();
-
-	float dx = mx - center_x;
-	float dy = my - center_y;
-
-	float distance = sqrtf(dx * dx + dy * dy);
-	float radius = diameter / 2.0f;
-
-	return (distance <= radius);
-}
 // returns 1 if mouse is hovered
 int IsButtonHovered(float rectX, float rectY, float rectW, float rectH)
 {
@@ -73,7 +31,6 @@ int IsButtonHovered(float rectX, float rectY, float rectW, float rectH)
 	return (mx >= rectX && mx <= rectX + rectW &&
 		my >= rectY && my <= rectY + rectH);
 }
-
 
 // if mouse is within left to right of triangle and y is within bottom to top of triangle
 int IsCircleClicked(float circle_center_x, float circle_center_y, float diameter, float click_x, float click_y)
@@ -93,6 +50,53 @@ int IsCircleClicked(float circle_center_x, float circle_center_y, float diameter
 	}
 	return 0;
 }
+
+int IsCircleHovered(float center_x, float center_y, float diameter)
+{
+	float mx = CP_Input_GetMouseX();
+	float my = CP_Input_GetMouseY();
+
+	float dx = mx - center_x;
+	float dy = my - center_y;
+
+	float distance = sqrtf(dx * dx + dy * dy);
+	float radius = diameter / 2.0f;
+
+	return (distance <= radius);
+}
+
+int IsButtonClicked_Center(float centerX, float centerY, float rectW, float rectH)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - rectW / 2;
+	float right = centerX + rectW / 2;
+	float top = centerY - rectH / 2;
+	float bottom = centerY + rectH / 2;
+
+	if (mouseX >= left && mouseX <= right &&
+		mouseY >= top && mouseY <= bottom)
+	{
+		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
+			return 1;
+	}
+	return 0;
+}
+
+int IsButtonHovered_Center(float centerX, float centerY, float width, float height)
+{
+	float mouseX = CP_Input_GetMouseX();
+	float mouseY = CP_Input_GetMouseY();
+
+	float left = centerX - width / 2;
+	float right = centerX + width / 2;
+	float top = centerY - height / 2;
+	float bottom = centerY + height / 2;
+
+	return (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom);
+}
+
 int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c2_y, float r2)
 {
 	//this calculates the distance of x and y coordinate of click to x and y coordinate of circle center
@@ -102,14 +106,6 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 	float distance = (float)sqrt(distance_x * distance_x + distance_y * distance_y);
 	//if distance between circle 1 centre and circle 2 centre is less than the sum of 2 radius means intersecting
 	return distance <= r1 + r2 ? 1 : 0;
-}
-int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float posx, float posy) {
-	float left = rect_x - rect_w / 2.0f;
-	float right = rect_x + rect_w / 2.0f;
-	float top = rect_y - rect_h / 2.0f;
-	float down = rect_y + rect_h / 2.0f;
-
-	return (posx >= left && posx <= right && posy >= top && posy <= down);
 }
 
 int AreRectsIntersecting(float rect1_x, float rect1_y, float width1, float height1,
@@ -128,6 +124,15 @@ int AreRectsIntersecting(float rect1_x, float rect1_y, float width1, float heigh
 	return ((right_check || left_check) && (top_check || btm_check));
 }
 
+int IsWithinRect(float rect_x, float rect_y, float rect_w, float rect_h, float posx, float posy) {
+	float left = rect_x - rect_w / 2.0f;
+	float right = rect_x + rect_w / 2.0f;
+	float top = rect_y - rect_h / 2.0f;
+	float down = rect_y + rect_h / 2.0f;
+
+	return (posx >= left && posx <= right && posy >= top && posy <= down);
+}
+
 void show_tooltip(const char* text) {
 	CP_Font font;
 	font = CP_Font_Load("Assets/Exo2-Regular.ttf");
@@ -137,6 +142,7 @@ void show_tooltip(const char* text) {
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Font_DrawText(text, 1550.0f, 830.0f);
 }
+
 int loadLevel() {
 	FILE* file = fopen("savelevel.txt", "r");
 	int level = 1;
@@ -151,6 +157,7 @@ int loadLevel() {
 	// Print inside game window later, not here.
 	return level;
 }
+
 void saveLevel(int level) {
 	FILE* file = fopen("savelevel.txt", "w");  // open file for writing
 	if (file == NULL) {

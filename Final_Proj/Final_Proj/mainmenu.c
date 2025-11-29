@@ -10,47 +10,47 @@ CP_Image mainmenu_bg;
 CP_Image button_white;
 CP_Image white_background;
 CP_Image button_green;
-CP_Image guide1;
-CP_Image guide2;
+CP_Image guide_1;
+CP_Image guide_2;
 CP_Image left;
 CP_Image right;
 //font 
 CP_Font font;
-CP_Font myFont;
-CP_Sound BtnSound;
+CP_Font my_font;
+CP_Sound btn_sound;
 //sound
-extern CP_Sound openingSound;
-CP_Sound mainmenuSound;
+extern CP_Sound opening_sound;
+CP_Sound mainmenu_sound;
 int quitClicked = 0;       // flag if Quit was clicked
-float quitStartTime = 0;   // time when quit button was clicked
+float quit_start_time = 0;   // time when quit button was clicked
 
 // Number of clouds
 #define NUM_CLOUDS 3
 
 // x coordinates of clouds
-float cloudX[NUM_CLOUDS] = { -350, -700, -1050 };
+float cloud_x[NUM_CLOUDS] = { -350, -700, -1050 };
 
 // speed of clouds
 // diff speed so sometimes clouds can overlap and does not move in a pattern of 3
-float cloudSpeed[NUM_CLOUDS] = { 2.2f, 1.6f, 1.4f };
+float cloud_speed[NUM_CLOUDS] = { 2.2f, 1.6f, 1.4f };
 
-// x coordinate of bg, If bgX were an int, adding 0.5 each frame would round down to 0, and the background would not move smoothly.
-float bgX = 0;
+// x coordinate of bg, If bg_x were an int, adding 0.5 each frame would round down to 0, and the background would not move smoothly.
+float bg_x = 0;
 // speed of bg
-float bgSpeed = 0.5f;
+float bg_speed = 0.5f;
 
 // Tileable background width (in pixels)
 // use tileable if not when the bg is moving, the two bg doesnt align perfectly
 // leaving a thin black line in between.
-int bgWidth;
+int bg_width;
 
-int showControls;
+int show_controls;
 int level = 1;
 
 void Main_Menu_Init(void)
 {
-	openingSound = CP_Sound_LoadMusic("Assets/opening.wav");
-	mainmenuSound = CP_Sound_LoadMusic("Assets/mainmenu.wav");
+	opening_sound = CP_Sound_LoadMusic("Assets/opening.wav");
+	mainmenu_sound = CP_Sound_LoadMusic("Assets/mainmenu.wav");
 	level = loadLevel();
 	//load mainmenu background and spritesheet for cloud from asset folder
 	mainmenu_bg = CP_Image_Load("Assets/backgroundColorGrass.png");
@@ -58,121 +58,125 @@ void Main_Menu_Init(void)
 	button_white = CP_Image_Load("Assets/button_rectangle_line.png");
 	white_background = CP_Image_Load("Assets/button_rectangle_line-1.png");
 	button_green = CP_Image_Load("Assets/button_rectangle_gloss.png");
-	guide1 = CP_Image_Load("Assets/guide1.png");
-	guide2 = CP_Image_Load("Assets/guide2.png");
+	guide_1 = CP_Image_Load("Assets/guide1.png");
+	guide_2 = CP_Image_Load("Assets/guide2.png");
 	//load font 
 	font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
-	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
+	my_font = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	//themeSound = CP_Sound_LoadMusic("Assets/mainmenu.wav");
-	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+	btn_sound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
 	// x coordinate of background initate to 0 whenever we reopen mainmenu
-	bgX = 0;
+	bg_x = 0;
 	// Get background width
-	bgWidth = CP_Image_GetWidth(mainmenu_bg);
+	bg_width = CP_Image_GetWidth(mainmenu_bg);
 
 	//CP_Sound_PlayMusic(themeSound);
-	showControls = 0;
+	show_controls = 0;
 	left = CP_Image_Load("Assets/left.png");
 	right = CP_Image_Load("Assets/right.png");
-	CP_Sound_PlayMusic(mainmenuSound);
+	CP_Sound_PlayMusic(mainmenu_sound);
 }
 
 void Main_Menu_Update(void)
 {
-	float screenW = (float)CP_System_GetWindowWidth();
-	float screenH = (float)CP_System_GetWindowHeight();
+	float screen_w = (float)CP_System_GetWindowWidth();
+	float screen_h = (float)CP_System_GetWindowHeight();
 
 	// ---------------- Background scrolling ----------------
-	bgX += bgSpeed;
-	if (bgX >= bgWidth) bgX -= bgWidth;
+	bg_x += bg_speed;
+	if (bg_x >= bg_width) bg_x -= bg_width;
 
-	int bgDrawX1 = -(int)bgX + bgWidth / 2;
-	int bgDrawX2 = bgDrawX1 + bgWidth;
-	int bgDrawX3 = bgDrawX2 + bgWidth;
+	int bg_drawX1 = -(int)bg_x + bg_width / 2;
+	int bg_drawX2 = bg_drawX1 + bg_width;
+	int bg_drawX3 = bg_drawX2 + bg_width;
 
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
-	CP_Image_Draw(mainmenu_bg, (float)bgDrawX1, screenH / 2.0f, (float)bgWidth, screenH, 255);
-	CP_Image_Draw(mainmenu_bg, (float)bgDrawX2, screenH / 2.0f, (float)bgWidth, screenH, 255);
-	CP_Image_Draw(mainmenu_bg, (float)bgDrawX3, screenH / 2.0f, (float)bgWidth, screenH, 255);
-																
+	CP_Image_Draw(mainmenu_bg, (float)bg_drawX1, screen_h / 2.0f, (float)bg_width, screen_h, 255);
+	CP_Image_Draw(mainmenu_bg, (float)bg_drawX2, screen_h / 2.0f, (float)bg_width, screen_h, 255);
+	CP_Image_Draw(mainmenu_bg, (float)bg_drawX3, screen_h / 2.0f, (float)bg_width, screen_h, 255);
+
 	// ---------------- Clouds ----------------
 	for (int i = 0; i < NUM_CLOUDS; i++) {
-		cloudX[i] += cloudSpeed[i];
-		if (cloudX[i] >= screenW + 175) cloudX[i] = -175;
-		CP_Image_DrawSubImage(spriteSheet, cloudX[i], screenH / 6,
+		cloud_x[i] += cloud_speed[i];
+		if (cloud_x[i] >= screen_w + 175) cloud_x[i] = -175;
+		CP_Image_DrawSubImage(spriteSheet, cloud_x[i], screen_h / 6,
 			300, 250,
 			0, 218, 251, 363,
 			255);
 	}
 
 	// ---------------- Controls overlay ----------------
-	if (showControls == 1 || showControls == 2)
+	if (show_controls == 1 || show_controls == 2)
 	{
 		// dark overlay
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 180));
-		CP_Graphics_DrawRect(screenW / 2, screenH / 2, screenW, screenH);
+		CP_Graphics_DrawRect(screen_w / 2, screen_h / 2, screen_w, screen_h);
 
 		// panel
 		CP_Settings_ImageMode(CP_POSITION_CENTER);
-		float panelWidth = 1600;
-		float panelHeight = 900;
-		float panelX = screenW / 2;
-		float panelY = screenH / 2;
+		float panel_width = 1600;
+		float panel_height = 900;
+		float panel_x = screen_w / 2;
+		float panel_y = screen_h / 2;
 
 		// Draw different guides for each panel
-		if (showControls == 1)
-			CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
+		if (show_controls == 1)
+			CP_Image_Draw(guide_1, panel_x, panel_y, panel_width, panel_height, 255);
 		else
-			CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
+			CP_Image_Draw(guide_2, panel_x, panel_y, panel_width, panel_height, 255);
 
-	
+
 		// Right button (panel 1)
-		if (showControls == 1)
+		if (show_controls == 1)
 		{
-			float btnRX = 1550, btnRY = 420, btnRSize = 75;
+			float btn_rx = 1550, btn_ry = 420, btn_rsize = 75;
 
 			// Hover effect
-			if (IsButtonHovered_Center(btnRX, btnRY, btnRSize, btnRSize))
-				CP_Image_Draw(button_green, btnRX, btnRY, btnRSize, btnRSize, 255);
+			if (IsButtonHovered_Center(btn_rx, btn_ry, btn_rsize, btn_rsize))
+				CP_Image_Draw(button_green, btn_rx, btn_ry, btn_rsize, btn_rsize, 255);
 			else
-				CP_Image_Draw(button_white, btnRX, btnRY, btnRSize, btnRSize, 255);
+				CP_Image_Draw(button_white, btn_rx, btn_ry, btn_rsize, btn_rsize, 255);
 
-			CP_Image_Draw(right, btnRX, btnRY, 67, 67, 255);
+			CP_Image_Draw(right, btn_rx, btn_ry, 67, 67, 255);
 
-			if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize))
-				showControls = 2;
+			if (IsButtonClicked_Center(btn_rx, btn_ry, btn_rsize, btn_rsize))
+				show_controls = 2;
 
 			// Close overlay with key 1
 			if (CP_Input_KeyReleased(KEY_1))
-				showControls = 0;
+				show_controls = 0;
 
-			if (IsButtonClicked_Center(btnRX, btnRY, btnRSize, btnRSize)) {
-				CP_Sound_Play(BtnSound);
-				showControls = 2;
+			if (IsButtonClicked_Center(btn_rx, btn_ry, btn_rsize, btn_rsize)) {
+				CP_Sound_Play(btn_sound);
+				show_controls = 2;
 			}
 		}
-		
 
-              
-            
+
+
+
 		// Left button (panel 2)
-		if (showControls == 2)
+		if (show_controls == 2)
 		{
-			float btnLX = 50, btnLY = 420, btnLSize = 75;
+			// Close overlay with key 1
+			if (CP_Input_KeyReleased(KEY_1))
+				show_controls = 0;
+
+			float btn_lx = 50, btn_ly = 420, btn_lsize = 75;
 
 			// Hover effect
-			if (IsButtonHovered_Center(btnLX, btnLY, btnLSize, btnLSize))
-				CP_Image_Draw(button_green, btnLX, btnLY, btnLSize, btnLSize, 255);
+			if (IsButtonHovered_Center(btn_lx, btn_ly, btn_lsize, btn_lsize))
+				CP_Image_Draw(button_green, btn_lx, btn_ly, btn_lsize, btn_lsize, 255);
 			else
-				CP_Image_Draw(button_white, btnLX, btnLY, btnLSize, btnLSize, 255);
+				CP_Image_Draw(button_white, btn_lx, btn_ly, btn_lsize, btn_lsize, 255);
 
-			CP_Image_Draw(left, btnLX, btnLY, 67, 67, 255);
+			CP_Image_Draw(left, btn_lx, btn_ly, 67, 67, 255);
 
-		
 
-			if (IsButtonClicked_Center(btnLX, btnLY, btnLSize, btnLSize)) {
-				CP_Sound_Play(BtnSound);
-				showControls = 1;
+
+			if (IsButtonClicked_Center(btn_lx, btn_ly, btn_lsize, btn_lsize)) {
+				CP_Sound_Play(btn_sound);
+				show_controls = 1;
 			}
 		}
 
@@ -182,51 +186,51 @@ void Main_Menu_Update(void)
 
 
 	int x_coord = 650;
-	float btnWidth = 500.0f;
-	float btnHeight = 90.0f;
-	float btnX = x_coord - 100.0f;
-	float btnY[5] = { 225, 325, 425, 525, 625 };
-	const char* btnText[5] = { "Start", "Levels", "Controls", "Credits", "Quit" };
+	float btn_width = 500.0f;
+	float btn_height = 90.0f;
+	float btn_x = x_coord - 100.0f;
+	float btn_y[5] = { 225, 325, 425, 525, 625 };
+	const char* btn_text[5] = { "Start", "Levels", "Controls", "Credits", "Quit" };
 
 	CP_Settings_ImageMode(CP_POSITION_CORNER);
 
 	// Draw buttons
 	for (int i = 0; i < 5; i++) {
-		if (IsButtonHovered(btnX, btnY[i], btnWidth, btnHeight))
-			CP_Image_Draw(button_green, btnX, btnY[i], btnWidth, btnHeight, 255);
+		if (IsButtonHovered(btn_x, btn_y[i], btn_width, btn_height))
+			CP_Image_Draw(button_green, btn_x, btn_y[i], btn_width, btn_height, 255);
 		else
-			CP_Image_Draw(button_white, btnX, btnY[i], btnWidth, btnHeight, 255);
+			CP_Image_Draw(button_white, btn_x, btn_y[i], btn_width, btn_height, 255);
 	}
 
 	// Play click sound for any button
 	for (int i = 0; i < 5; i++) {
-		if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
-			CP_Sound_Play(BtnSound);
+		if (IsButtonClicked(btn_x, btn_y[i], btn_width, btn_height)) {
+			CP_Sound_Play(btn_sound);
 			break;
 		}
 	}
 
 	// Button actions
-	if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight))
+	if (IsButtonClicked(btn_x, btn_y[0], btn_width, btn_height))
 		CP_Engine_SetNextGameState(Game_Init, Game_Update, Game_Exit);
 
-	if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight))
+	if (IsButtonClicked(btn_x, btn_y[1], btn_width, btn_height))
 		CP_Engine_SetNextGameState(Level_Init, Level_Update, Level_Exit);
 
-	if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight)) {
-		showControls = 1;
+	if (IsButtonClicked(btn_x, btn_y[2], btn_width, btn_height)) {
+		show_controls = 1;
 		return;
 	}
 
-	if (IsButtonClicked(btnX, btnY[3], btnWidth, btnHeight))
+	if (IsButtonClicked(btn_x, btn_y[3], btn_width, btn_height))
 		CP_Engine_SetNextGameState(Credits_Init, Credits_Update, Credits_Exit);
 
-	if (!quitClicked && IsButtonClicked(btnX, btnY[4], btnWidth, btnHeight)) {
+	if (!quitClicked && IsButtonClicked(btn_x, btn_y[4], btn_width, btn_height)) {
 		quitClicked = 1;
-		quitStartTime = CP_System_GetSeconds();
+		quit_start_time = CP_System_GetSeconds();
 	}
 
-	if (quitClicked && CP_System_GetSeconds() - quitStartTime >= 0.25f)
+	if (quitClicked && CP_System_GetSeconds() - quit_start_time >= 0.25f)
 		CP_Engine_Terminate();
 
 	// Draw button labels
@@ -236,9 +240,9 @@ void Main_Menu_Update(void)
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 
 	for (int i = 0; i < 5; i++) {
-		float textX = btnX + btnWidth / 2;
-		float textY = btnY[i] + btnHeight / 2;
-		CP_Font_DrawText(btnText[i], textX, textY);
+		float text_x = btn_x + btn_width / 2;
+		float text_y = btn_y[i] + btn_height / 2;
+		CP_Font_DrawText(btn_text[i], text_x, text_y);
 	}
 
 	if (CP_Input_KeyTriggered(KEY_ESCAPE))
@@ -252,19 +256,15 @@ void Main_Menu_Exit(void)
 	CP_Image_Free(spriteSheet);
 	CP_Image_Free(mainmenu_bg);
 	CP_Font_Free(font);
-	CP_Font_Free(myFont);
-	CP_Sound_Free(openingSound);
-	CP_Sound_Free(mainmenuSound);
+	CP_Font_Free(my_font);
+	CP_Sound_Free(opening_sound);
+	CP_Sound_Free(mainmenu_sound);
 	CP_Image_Free(button_white);
 	CP_Image_Free(white_background);
 	CP_Image_Free(button_green);
-	CP_Sound_Free(BtnSound);
-	CP_Image_Free(guide1);
-	CP_Image_Free(guide2);
+	CP_Sound_Free(btn_sound);
+	CP_Image_Free(guide_1);
+	CP_Image_Free(guide_2);
 	CP_Image_Free(left);
 	CP_Image_Free(right);
 }
-
-
-
-

@@ -37,10 +37,11 @@ float bgSpeed_level = 0.5f;
 int bgWidth_level;
 
 extern int level;
-int flashTimer; // timer for flashing
-int flashInterval; // frames between flashes
-bool showText;
-extern CP_Font Font;
+int flash_timer; // timer for flashing
+int flash_interval; // frames between flashes
+bool show_text;
+CP_Font Font;
+
 void Level_Init(void)
 {
     level = loadLevel();
@@ -56,16 +57,16 @@ void Level_Init(void)
     button_exitW_level = CP_Image_Load("Assets/check_square_grey_cross.png");
     button_exitG_level = CP_Image_Load("Assets/check_square_green_cross.png");
     // sound for button click
-    BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+    btn_sound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
     // x coordinate of background initate to 0 whenever we reopen mainmenu
     bgX_level = 0;
     // Get background width
     bgWidth_level = CP_Image_GetWidth(mainmenu_bg_level);
     Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
 
-    showText = false;
-    flashTimer = 0;
-    flashInterval = 30;
+    show_text = false;
+    flash_timer = 0;
+    flash_interval = 30;
 
 
 }
@@ -148,7 +149,7 @@ void Level_Update(void)
     }
     for (int i = 0; i < 5; i++) {
         if (IsButtonClicked(btnX[i], btnY, btnWidth, btnHeight)) {
-            CP_Sound_Play(BtnSound);
+            CP_Sound_Play(btn_sound);
             break; // play once even if multiple buttons are clicked
         }
     }
@@ -159,32 +160,32 @@ void Level_Update(void)
     }
     if (IsButtonClicked(btnX[1], btnY, btnWidth, btnHeight) == 1) {
         if (level >= 2) {
-            CP_Sound_Play(BtnSound);
+            CP_Sound_Play(btn_sound);
             CP_Engine_SetNextGameState(Level2_Init, Level2_Update, Level2_Exit);
         }
         else {
             // Only trigger flash once when button is clicked
-            showText = true;
-            flashTimer = 0;
+            show_text = true;
+            flash_timer = 0;
         }
     }
     if (IsButtonClicked(btnX[2], btnY, btnWidth, btnHeight) == 1) {
         if (level == 3) {
-            CP_Sound_Play(BtnSound);
+            CP_Sound_Play(btn_sound);
             CP_Engine_SetNextGameState(Level3_Init, Level3_Update, Level3_Exit);
         }
         else {
             // Only trigger flash once when button is clicked
-            showText = true;
-            flashTimer = 0;
+            show_text = true;
+            flash_timer = 0;
         }
     }
 
 
     // Flashing logic
-    if (showText) {
-        flashTimer++;
-        if (flashTimer % flashInterval < flashInterval / 2) {
+    if (show_text) {
+        flash_timer++;
+        if (flash_timer % flash_interval < flash_interval / 2) {
             CP_Font_Set(Font);
             CP_Settings_TextSize(64.0f);
             CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
@@ -193,8 +194,8 @@ void Level_Update(void)
         }
 
         //  stop flashing after some time
-        if (flashTimer > flashInterval * 2.5) { // 
-            showText = false;
+        if (flash_timer > flash_interval * 2.5) { // 
+            show_text = false;
         }
     }
 
@@ -207,21 +208,15 @@ void Level_Update(void)
         CP_Image_Draw(button_exitW_level, 50, 50, 100, 100, 255);
     }
 
-    // if exit button is clicked
-    if(IsButtonClicked(50, 50, 100, 100)){ 
-        CP_Sound_Play(BtnSound);
-        CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit); }
+	// if exit button is clicked
+	if (IsButtonClicked(50, 50, 100, 100)) {
+		CP_Sound_Play(btn_sound);
+		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+	}
 
-    
-
-
-
-
-
-
-    if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
-        CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
-    }
+	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
+		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+	}
 }
 
 void Level_Exit(void)
@@ -235,6 +230,4 @@ void Level_Exit(void)
     CP_Image_Free(button_exitW_level);
     CP_Image_Free(button_exitG_level);
     CP_Font_Free(font_level);
-
-
 }

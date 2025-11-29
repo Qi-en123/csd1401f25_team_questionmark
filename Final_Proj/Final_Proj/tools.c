@@ -50,8 +50,6 @@ void initialize_tools(Tool* tools, int tool_size, Tool_name* tool_names, Tile* t
 	}
 }
 
-#define TOOL_WIDTH 16
-#define TOOL_HEIGHT 16
 //Render unheld tools and checks if player is within range of them
 void render_tools(Tool* tools, int size, float player_posx, float player_posy, Tool* held_tool, void* held_pot) {
 

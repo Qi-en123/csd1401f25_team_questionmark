@@ -16,8 +16,8 @@ void initialize_pots(Pot *pots, int size, Tile* tile) {
 		pots[i].filled = false;
 		pots[i].selected = false;
 		pots[i].plant.seed_type = EMPTY;
-		pots[i].plant.fillProgress = 0.0f;
-		pots[i].plant.wateredOnce = false;
+		pots[i].plant.fill_progress = 0.0f;
+		pots[i].plant.watered_once = false;
 		tile[tile_index].obstructed = true;
 		pots[i].occupied_tile = &tile[tile_index];
 	}
@@ -128,8 +128,8 @@ void initialize_plant(Plant *plant, SEED_TYPE seed_type) {
 	plant->growth_stage = SEED;
 	plant->seed_type = seed_type;
 	plant->sunlight_amount = 0;
-	plant->wateredOnce = false;
-	plant->fillProgress = 0.0f;
+	plant->watered_once = false;
+	plant->fill_progress = 0.0f;
 }
 
 //Draws the plant on top of the pot
@@ -169,11 +169,10 @@ void grow_plant(Plant* plant) {
 		plant->sunlight_amount = 0; //reset sunlight bar
 		plant->sunlight_needed *= 1.25f; //increase sunlight needed per growth stage
 		plant->water_amount = 0;
-		plant->fillProgress = 0;
-		plant->wateredOnce = false;
+		plant->fill_progress = 0;
+		plant->watered_once = false;
 	}
 }
-
 
 //Renders sunlight bar on top of selected/nearest plant
 void render_sunlight_bar(Plant* plant, float posx, float posy) {

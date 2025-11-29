@@ -1,5 +1,4 @@
-#ifndef PLANT_H
-#define PLANT_H
+#pragma once
 
 #include "utils.h"
 #include "cprocessing.h"
@@ -19,10 +18,10 @@ typedef enum SEED_TYPE {
 }SEED_TYPE;
 
 typedef enum GROWTH_STAGE {
-	SEED,
+	SEED, //0
 	SEEDLING,
 	YOUTH,
-	ADULT,
+	ADULT, //3
 }GROWTH_STAGE;
 
 typedef struct Plant {
@@ -32,8 +31,8 @@ typedef struct Plant {
 	float sunlight_amount, sunlight_needed;
 	CP_Image plant_spritesheet; //plant growth stages
 	GROWTH_STAGE growth_stage;
-	bool wateredOnce;
-	float fillProgress;
+	bool watered_once;
+	float fill_progress;
 }Plant;
 
 typedef struct Pot {
@@ -45,17 +44,29 @@ typedef struct Pot {
 	bool beingCarried;
 }Pot;
 
+//Initialize "size" number of pots for the level
+//Assign pots with spawn position, tile occupied, plants, got soil or not
 void initialize_pots(Pot* pots, int size, Tile* tile);
+
+//Draws every pot except the one player is holding
 void render_pots(Pot* pots, CP_Image pot_spritesheet, int size,
 	float player_posx, float player_posy, Pot* held_pot, void* held_tool);
+
+//Draws pot that player is holding
 void render_held_pot(Pot* pot, CP_Image pot_spritesheet);
 
-
+//Initializes plant for the pot (called after using SEED tool on empty pot)
 void initialize_plant(Plant* plant, SEED_TYPE seed_type);
+
+//Draws plant on top of pot (called in render_held_pot if pot's plant seed_type != EMPTY)
+//Plant subimg based on plant growth stage
 void render_plant(Plant* plant, float posx, float posy, bool selected);
+
+//Increments plant growth stage up till 3
 void grow_plant(Plant* plant);
+
+//Draws sunlight bar/meter on top of plant
 void render_sunlight_bar(Plant* plant, float posx, float posy);
 
+//Destroys plant, reset plant values to default, seed_type to EMPTY
 void kill_plant(Pot* pot);
-
-#endif // !PLANT_H

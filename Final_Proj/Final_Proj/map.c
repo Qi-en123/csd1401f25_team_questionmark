@@ -38,7 +38,7 @@ int modified_map[TILE_ROWS][TILE_COLS] = {
 };
 void draw_tile(int tile_index, float x, float y, float w, float h)
 {
-	// coordinates to draw each tile in spriteSheetTiles
+	// coordinates to draw each tile in spritesheet_tiles
 	int left, top, right, bottom;
 
 	switch (tile_index)
@@ -84,7 +84,7 @@ void draw_tile(int tile_index, float x, float y, float w, float h)
 	bottom -= 1;
 
 	CP_Settings_ImageMode(CP_POSITION_CENTER);
-	CP_Image_DrawSubImage(spriteSheetTiles,
+	CP_Image_DrawSubImage(spritesheet_tiles,
 		x, y, w, h,
 		(float)left, (float)top, (float)right, (float)bottom,
 		255);
@@ -109,8 +109,8 @@ void draw_tile_map(Tile* map_tile)
 			tile->tile_index = map[row][col];
 
 			// Use integer positions to avoid gaps
-			tile->x = col * tile_w + tile_w/2.0f;
-			tile->y = row * tile_h + tile_h/2.0f;
+			tile->x = col * tile_w + tile_w / 2.0f;
+			tile->y = row * tile_h + tile_h / 2.0f;
 
 			draw_tile(tile->tile_index, tile->x, tile->y, tile_w, tile_h);
 		}
@@ -129,8 +129,8 @@ void draw_modified_map(Tile* map_tile)
 		for (int col = 0; col < TILE_COLS; col++)
 		{
 			int tile = modified_map[row][col];
-			float x = col * tile_w + tile_w/2.0f;
-			float y = row * tile_h + tile_h/2.0f;
+			float x = col * tile_w + tile_w / 2.0f;
+			float y = row * tile_h + tile_h / 2.0f;
 
 			//no time kinda bs paiseh
 			if (tile == 11 || tile == 5 || tile == 4 || tile == 8) {
@@ -140,7 +140,7 @@ void draw_modified_map(Tile* map_tile)
 
 
 			// If tile is 8, stretch it vertically to cover 2 tiles
-			if (tile == 8 )
+			if (tile == 8)
 			{
 				draw_tile(tile, x, y, tile_w, tile_h * 2);
 

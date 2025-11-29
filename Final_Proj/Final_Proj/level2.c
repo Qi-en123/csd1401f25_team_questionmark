@@ -5,19 +5,16 @@
 #include "utils.h" //for intersecting function
 #include "game.h"
 #include <stdio.h>
-
 #include "player.h"
 #include "tools.h"
 #include "plants.h"
 #include "map.h"
 #include <stdlib.h>
 #include <time.h>
-#include "ui.h"
-
-#include "Pest.h"
+#include "pest.h"
 #include "level3.h"
 
-#define L2_TIMER 3.0f
+#define L2_TIMER 300.0f
 static Timer timer;
 
 //--------------------- Tools ---------------------//
@@ -49,8 +46,8 @@ CP_Image button_circle_green;
 //Frequently used colors
 CP_Color red, green, blue, gray;
 
-CP_Font myFont;
-CP_Font Font;
+CP_Font my_font;
+CP_Font font;
 
 CP_Sound refill;
 CP_Sound watering;
@@ -58,19 +55,19 @@ CP_Sound win;
 CP_Sound lose;
 
 void Level2_Init(void) {
-	Font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
-	myFont = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
+	font = CP_Font_Load("Assets/Kenney Pixel Square.ttf");
+	my_font = CP_Font_Load("Assets/Kenney Future Narrow.ttf");
 	star_default = CP_Image_Load("Assets/star_outline.png");
 	star_achieved = CP_Image_Load("Assets/star.png");
 	guide1 = CP_Image_Load("Assets/guide1.png");
 	guide2 = CP_Image_Load("Assets/guide2.png");
 	left = CP_Image_Load("Assets/left.png");
 	right = CP_Image_Load("Assets/right.png");
-	spriteSheetTiles = CP_Image_Load("Assets/tilemap_packed.png");
+	spritesheet_tiles = CP_Image_Load("Assets/tilemap_packed.png");
 
 	//Request
-	l2_request.requestBg = CP_Image_Load("Assets/button_square_gradient-1.png");
-	l2_request.customerNoti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
+	l2_request.request_bg = CP_Image_Load("Assets/button_square_gradient-1.png");
+	l2_request.customer_noti = CP_Sound_Load("Assets/BellBrass CTE01_28.5.wav");
 	l2_request.berrybush = CP_Image_Load("Assets/tool_sprites/seed_berrybush.png");
 	l2_request.cactus = CP_Image_Load("Assets/tool_sprites/seed_cactus.png");
 	l2_request.orangebush = CP_Image_Load("Assets/tool_sprites/seed_orangebush.png");
@@ -90,7 +87,7 @@ void Level2_Init(void) {
 	next = CP_Image_Load("Assets/next.png");
 	repeat = CP_Image_Load("Assets/icon_repeat_light.png");
 	home = CP_Image_Load("Assets/menuList.png");
-	BtnSound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
+	btn_sound = CP_Sound_Load("Assets/ADDING-MACHINE-ELECTRONIC_GEN-HDF-00038.wav");
 
 	watering = CP_Sound_Load("Assets/Watering Soil.wav");
 	lose = CP_Sound_Load("Assets/You Lost.wav");
@@ -115,8 +112,8 @@ void Level2_Init(void) {
 
 	level = loadLevel();
 	paused = 0;
-	showControls = 1;
-	gameOver = 0;
+	show_controls = 1;
+	game_over = 0;
 	score = 0;
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	timer.stage_timer = L2_TIMER;
@@ -130,7 +127,7 @@ void Level2_Init(void) {
 	srand((unsigned int)time(NULL));
 
 	CP_System_SetFrameRate(60);
-	l2_request.boxCount = 0;
+	l2_request.box_count = 0;
 	l2_request.spawn_timer = 0;
 	l2_request.start_delay = 10.0f;
 	l2_request.boxes = boxes;
@@ -166,15 +163,15 @@ void Level2_Init(void) {
 
 void Level2_Update(void) {
 	// Don't allow pause if game is over
-	if (!gameOver && CP_Input_KeyReleased(KEY_ESCAPE)) {
+	if (!game_over && CP_Input_KeyReleased(KEY_ESCAPE)) {
 		paused = !paused;
 
 		if (paused) {
-			showControls = 0; // Reset controls overlay when opening pause menu
+			show_controls = 0; // Reset controls overlay when opening pause menu
 		}
 	}
 	if (CP_Input_KeyReleased(KEY_2)) {
-		gameOver = 1;
+		game_over = 1;
 		score = 1000000;
 
 	}
@@ -257,7 +254,7 @@ void Level2_Update(void) {
 			(float)CP_System_GetWindowWidth(),
 			(float)CP_System_GetWindowHeight());
 
-		if (showControls == 1 || showControls == 2) {
+		if (show_controls == 1 || show_controls == 2) {
 			// Draw the controls overlay
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
 			float panelWidth = 1600;
@@ -265,7 +262,7 @@ void Level2_Update(void) {
 			float panelX = (float)CP_System_GetWindowWidth() / 2;
 			float panelY = (float)CP_System_GetWindowHeight() / 2;
 
-			if (showControls == 1) {
+			if (show_controls == 1) {
 				CP_Image_Draw(guide1, panelX, panelY, panelWidth, panelHeight, 255);
 
 				// Draw right button
@@ -279,10 +276,10 @@ void Level2_Update(void) {
 
 				// Navigate
 				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
-					showControls = 2;
+					show_controls = 2;
 
 			}
-			else { // showControls == 2
+			else { // show_controls == 2
 				CP_Image_Draw(guide2, panelX, panelY, panelWidth, panelHeight, 255);
 
 				// Draw left button
@@ -296,15 +293,15 @@ void Level2_Update(void) {
 
 				// Navigate
 				if (IsButtonClicked_Center(btnX, btnY, btnSize, btnSize))
-					showControls = 1;
+					show_controls = 1;
 			}
 
 			// Close overlay with key 1
 			if (CP_Input_KeyReleased(KEY_1))
-				showControls = 0;
+				show_controls = 0;
 
 		}
-		else { // showControls == 0
+		else { // show_controls == 0
 			// Draw normal pause menu
 			int x_coord = 650; // shared x coordinate for all buttons
 			float btnWidth = 500.0f;
@@ -324,18 +321,18 @@ void Level2_Update(void) {
 
 			for (int i = 0; i < 3; i++) {
 				if (IsButtonClicked(btnX, btnY[i], btnWidth, btnHeight)) {
-					CP_Sound_Play(BtnSound);
+					CP_Sound_Play(btn_sound);
 					break;
 				}
 			}
 
 			if (IsButtonClicked(btnX, btnY[0], btnWidth, btnHeight)) paused = 0;
-			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) showControls = 1;
+			if (IsButtonClicked(btnX, btnY[1], btnWidth, btnHeight)) show_controls = 1;
 			if (IsButtonClicked(btnX, btnY[2], btnWidth, btnHeight))
 				CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 
 			// Draw button texts
-			CP_Font_Set(Font);
+			CP_Font_Set(font);
 			CP_Settings_TextSize(64.0f);
 			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 			CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
@@ -350,9 +347,9 @@ void Level2_Update(void) {
 		return; // skip the rest of the game logic
 	}
 	//---------------- GAME OVER -----------------------------
-	if (gameOver)
+	if (game_over)
 	{
-		draw_gameover_panel(&score, Level2_Init, Level2_Update, Level2_Exit, Level3_Init, Level3_Update, Level3_Exit, 2, &playedWin, &playedLose);
+		draw_game_over_panel(&score, Level2_Init, Level2_Update, Level2_Exit, Level3_Init, Level3_Update, Level3_Exit, 2, &played_win, &played_lose);
 		return;   // Stop all other game updates
 	}
 
@@ -372,18 +369,18 @@ void Level2_Update(void) {
 
 	//--------------------- Timer ---------------------//
 	//render timer on top
-	start_timer(L2_TIMER, &timer, Font);
+	start_timer(L2_TIMER, &timer, font);
 
-	if (timer.stage_timer <= 0 && !gameOver)
+	if (timer.stage_timer <= 0 && !game_over)
 	{
-		gameOver = 1;
+		game_over = 1;
 	}
 
 	//--------------------- Score ---------------------//
 	char buffer_score[50];
 	sprintf_s(buffer_score, 50, "%d", score);
 	CP_Image_Draw(button_score, timer.pos_x, 135, 200, 60, 255);
-	CP_Font_Set(myFont);
+	CP_Font_Set(my_font);
 	CP_Settings_TextSize(40);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
@@ -410,12 +407,12 @@ void Level2_Update(void) {
 
 void Level2_Exit(void) {
 	//--------------------- Free Fonts ---------------------//
-	CP_Font_Free(myFont);
-	CP_Font_Free(Font);
+	CP_Font_Free(my_font);
+	CP_Font_Free(font);
 
 	//--------------------- Free Sprites ---------------------//
 	//Spritesheets
-	CP_Image_Free(spriteSheetTiles);
+	CP_Image_Free(spritesheet_tiles);
 	CP_Image_Free(player_spritesheet);
 	CP_Image_Free(pest_spritesheet);
 
@@ -462,7 +459,7 @@ void Level2_Exit(void) {
 	}
 
 	//Request sprites
-	CP_Image_Free(l2_request.requestBg);
+	CP_Image_Free(l2_request.request_bg);
 	CP_Image_Free(l2_request.berrybush);
 	CP_Image_Free(l2_request.cactus);
 	CP_Image_Free(l2_request.orangebush);
@@ -471,6 +468,6 @@ void Level2_Exit(void) {
 	CP_Image_Free(star_achieved);
 
 	//--------------------- Free Audio ---------------------//
-	CP_Sound_Free(l2_request.customerNoti);
-	CP_Sound_Free(BtnSound);
+	CP_Sound_Free(l2_request.customer_noti);
+	CP_Sound_Free(btn_sound);
 }

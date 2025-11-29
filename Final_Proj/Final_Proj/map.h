@@ -4,7 +4,7 @@
 #define TILE_COLS 20
 #define TILE_ROWS 15
 //image
-CP_Image spriteSheetTiles;
+CP_Image spritesheet_tiles;
 typedef struct Tile {
     float x;
     float y;
@@ -16,4 +16,4 @@ typedef struct Tile {
 void draw_tile(int tile_index, float x, float y, float w, float h);
 void draw_tile_map(Tile* map_tile);
 void draw_modified_map(Tile* map_tile);
-void set_tile_placeable(Tile* map_tile, int *placeable, int size);
+void set_tile_placeable(Tile* map_tile, int* placeable, int size);
