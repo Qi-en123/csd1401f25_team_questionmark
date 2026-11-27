@@ -10,5 +10,5 @@ Team of 3.
 - Game map tiling
 
 ## Build and run
-1. Open `Final_Proj/<name>.sln` in Visual Studio. <- check the name
+1. Open `Final_Proj/Final_Proj.sln` in Visual Studio. <- check the name
 2. Build in Debug or Release (x64).  <- check
